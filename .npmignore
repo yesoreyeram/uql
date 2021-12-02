@@ -1,0 +1,14 @@
+node_modules
+src
+coverage
+.prettierrc
+.vscode
+dist/**/*.test.d.ts
+dist/**/*.test.js
+dist/babel.config.js
+dist/jest.config.d.ts
+dist/jest.config.js
+tsconfig.json
+tslint.json
+jest.config.js
+yarn.lock
