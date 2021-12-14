@@ -125,7 +125,6 @@ export const parse = (input: Command[], options?: { data?: any }): Promise<unkno
                   return pv;
                 }
                 return pv;
-                return pv;
               case "tolower":
                 if (typeof pv.output === "string") {
                   pv.output = get_value("tolower", [pv.output]);
@@ -188,10 +187,23 @@ export const parse = (input: Command[], options?: { data?: any }): Promise<unkno
                 .filter((c) => c.type === "ref")
                 .map((c) => (c.type === "ref" ? c.value : "" || ""))
                 .filter(Boolean);
+              let funcs = cv.value.filter((c) => c.type === "function");
               pv.output = pv.output.map((o) => {
                 let oo = {};
                 keys.forEach((key) => {
                   set(oo, key, get(o, key));
+                });
+                funcs.forEach((fun) => {
+                  if (fun.type === "function") {
+                    let key = fun.alias || fun.operator;
+                    let args = fun.args.map((arg) => {
+                      if (arg.type === "ref") return get(o, arg.value);
+                      else if (arg.type === "string") return arg.value;
+                      else if (arg.type === "number") return +arg.value;
+                    });
+                    let value = get_value(fun.operator, args);
+                    set(oo, key, value);
+                  }
                 });
                 return oo;
               });

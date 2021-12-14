@@ -2,8 +2,7 @@ type type_str_type = { type: "string"; value: string };
 type type_ref_type = { type: "ref"; value: string };
 type type_num_type = { type: "number"; value: number };
 type type_function_arg = type_str_type | type_ref_type | type_num_type;
-type type_function = { operator: FunctionName; args: type_function_arg[]; type: "function" };
-export type type_function_assignment = { alias: string } & type_function;
+export type type_function = { alias?: string; operator: FunctionName; args: type_function_arg[]; type: "function" };
 type type_orderby_arg = { field: string; direction: "asc" | "desc" };
 type type_summarize_arg = type_str_type;
 type type_summarize_function = { operator: FunctionName; args: type_summarize_arg[] };
@@ -27,7 +26,18 @@ export type FunctionName =
   | "strlen"
   | "trim"
   | "trim_start"
-  | "trim_end";
+  | "trim_end"
+  | "toint"
+  | "tolong"
+  | "tobool"
+  | "tostring"
+  | "todouble"
+  | "tofloat"
+  | "todatetime"
+  | "unixtime_seconds_todatetime"
+  | "unixtime_nanoseconds_todatetime"
+  | "unixtime_milliseconds_todatetime"
+  | "unixtime_microseconds_todatetime";
 
 type CommandType = "hello" | "ping" | "echo" | "count" | "limit" | "command" | "orderby" | "project" | "project-away" | "extend" | "summarize" | "range";
 type CommandBase<T extends CommandType> = { type: T };
@@ -54,13 +64,13 @@ type CommandOrderBy = {
   value: type_orderby_arg[];
 } & CommandBase<"orderby">;
 type CommandProject = {
-  value: (type_function | type_function_assignment | type_ref_type)[];
+  value: (type_function | type_ref_type)[];
 } & CommandBase<"project">;
 type CommandProjectAway = {
   value: type_ref_type[];
 } & CommandBase<"project-away">;
 type CommandExtend = {
-  value: type_function_assignment[];
+  value: type_function[];
 } & CommandBase<"extend">;
 type CommandSummarize = {
   value: type_summarize_item;

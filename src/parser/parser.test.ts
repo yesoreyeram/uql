@@ -116,6 +116,23 @@ describe("parser", () => {
       });
       expect(result).toStrictEqual([{ foo: "foo1", bar: "bar1" }]);
     });
+    it("conversion", async () => {
+      const result = await uql(
+        `project "age"=toint("age"), "DOB"=todatetime("dob"), "sal"=tofloat("sal"), "rand"=tostring("rand"), "doj"=unixtime_seconds_todatetime("doj"),  "dot"=unixtime_milliseconds_todatetime("dot")`,
+        {
+          data: [
+            { name: "foo", age: "20", sal: "21.34", dob: "2021-12-31", rand: "21.32", doj: "1546300800", dot: "1546300800000" },
+            { name: "foo", age: "20", sal: "21.34", dob: "2021-12-31", rand: 21.32, doj: 1546300800, dot: 1546300800000 },
+            { name: "foo", age: 30, sal: 12.32, dob: 2021, rand: "12", doj: "1546300800", dot: "1546300800000" },
+          ],
+        }
+      );
+      expect(result).toStrictEqual([
+        { age: 20, sal: 21.34, DOB: new Date("2021-12-31T00:00:00.000Z"), rand: "21.32", doj: new Date("2019"), dot: new Date("2019") },
+        { age: 20, sal: 21.34, DOB: new Date("2021-12-31T00:00:00.000Z"), rand: "21.32", doj: new Date("2019"), dot: new Date("2019") },
+        { age: 30, sal: 12.32, DOB: new Date("2021-01-01T00:00:00.000Z"), rand: "12", doj: new Date("2019"), dot: new Date("2019") },
+      ]);
+    });
   });
   describe("project-away", () => {
     it("basic", async () => {
@@ -181,6 +198,21 @@ describe("parser", () => {
     it("strlen", async () => {
       const result = await uql(`extend "len"=strlen(str("HELLO")), "len1"=strlen("name") | project-away "name" `, { data: [{ name: "foo" }] });
       expect(result).toStrictEqual([{ len: 5, len1: 3 }]);
+    });
+    it("conversion", async () => {
+      const result = await uql(
+        `extend "age"=toint("age"), "dob"=todatetime("dob"), "sal"=tofloat("sal"), "rand"=tostring("rand"), "doj"=unixtime_seconds_todatetime("doj"),  "dot"=unixtime_milliseconds_todatetime("dot")`,
+        {
+          data: [
+            { name: "foo", age: "20", sal: "21.34", dob: "2021-12-31", rand: 21.32, doj: 1546300800, dot: 1546300800000 },
+            { name: "foo", age: 30, sal: 12.32, dob: 2021, rand: "12", doj: "1546300800", dot: "1546300800000" },
+          ],
+        }
+      );
+      expect(result).toStrictEqual([
+        { name: "foo", age: 20, sal: 21.34, dob: new Date("2021-12-31T00:00:00.000Z"), rand: "21.32", doj: new Date("2019"), dot: new Date("2019") },
+        { name: "foo", age: 30, sal: 12.32, dob: new Date("2021-01-01T00:00:00.000Z"), rand: "12", doj: new Date("2019"), dot: new Date("2019") },
+      ]);
     });
   });
   describe("summarize", () => {

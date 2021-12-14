@@ -1,5 +1,5 @@
 import { get, set, sum, min, max, mean, uniq } from "lodash";
-import { type_function_assignment, type_summarize_assignment, FunctionName } from "../types";
+import { type_function, type_summarize_assignment, FunctionName } from "../types";
 
 export const summarize = (o: object, metrics: type_summarize_assignment[], pi: unknown[]): object => {
   metrics.forEach((i) => {
@@ -66,6 +66,31 @@ export const get_value = (operator: FunctionName, args: any[]): unknown => {
       return max(args);
     case "mean":
       return mean(args);
+    case "toint":
+    case "tolong":
+    case "todouble":
+    case "tofloat":
+      return +(args[0] || "");
+    case "tobool":
+      //TODO: write a logic to convert to bool
+      return args[0];
+    case "tostring":
+      return args[0] + "";
+    case "todatetime":
+      if (typeof args[0] === "number") return new Date(args[0] + "");
+      return new Date(args[0] || "");
+    case "unixtime_seconds_todatetime":
+      if (typeof args[0] === "string") return new Date(+args[0] * 1000);
+      return new Date(args[0] * 1000);
+    case "unixtime_milliseconds_todatetime":
+      if (typeof args[0] === "string") return new Date(+args[0]);
+      return new Date(args[0]);
+    case "unixtime_microseconds_todatetime":
+      if (typeof args[0] === "string") return new Date(+args[0] / 1000);
+      return new Date(args[0] / 1000);
+    case "unixtime_nanoseconds_todatetime":
+      if (typeof args[0] === "string") return new Date(+args[0] / 1000 / 1000);
+      return new Date(args[0] / 1000 / 1000);
     case "random":
     case "dcount":
     case "distinct":
@@ -74,7 +99,7 @@ export const get_value = (operator: FunctionName, args: any[]): unknown => {
   }
 };
 
-export const get_extended_object = (o: object, assignment: type_function_assignment): object => {
+export const get_extended_object = (o: object, assignment: type_function): object => {
   let args = assignment.args.map((arg) => {
     if (arg.type === "ref") return get(o, arg.value);
     else if (arg.type === "string") return arg.value;

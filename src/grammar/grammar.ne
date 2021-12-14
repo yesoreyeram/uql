@@ -113,6 +113,17 @@ function_name
     |  "trim"                                               {% as_string %}
     |  "trim_start"                                         {% as_string %}
     |  "trim_end"                                           {% as_string %}
+    |  "toint"                                              {% as_string %}
+    |  "tolong"                                             {% as_string %}
+    |  "tobool"                                             {% as_string %}
+    |  "tostring"                                           {% as_string %}
+    |  "todouble"                                           {% as_string %}
+    |  "tofloat"                                            {% as_string %}
+    |  "todatetime"                                         {% as_string %}
+    |  "unixtime_seconds_todatetime"                        {% as_string %}
+    |  "unixtime_nanoseconds_todatetime"                    {% as_string %}
+    |  "unixtime_milliseconds_todatetime"                   {% as_string %}
+    |  "unixtime_microseconds_todatetime"                   {% as_string %}
 function_args       
     -> function_arg __                                      {% as_array(0) %}
     |  function_arg __ "," __ function_args                 {% merge(0,4)  %}
