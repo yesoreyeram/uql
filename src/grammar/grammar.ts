@@ -10,6 +10,7 @@ declare var dash: any;
 declare var mul: any;
 declare var divide: any;
 declare var mod: any;
+declare var identifier: any;
 declare var str: any;
 declare var sq_string: any;
 declare var string: any;
@@ -109,9 +110,9 @@ const grammar: Grammar = {
     {"name": "command", "symbols": ["command_extend"], "postprocess": d => ({ type: "extend", value: d[0] })},
     {"name": "command", "symbols": ["command_project_away"], "postprocess": d => ({ type: "project-away", value: d[0] })},
     {"name": "command", "symbols": ["command_project"], "postprocess": d => ({ type: "project", value: d[0] })},
-    {"name": "command", "symbols": ["command_parse_json"], "postprocess": d => ({ type: "parse-json" })},
-    {"name": "command", "symbols": ["command_parse_csv"], "postprocess": d => ({ type: "parse-csv" })},
-    {"name": "command", "symbols": ["command_parse_xml"], "postprocess": d => ({ type: "parse-xml" })},
+    {"name": "command", "symbols": ["command_parse_json"], "postprocess": d => ({ type: "parse-json", args: d[0] })},
+    {"name": "command", "symbols": ["command_parse_csv"], "postprocess": d => ({ type: "parse-csv", args: d[0] })},
+    {"name": "command", "symbols": ["command_parse_xml"], "postprocess": d => ({ type: "parse-xml", args: d[0] })},
     {"name": "command", "symbols": ["command_scope"], "postprocess": d => ({ type: "scope", value: d[0] })},
     {"name": "command", "symbols": ["command_summarize"], "postprocess": d => ({ type: "summarize", value: d[0] })},
     {"name": "command", "symbols": ["command_range"], "postprocess": d => ({ type: "range", value: d[0] })},
@@ -187,9 +188,20 @@ const grammar: Grammar = {
     {"name": "command_project", "symbols": [{"literal":"project"}, "_", "function_assignments"], "postprocess": d => d[2]},
     {"name": "command_project_away", "symbols": [{"literal":"project"}, (oqlLexer.has("dash") ? {type: "dash"} : dash), {"literal":"away"}, "_", "ref_types"], "postprocess": d => d[4]},
     {"name": "command_scope", "symbols": [{"literal":"scope"}, "_", "ref_type"], "postprocess": d => d[2]},
-    {"name": "command_parse_json", "symbols": [{"literal":"parse"}, (oqlLexer.has("dash") ? {type: "dash"} : dash), {"literal":"json"}], "postprocess": d => d[2]},
-    {"name": "command_parse_csv", "symbols": [{"literal":"parse"}, (oqlLexer.has("dash") ? {type: "dash"} : dash), {"literal":"csv"}], "postprocess": d => d[2]},
-    {"name": "command_parse_xml", "symbols": [{"literal":"parse"}, (oqlLexer.has("dash") ? {type: "dash"} : dash), {"literal":"xml"}], "postprocess": d => d[2]},
+    {"name": "command_parse_json$ebnf$1", "symbols": []},
+    {"name": "command_parse_json$ebnf$1", "symbols": ["command_parse_json$ebnf$1", "parse_args"], "postprocess": (d) => d[0].concat([d[1]])},
+    {"name": "command_parse_json", "symbols": [{"literal":"parse"}, (oqlLexer.has("dash") ? {type: "dash"} : dash), {"literal":"json"}, "__", "command_parse_json$ebnf$1"], "postprocess": d => d[4]},
+    {"name": "command_parse_csv$ebnf$1", "symbols": []},
+    {"name": "command_parse_csv$ebnf$1", "symbols": ["command_parse_csv$ebnf$1", "parse_args"], "postprocess": (d) => d[0].concat([d[1]])},
+    {"name": "command_parse_csv", "symbols": [{"literal":"parse"}, (oqlLexer.has("dash") ? {type: "dash"} : dash), {"literal":"csv"}, "__", "command_parse_csv$ebnf$1"], "postprocess": d => d[4]},
+    {"name": "command_parse_xml$ebnf$1", "symbols": []},
+    {"name": "command_parse_xml$ebnf$1", "symbols": ["command_parse_xml$ebnf$1", "parse_args"], "postprocess": (d) => d[0].concat([d[1]])},
+    {"name": "command_parse_xml", "symbols": [{"literal":"parse"}, (oqlLexer.has("dash") ? {type: "dash"} : dash), {"literal":"xml"}, "__", "command_parse_xml$ebnf$1"], "postprocess": d => d[4]},
+    {"name": "parse_args", "symbols": ["parse_arg"], "postprocess": as_array(0)},
+    {"name": "parse_args", "symbols": ["parse_arg", "__", "parse_args"], "postprocess": merge(0,2)},
+    {"name": "parse_arg", "symbols": [(oqlLexer.has("dash") ? {type: "dash"} : dash), (oqlLexer.has("dash") ? {type: "dash"} : dash), (oqlLexer.has("identifier") ? {type: "identifier"} : identifier), "__", "str"], "postprocess": d => ({ identifier: d[2].value, value: d[4] })},
+    {"name": "parse_arg", "symbols": [(oqlLexer.has("dash") ? {type: "dash"} : dash), (oqlLexer.has("dash") ? {type: "dash"} : dash), (oqlLexer.has("identifier") ? {type: "identifier"} : identifier), "__", "str_type"], "postprocess": d => ({ identifier: d[2].value, value: d[4].value })},
+    {"name": "parse_arg", "symbols": [(oqlLexer.has("dash") ? {type: "dash"} : dash), (oqlLexer.has("dash") ? {type: "dash"} : dash), (oqlLexer.has("identifier") ? {type: "identifier"} : identifier), "__", (oqlLexer.has("identifier") ? {type: "identifier"} : identifier)], "postprocess": d => ({ identifier: d[2].value, value: d[4].value })},
     {"name": "command_summarize", "symbols": ["summarize_item"], "postprocess": pick(0)},
     {"name": "command_summarize$ebnf$1", "symbols": []},
     {"name": "command_summarize$ebnf$1", "symbols": ["command_summarize$ebnf$1", "summarize_args"], "postprocess": (d) => d[0].concat([d[1]])},

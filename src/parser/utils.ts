@@ -1,5 +1,7 @@
 import { get, set, sum, min, max, mean, uniq } from "lodash";
-import { type_function, type_summarize_assignment, FunctionName } from "../types";
+import { type_function, type_summarize_assignment, type_parse_arg, FunctionName } from "../types";
+import { Options as csv_parser_Options } from "csv-parse/lib";
+import { X2jOptionsOptional } from "fast-xml-parser";
 
 export const summarize = (o: object, metrics: type_summarize_assignment[], pi: unknown[]): object => {
   metrics.forEach((i) => {
@@ -108,4 +110,62 @@ export const get_extended_object = (o: object, assignment: type_function): objec
   let value = get_value(assignment.operator, args);
   set(o, assignment.alias || assignment.operator, value);
   return o;
+};
+
+export const get_parse_csv_options = (args: type_parse_arg[][]): csv_parser_Options => {
+  let options: csv_parser_Options = { columns: true, delimiter: ",", skipEmptyLines: false, skipLinesWithError: false, relaxColumnCount: false };
+  if (args[0] && args[0].length > 0) {
+    args[0].forEach((arg) => {
+      switch (arg.identifier) {
+        case "autoParse":
+        case "autoParseDate":
+        case "bom":
+        case "cast":
+        case "castDate":
+        case "relaxColumnCount":
+        case "skipEmptyLines":
+        case "skipLinesWithEmptyValues":
+        case "trim":
+          options[arg.identifier] = arg.value.toLowerCase() === "true";
+          break;
+        case "columns":
+          options[arg.identifier] = arg.value ? arg.value.split(",") : true;
+          break;
+        default:
+          // @ts-ignore
+          options[arg.identifier] = arg.value.toLowerCase() === "true" ? true : arg.value.toLowerCase() === "false" ? false : arg.value;
+          break;
+      }
+    });
+  }
+  return options;
+};
+export const get_parse_xml_options = (args: type_parse_arg[][]): X2jOptionsOptional => {
+  let options: X2jOptionsOptional = { ignoreAttributes: false, allowBooleanAttributes: true, commentPropName: "#comments" };
+  if (args[0] && args[0].length > 0) {
+    args[0].forEach((arg) => {
+      switch (arg.identifier) {
+        case "ignoreAttributes":
+        case "allowBooleanAttributes":
+        case "alwaysCreateTextNode":
+        case "preserveOrder":
+        case "parseTagValue":
+        case "parseAttributeValue":
+        case "trimValues":
+          options[arg.identifier] = arg.value.toLowerCase() === "true";
+          break;
+        case "commentPropName":
+          options["commentPropName"] = arg.value || "#comment";
+          break;
+        case "attributeNamePrefix":
+          options["attributeNamePrefix"] = arg.value || "@_";
+          break;
+        default:
+          // @ts-ignore
+          options[arg.identifier] = arg.value.toLowerCase() === "true" ? true : arg.value.toLowerCase() === "false" ? false : arg.value;
+          break;
+      }
+    });
+  }
+  return options;
 };

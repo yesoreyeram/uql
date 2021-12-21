@@ -68,9 +68,9 @@ command
     |  command_extend                                       {% d => ({ type: "extend", value: d[0] })%}
     |  command_project_away                                 {% d => ({ type: "project-away", value: d[0] })%}
     |  command_project                                      {% d => ({ type: "project", value: d[0] })%}
-    |  command_parse_json                                   {% d => ({ type: "parse-json" })%}
-    |  command_parse_csv                                    {% d => ({ type: "parse-csv" })%}
-    |  command_parse_xml                                    {% d => ({ type: "parse-xml" })%}
+    |  command_parse_json                                   {% d => ({ type: "parse-json", args: d[0] })%}
+    |  command_parse_csv                                    {% d => ({ type: "parse-csv", args: d[0] })%}
+    |  command_parse_xml                                    {% d => ({ type: "parse-xml", args: d[0] })%}
     |  command_scope                                        {% d => ({ type: "scope", value: d[0] })%}
     |  command_summarize                                    {% d => ({ type: "summarize", value: d[0] })%}
     |  command_range                                        {% d => ({ type: "range", value: d[0] })%}
@@ -158,13 +158,20 @@ command_scope
     -> "scope" _ ref_type                                   {% d => d[2] %}
 # Command : Parse json
 command_parse_json
-    -> "parse" %dash "json"                                 {% d => d[2] %}
+    -> "parse" %dash "json" __ parse_args:*                 {% d => d[4] %}
 # Command : Parse csv
 command_parse_csv
-    -> "parse" %dash "csv"                                  {% d => d[2] %}
+    -> "parse" %dash "csv" __ parse_args:*                  {% d => d[4] %}
 # Command : Parse xml
 command_parse_xml
-    -> "parse" %dash "xml"                                  {% d => d[2] %}
+    -> "parse" %dash "xml" __ parse_args:*                  {% d => d[4] %}
+parse_args
+    -> parse_arg                                            {% as_array(0) %}
+    |  parse_arg __ parse_args                              {% merge(0,2) %}
+parse_arg
+    -> %dash %dash %identifier __ str                       {% d => ({ identifier: d[2].value, value: d[4] }) %}
+    |  %dash %dash %identifier __ str_type                  {% d => ({ identifier: d[2].value, value: d[4].value }) %}
+    |  %dash %dash %identifier __ %identifier               {% d => ({ identifier: d[2].value, value: d[4].value }) %}
 # Command : Summarize
 command_summarize 
      ->  summarize_item                                              {% pick(0) %}

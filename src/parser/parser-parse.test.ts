@@ -1,3 +1,4 @@
+import { get } from "lodash";
 import { uql } from "./index";
 
 const sample_date = {
@@ -10,7 +11,6 @@ usa,200`,
 <country><name>uk</name><population>100</population></country>
 <country><name>usa</name><population>200</population></country>
 </countries>`,
-  xml_with_root_data_and_attributes: `<root a="nice" checked><a>wow</a></root>`,
   xml_aws_status_sample: `<?xml version="1.0" encoding="UTF-8"?>
   <rss version="2.0">
     <channel>
@@ -57,6 +57,22 @@ describe("parser", () => {
         { country: "usa", population: "200" },
       ]);
     });
+    it("with options", async () => {
+      const result = await uql("parse-csv --delimiter ':'", { data: sample_date.csv_countries_and_population.replace(/\,/g, ":") });
+      expect(result).toStrictEqual([
+        { country: "india", population: "300" },
+        { country: "uk", population: "100" },
+        { country: "usa", population: "200" },
+      ]);
+    });
+    it("tsv", async () => {
+      const result: any = await uql("parse-csv --delimiter '\t' --columns 'a,b,c,d,e,f,g,h,i,j'", {
+        data: `aar_lsd_broad.tsv	aar	ds	dds	Latin		False	Broad	True	715
+acw_ard_broad.tsv	acw	asd sas	sds sds	sss		False	Broad	False	1090`,
+      });
+      expect(result[0]["b"]).toStrictEqual("aar");
+      expect(result[0]["j"]).toStrictEqual("715");
+    });
   });
   describe("parse-xml", () => {
     it("default", async () => {
@@ -68,8 +84,13 @@ describe("parser", () => {
       ]);
     });
     it("with attribs", async () => {
-      const result = await uql(`parse-xml`, { data: sample_date.xml_with_root_data_and_attributes });
+      const result = await uql(`parse-xml`, { data: `<root a="nice" checked><a>wow</a></root>` });
       expect(result).toStrictEqual({ root: { "@_a": "nice", "@_checked": true, a: "wow" } });
+    });
+    it("parsing with additional parameters", async () => {
+      const result = await uql(`parse-xml --allowBooleanAttributes false --attributeNamePrefix "$."`, { data: `<root a="nice" checked><a>wow</a></root>` });
+      expect(result).toStrictEqual({ root: { "$.a": "nice", a: "wow" } });
+      expect(get(result, "root['$.a']")).toStrictEqual("nice");
     });
     it("rss feed", async () => {
       const result: any = await uql(`parse-xml`, { data: sample_date.xml_aws_status_sample });

@@ -8,6 +8,7 @@ type type_summarize_arg = type_str_type;
 type type_summarize_function = { operator: FunctionName; args: type_summarize_arg[] };
 export type type_summarize_assignment = { alias?: string } & type_summarize_function;
 type type_summarize_item = { metrics: type_summarize_assignment[]; by: type_summarize_arg[] };
+export type type_parse_arg = { identifier: string; value: string };
 
 export type FunctionName =
   | "count"
@@ -66,9 +67,9 @@ type CommandEcho = {
   value: string;
 } & CommandBase<"echo">;
 type CommandScope = { value: type_ref_type } & CommandBase<"scope">;
-type CommandParseJSON = {} & CommandBase<"parse-json">;
-type CommandParseCSV = {} & CommandBase<"parse-csv">;
-type CommandParseXML = {} & CommandBase<"parse-xml">;
+type CommandParseJSON = { args: type_parse_arg[][] } & CommandBase<"parse-json">;
+type CommandParseCSV = { args: type_parse_arg[][] } & CommandBase<"parse-csv">;
+type CommandParseXML = { args: type_parse_arg[][] } & CommandBase<"parse-xml">;
 type CommandCount = {} & CommandBase<"count">;
 type CommandLimit = {
   value: number;

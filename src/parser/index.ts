@@ -4,7 +4,7 @@ import grammar from "../grammar/grammar";
 import * as csv_parser from "csv-parse/lib/sync";
 import { XMLParser } from "fast-xml-parser";
 import { Command } from "../types";
-import { summarize, get_value, get_extended_object } from "./utils";
+import { summarize, get_value, get_extended_object, get_parse_csv_options, get_parse_xml_options } from "./utils";
 
 const oqlGrammar = Grammar.fromCompiled(grammar);
 
@@ -255,24 +255,15 @@ export const parse = (input: Command[], options?: { data?: any }): Promise<unkno
             return pv;
           case "parse-csv":
             if (typeof pv.output === "string") {
-              let result: string[][] = csv_parser(pv.output);
-              let out: Record<string, string>[] = [];
-              let headers = result[0];
-              result.forEach((o, index) => {
-                if (index !== 0) {
-                  let value: Record<string, string> = {};
-                  headers.forEach((h, hi) => {
-                    value[headers[hi]] = o[hi];
-                  });
-                  out.push(value);
-                }
-              });
-              pv.output = out;
+              let csv_parser_options = get_parse_csv_options(cv.args);
+              let result: string[][] = csv_parser(pv.output, csv_parser_options);
+              pv.output = result;
             }
             return pv;
           case "parse-xml":
             if (typeof pv.output === "string") {
-              let parser = new XMLParser({ ignoreAttributes: false, allowBooleanAttributes: true, commentPropName: "#comment" });
+              let xml_parser_options = get_parse_xml_options(cv.args);
+              let parser = new XMLParser(xml_parser_options);
               pv.output = parser.parse(pv.output);
             }
             return pv;
