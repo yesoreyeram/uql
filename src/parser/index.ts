@@ -1,6 +1,8 @@
 import { isArray, orderBy, get, set, forEach, groupBy } from "lodash";
 import { Parser, Grammar } from "nearley";
 import grammar from "../grammar/grammar";
+import * as csv_parser from "csv-parse/lib/sync";
+import { XMLParser } from "fast-xml-parser";
 import { Command } from "../types";
 import { summarize, get_value, get_extended_object } from "./utils";
 
@@ -31,6 +33,9 @@ export const parse = (input: Command[], options?: { data?: any }): Promise<unkno
           case "ping":
           case "echo":
             pv.output = cv.value;
+            return pv;
+          case "scope":
+            pv.output = get(pv.output, cv.value.value);
             return pv;
           case "count":
             if (typeof pv.output === "string") {
@@ -241,6 +246,34 @@ export const parse = (input: Command[], options?: { data?: any }): Promise<unkno
               return pv;
             } else {
               pv.output = summarize({}, item.metrics, pv.output as unknown[]);
+            }
+            return pv;
+          case "parse-json":
+            if (typeof pv.output === "string") {
+              pv.output = JSON.parse(pv.output);
+            }
+            return pv;
+          case "parse-csv":
+            if (typeof pv.output === "string") {
+              let result: string[][] = csv_parser(pv.output);
+              let out: Record<string, string>[] = [];
+              let headers = result[0];
+              result.forEach((o, index) => {
+                if (index !== 0) {
+                  let value: Record<string, string> = {};
+                  headers.forEach((h, hi) => {
+                    value[headers[hi]] = o[hi];
+                  });
+                  out.push(value);
+                }
+              });
+              pv.output = out;
+            }
+            return pv;
+          case "parse-xml":
+            if (typeof pv.output === "string") {
+              let parser = new XMLParser({ ignoreAttributes: false, allowBooleanAttributes: true, commentPropName: "#comment" });
+              pv.output = parser.parse(pv.output);
             }
             return pv;
           default:

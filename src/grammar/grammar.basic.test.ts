@@ -45,6 +45,7 @@ const tests: [string, { query: string; expected: unknown }][] = [
   ["hello with newline", { query: "hello\n | hello ", expected: [{ type: "hello" }, { type: "hello" }] }],
   ["hello with newline", { query: "hello \n | hello ", expected: [{ type: "hello" }, { type: "hello" }] }],
   ["hello with newline", { query: "hello \n |hello", expected: [{ type: "hello" }, { type: "hello" }] }],
+  ["scope", { query: `scope "foo.bar"`, expected: [{ type: "scope", value: { type: "ref", value: "foo.bar" } }] }],
 ];
 
 describe("grammar basic", () => {

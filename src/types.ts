@@ -39,7 +39,23 @@ export type FunctionName =
   | "unixtime_milliseconds_todatetime"
   | "unixtime_microseconds_todatetime";
 
-type CommandType = "hello" | "ping" | "echo" | "count" | "limit" | "command" | "orderby" | "project" | "project-away" | "extend" | "summarize" | "range";
+type CommandType =
+  | "hello"
+  | "ping"
+  | "echo"
+  | "count"
+  | "limit"
+  | "command"
+  | "orderby"
+  | "project"
+  | "project-away"
+  | "extend"
+  | "summarize"
+  | "range"
+  | "scope"
+  | "parse-json"
+  | "parse-csv"
+  | "parse-xml";
 type CommandBase<T extends CommandType> = { type: T };
 
 type CommandHello = {} & CommandBase<"hello">;
@@ -49,6 +65,10 @@ type CommandPing = {
 type CommandEcho = {
   value: string;
 } & CommandBase<"echo">;
+type CommandScope = { value: type_ref_type } & CommandBase<"scope">;
+type CommandParseJSON = {} & CommandBase<"parse-json">;
+type CommandParseCSV = {} & CommandBase<"parse-csv">;
+type CommandParseXML = {} & CommandBase<"parse-xml">;
 type CommandCount = {} & CommandBase<"count">;
 type CommandLimit = {
   value: number;
@@ -88,6 +108,10 @@ export type Command =
   | CommandOrderBy
   | CommandProject
   | CommandProjectAway
+  | CommandScope
+  | CommandParseJSON
+  | CommandParseCSV
+  | CommandParseXML
   | CommandExtend
   | CommandSummarize
   | CommandRange;

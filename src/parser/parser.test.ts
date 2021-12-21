@@ -57,6 +57,16 @@ describe("parser", () => {
       expect(result).toStrictEqual([1, 2]);
     });
   });
+  describe("scope", () => {
+    it("basic", async () => {
+      const result = await uql('scope "users"', { data: sample_data });
+      expect(result).toStrictEqual(sample_data.users);
+    });
+    it("nested", async () => {
+      const result = await uql('scope "users[3]"', { data: sample_data });
+      expect(result).toStrictEqual(sample_data.users[3]);
+    });
+  });
   describe("orderby", () => {
     it("string", async () => {
       const result = await uql(`order by "name" asc`, { data: "hello" });

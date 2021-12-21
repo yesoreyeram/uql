@@ -68,6 +68,10 @@ command
     |  command_extend                                       {% d => ({ type: "extend", value: d[0] })%}
     |  command_project_away                                 {% d => ({ type: "project-away", value: d[0] })%}
     |  command_project                                      {% d => ({ type: "project", value: d[0] })%}
+    |  command_parse_json                                   {% d => ({ type: "parse-json" })%}
+    |  command_parse_csv                                    {% d => ({ type: "parse-csv" })%}
+    |  command_parse_xml                                    {% d => ({ type: "parse-xml" })%}
+    |  command_scope                                        {% d => ({ type: "scope", value: d[0] })%}
     |  command_summarize                                    {% d => ({ type: "summarize", value: d[0] })%}
     |  command_range                                        {% d => ({ type: "range", value: d[0] })%}
 # Command Function
@@ -149,6 +153,18 @@ command_project
 # Command : Project Away
 command_project_away
     -> "project" %dash "away" _ ref_types                   {% d => d[4] %}
+# Command : Scope 
+command_scope
+    -> "scope" _ ref_type                                   {% d => d[2] %}
+# Command : Parse json
+command_parse_json
+    -> "parse" %dash "json"                                 {% d => d[2] %}
+# Command : Parse csv
+command_parse_csv
+    -> "parse" %dash "csv"                                  {% d => d[2] %}
+# Command : Parse xml
+command_parse_xml
+    -> "parse" %dash "xml"                                  {% d => d[2] %}
 # Command : Summarize
 command_summarize 
      ->  summarize_item                                              {% pick(0) %}
