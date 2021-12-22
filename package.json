@@ -1,6 +1,6 @@
 {
   "name": "uql",
-  "version": "0.0.3",
+  "version": "0.0.4-dev.2",
   "description": "UQL - Unstructured Query Language",
   "author": "Sriramajeyam Sugumaran",
   "license": "Apache-2.0",

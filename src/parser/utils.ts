@@ -72,6 +72,7 @@ export const get_value = (operator: FunctionName, args: any[]): unknown => {
     case "tolong":
     case "todouble":
     case "tofloat":
+    case "tonumber":
       return +(args[0] || "");
     case "tobool":
       //TODO: write a logic to convert to bool

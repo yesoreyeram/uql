@@ -81,6 +81,7 @@ function_assignments
 function_assignment
     -> str:* "=":* expression                               {% d => ({ alias: d[0][0], ...d[2] })%}
     |  str:* "=":* function                                 {% d => ({ alias: d[0][0], ...d[2] })%}
+    |  str:* "=":* ref_type                                 {% d => ({ alias: d[0][0], ...d[2] })%}
     |  ref_type                                             {% d => d[0] %}
 expression
     ->  %lparan __ expression_args:* %rparan                {% d => ({ type: "expression", args: d[2][0]||[] }) %}
@@ -118,6 +119,7 @@ function_name
     |  "trim_start"                                         {% as_string %}
     |  "trim_end"                                           {% as_string %}
     |  "toint"                                              {% as_string %}
+    |  "tonumber"                                           {% as_string %}
     |  "tolong"                                             {% as_string %}
     |  "tobool"                                             {% as_string %}
     |  "tostring"                                           {% as_string %}

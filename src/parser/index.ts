@@ -186,32 +186,62 @@ export const parse = (input: Command[], options?: { data?: any }): Promise<unkno
             }
             return pv;
           case "project":
-            if (typeof pv.output === "number" || typeof pv.output === "string" || !isArray(pv.output)) return pv;
-            else if (isArray(pv.output)) {
-              let keys = cv.value
-                .filter((c) => c.type === "ref")
-                .map((c) => (c.type === "ref" ? c.value : "" || ""))
-                .filter(Boolean);
-              let funcs = cv.value.filter((c) => c.type === "function");
+            if (typeof pv.output === "number") {
+              return pv;
+            } else if (typeof pv.output === "string") {
+              return pv;
+            } else if (typeof pv.output === "object" && isArray(pv.output)) {
+              let refs = cv.value.filter((v) => v.type === "ref");
+              let functions = cv.value.filter((v) => v.type === "function");
               pv.output = pv.output.map((o) => {
                 let oo = {};
-                keys.forEach((key) => {
-                  set(oo, key, get(o, key));
+                refs.forEach((r) => {
+                  if (r.type === "ref") {
+                    let key = r.alias || r.value;
+                    set(oo, key, get(o, r.value));
+                  }
                 });
-                funcs.forEach((fun) => {
-                  if (fun.type === "function") {
-                    let key = fun.alias || fun.operator;
-                    let args = fun.args.map((arg) => {
+                functions.forEach((f) => {
+                  if (f.type === "function") {
+                    let key = f.alias || f.operator;
+                    let args = f.args.map((arg) => {
                       if (arg.type === "ref") return get(o, arg.value);
                       else if (arg.type === "string") return arg.value;
                       else if (arg.type === "number") return +arg.value;
                     });
-                    let value = get_value(fun.operator, args);
+                    let value = get_value(f.operator, args);
                     set(oo, key, value);
                   }
                 });
                 return oo;
               });
+              return pv;
+            } else if (typeof pv.output === "object") {
+              let refs = cv.value.filter((v) => v.type === "ref");
+              let functions = cv.value.filter((v) => v.type === "function");
+              let oo = {};
+              refs.forEach((r) => {
+                if (r.type === "ref") {
+                  let key = r.alias || r.value;
+                  set(oo, key, get(pv.output, r.value));
+                }
+              });
+              functions.forEach((f) => {
+                if (f.type === "function") {
+                  let key = f.alias || f.operator;
+                  let args = f.args.map((arg) => {
+                    if (arg.type === "ref") return get(pv.output, arg.value);
+                    else if (arg.type === "string") return arg.value;
+                    else if (arg.type === "number") return +arg.value;
+                  });
+                  let value = get_value(f.operator, args);
+                  set(oo, key, value);
+                }
+              });
+              pv.output == oo;
+              return pv;
+            } else {
+              return pv;
             }
             return pv;
           case "project-away":

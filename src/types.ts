@@ -30,6 +30,7 @@ export type FunctionName =
   | "trim_end"
   | "toint"
   | "tolong"
+  | "tonumber"
   | "tobool"
   | "tostring"
   | "todouble"
@@ -85,7 +86,7 @@ type CommandOrderBy = {
   value: type_orderby_arg[];
 } & CommandBase<"orderby">;
 type CommandProject = {
-  value: (type_function | type_ref_type)[];
+  value: (type_function | (type_ref_type & { alias: string }))[];
 } & CommandBase<"project">;
 type CommandProjectAway = {
   value: type_ref_type[];
