@@ -1,4 +1,4 @@
-import { get, set, sum, min, max, mean, uniq } from "lodash";
+import { get, set, sum, min, max, mean, uniq, isArray, random } from "lodash";
 import { type_function, type_summarize_assignment, type_parse_arg, FunctionName } from "../types";
 import { Options as csv_parser_Options } from "csv-parse/lib";
 import { X2jOptionsOptional } from "fast-xml-parser";
@@ -61,7 +61,12 @@ export const get_value = (operator: FunctionName, args: any[]): unknown => {
     case "diff":
       return args[0] - args[1];
     case "mul":
+      if (typeof args === "object" && isArray(args)) {
+        return args.reduce((a, b) => a * b, 1);
+      }
       return args[0] * args[1];
+    case "div":
+      return args[0] / args[1];
     case "min":
       return min(args);
     case "max":
@@ -75,8 +80,9 @@ export const get_value = (operator: FunctionName, args: any[]): unknown => {
     case "tonumber":
       return +(args[0] || "");
     case "tobool":
-      //TODO: write a logic to convert to bool
-      return args[0];
+      if (typeof args[0] === "string") return args[0].toLowerCase() === "true" ? true : false;
+      else if (typeof args[0] === "number") return args[0] <= 0 ? true : false;
+      else return args[0];
     case "tostring":
       return args[0] + "";
     case "todatetime":
@@ -95,6 +101,7 @@ export const get_value = (operator: FunctionName, args: any[]): unknown => {
       if (typeof args[0] === "string") return new Date(+args[0] / 1000 / 1000);
       return new Date(args[0] / 1000 / 1000);
     case "random":
+      return random(...args);
     case "dcount":
     case "distinct":
     default:
@@ -105,8 +112,12 @@ export const get_value = (operator: FunctionName, args: any[]): unknown => {
 export const get_extended_object = (o: object, assignment: type_function): object => {
   let args = assignment.args.map((arg) => {
     if (arg.type === "ref") return get(o, arg.value);
-    else if (arg.type === "string") return arg.value;
-    else if (arg.type === "number") return +arg.value;
+    else if (arg.type === "string" || arg.type === "identifier") {
+      if (arg.value.toLowerCase() === "true") return true;
+      else if (arg.value.toLowerCase() === "false") return false;
+      return arg.value;
+    } else if (arg.type === "number") return +arg.value;
+    else return arg;
   });
   let value = get_value(assignment.operator, args);
   set(o, assignment.alias || assignment.operator, value);

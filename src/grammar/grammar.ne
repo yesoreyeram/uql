@@ -105,6 +105,7 @@ function_name
     |  "sum"                                                {% as_string %}
     |  "diff"                                               {% as_string %}
     |  "mul"                                                {% as_string %}
+    |  "div"                                                {% as_string %}
     |  "min"                                                {% as_string %}
     |  "max"                                                {% as_string %}
     |  "mean"                                               {% as_string %}
@@ -137,6 +138,7 @@ function_arg
     -> str_type                                             {% pick(0) %}
     |  ref_type                                             {% pick(0) %}
     |  num_type                                             {% pick(0) %}
+    |  %identifier                                          {% d => { return { type: "identifier", value: d[0].value } } %}
 # Command : Order by
 command_orderby
     -> "order" _ "by" _ orderby_args                        {% pick(4) %}

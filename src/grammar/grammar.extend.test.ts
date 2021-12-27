@@ -139,6 +139,29 @@ const tests: [string, { query: string; expected: unknown }][] = [
       ],
     },
   ],
+  [
+    "random",
+    {
+      query: `extend "foo"=random(1.2,2.4,true)`,
+      expected: [
+        {
+          type: "extend",
+          value: [
+            {
+              type: "function",
+              alias: "foo",
+              operator: "random",
+              args: [
+                { value: 1.2, type: "number" },
+                { type: "number", value: 2.4 },
+                { type: "identifier", value: "true" },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  ],
 ];
 
 describe("grammar extend", () => {

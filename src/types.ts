@@ -1,7 +1,8 @@
 type type_str_type = { type: "string"; value: string };
 type type_ref_type = { type: "ref"; value: string };
 type type_num_type = { type: "number"; value: number };
-type type_function_arg = type_str_type | type_ref_type | type_num_type;
+type type_identifier_type = { type: "identifier"; value: string };
+type type_function_arg = type_str_type | type_ref_type | type_num_type | type_identifier_type;
 export type type_function = { alias?: string; operator: FunctionName; args: type_function_arg[]; type: "function" };
 type type_orderby_arg = { field: string; direction: "asc" | "desc" };
 type type_summarize_arg = type_str_type;
@@ -15,6 +16,7 @@ export type FunctionName =
   | "sum"
   | "diff"
   | "mul"
+  | "div"
   | "min"
   | "max"
   | "mean"
