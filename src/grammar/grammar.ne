@@ -68,6 +68,10 @@ command
     |  command_extend                                       {% d => ({ type: "extend", value: d[0] })%}
     |  command_project_away                                 {% d => ({ type: "project-away", value: d[0] })%}
     |  command_project                                      {% d => ({ type: "project", value: d[0] })%}
+    |  command_parse_json                                   {% d => ({ type: "parse-json", args: d[0] })%}
+    |  command_parse_csv                                    {% d => ({ type: "parse-csv", args: d[0] })%}
+    |  command_parse_xml                                    {% d => ({ type: "parse-xml", args: d[0] })%}
+    |  command_scope                                        {% d => ({ type: "scope", value: d[0] })%}
     |  command_summarize                                    {% d => ({ type: "summarize", value: d[0] })%}
     |  command_range                                        {% d => ({ type: "range", value: d[0] })%}
 # Command Function
@@ -77,6 +81,7 @@ function_assignments
 function_assignment
     -> str:* "=":* expression                               {% d => ({ alias: d[0][0], ...d[2] })%}
     |  str:* "=":* function                                 {% d => ({ alias: d[0][0], ...d[2] })%}
+    |  str:* "=":* ref_type                                 {% d => ({ alias: d[0][0], ...d[2] })%}
     |  ref_type                                             {% d => d[0] %}
 expression
     ->  %lparan __ expression_args:* %rparan                {% d => ({ type: "expression", args: d[2][0]||[] }) %}
@@ -100,6 +105,7 @@ function_name
     |  "sum"                                                {% as_string %}
     |  "diff"                                               {% as_string %}
     |  "mul"                                                {% as_string %}
+    |  "div"                                                {% as_string %}
     |  "min"                                                {% as_string %}
     |  "max"                                                {% as_string %}
     |  "mean"                                               {% as_string %}
@@ -114,6 +120,7 @@ function_name
     |  "trim_start"                                         {% as_string %}
     |  "trim_end"                                           {% as_string %}
     |  "toint"                                              {% as_string %}
+    |  "tonumber"                                           {% as_string %}
     |  "tolong"                                             {% as_string %}
     |  "tobool"                                             {% as_string %}
     |  "tostring"                                           {% as_string %}
@@ -131,6 +138,7 @@ function_arg
     -> str_type                                             {% pick(0) %}
     |  ref_type                                             {% pick(0) %}
     |  num_type                                             {% pick(0) %}
+    |  %identifier                                          {% d => { return { type: "identifier", value: d[0].value } } %}
 # Command : Order by
 command_orderby
     -> "order" _ "by" _ orderby_args                        {% pick(4) %}
@@ -149,6 +157,25 @@ command_project
 # Command : Project Away
 command_project_away
     -> "project" %dash "away" _ ref_types                   {% d => d[4] %}
+# Command : Scope 
+command_scope
+    -> "scope" _ ref_type                                   {% d => d[2] %}
+# Command : Parse json
+command_parse_json
+    -> "parse" %dash "json" __ parse_args:*                 {% d => d[4] %}
+# Command : Parse csv
+command_parse_csv
+    -> "parse" %dash "csv" __ parse_args:*                  {% d => d[4] %}
+# Command : Parse xml
+command_parse_xml
+    -> "parse" %dash "xml" __ parse_args:*                  {% d => d[4] %}
+parse_args
+    -> parse_arg                                            {% as_array(0) %}
+    |  parse_arg __ parse_args                              {% merge(0,2) %}
+parse_arg
+    -> %dash %dash %identifier __ str                       {% d => ({ identifier: d[2].value, value: d[4] }) %}
+    |  %dash %dash %identifier __ str_type                  {% d => ({ identifier: d[2].value, value: d[4].value }) %}
+    |  %dash %dash %identifier __ %identifier               {% d => ({ identifier: d[2].value, value: d[4].value }) %}
 # Command : Summarize
 command_summarize 
      ->  summarize_item                                              {% pick(0) %}

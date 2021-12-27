@@ -2,6 +2,11 @@
 
 Change history of the project. All the feature updates, bug fixes, breaking changes will be documented here.
 
+## [ 0.0.4 ]
+
+- Basic parsing functions added via `parse-json`, `parse-csv` and `parse-xml`
+- Bug fixes
+
 ## [ 0.0.3 ]
 
 - Basic conversion functions added in `project` and `extend` commands. (`toint`, `tolong`, `tobool`, `tostring`,`todouble`, `tofloat`, `todatetime`, `unixtime_seconds_todatetime`, `unixtime_nanoseconds_todatetime`, `unixtime_milliseconds_todatetime` and `unixtime_microseconds_todatetime` )

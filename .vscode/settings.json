@@ -1,3 +1,21 @@
 {
-  "cSpell.words": ["dcount", "lparan", "nearley", "nearleyc", "rparan", "tobool", "todatetime", "todouble", "tofloat", "toint", "tolong", "tolower", "tostring", "toupper", "unixtime", "vibgyor"]
+  "cSpell.words": [
+    "dcount",
+    "lparan",
+    "nearley",
+    "nearleyc",
+    "rparan",
+    "tobool",
+    "todatetime",
+    "todouble",
+    "tofloat",
+    "toint",
+    "tolong",
+    "tolower",
+    "tonumber",
+    "tostring",
+    "toupper",
+    "unixtime",
+    "vibgyor"
+  ]
 }
