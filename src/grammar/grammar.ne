@@ -29,7 +29,10 @@
     mul:"*",
     divide:"/",
     mod:"%",
+    gt:">",
+    lt:"<",
     eq: "==",
+    ne: "!=",
     lparan: "(",
     rparan: ")",
     comma: ",",
@@ -97,6 +100,12 @@ expression_arg
     |  %mul                                                 {% d => ({ type: "operation", value: "*" }) %}
     |  %divide                                              {% d => ({ type: "operation", value: "/" }) %}
     |  %mod                                                 {% d => ({ type: "operation", value: "%" }) %}
+    |  %gt %assignment                                      {% d => ({ type: "operation", value: ">=" }) %}
+    |  %gt                                                  {% d => ({ type: "operation", value: ">" }) %}
+    |  %lt %assignment                                      {% d => ({ type: "operation", value: "<=" }) %}
+    |  %lt                                                  {% d => ({ type: "operation", value: "<" }) %}
+    |  %eq                                                  {% d => ({ type: "operation", value: "==" }) %}
+    |  %ne                                                  {% d => ({ type: "operation", value: "!=" }) %}
     |  function                                             {% d => ({ type: "function", value: d[0] }) %}
 function
     ->  function_name "(" __ function_args:* ")"            {% d => ({ type: "function", operator: d[0], args: d[3][0]||[] }) %}
@@ -127,10 +136,19 @@ function_name
     |  "todouble"                                           {% as_string %}
     |  "tofloat"                                            {% as_string %}
     |  "todatetime"                                         {% as_string %}
+    |  "tounixtime"                                         {% as_string %}
     |  "unixtime_seconds_todatetime"                        {% as_string %}
     |  "unixtime_nanoseconds_todatetime"                    {% as_string %}
     |  "unixtime_milliseconds_todatetime"                   {% as_string %}
     |  "unixtime_microseconds_todatetime"                   {% as_string %}
+    |  "format_datetime"                                    {% as_string %}
+    |  "add_datetime"                                       {% as_string %}
+    |  "startofminute"                                      {% as_string %}
+    |  "startofhour"                                        {% as_string %}
+    |  "startofday"                                         {% as_string %}
+    |  "startofmonth"                                       {% as_string %}
+    |  "startofweek"                                        {% as_string %}
+    |  "startofyear"                                        {% as_string %}
 function_args       
     -> function_arg __                                      {% as_array(0) %}
     |  function_arg __ "," __ function_args                 {% merge(0,4)  %}

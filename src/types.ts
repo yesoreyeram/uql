@@ -38,10 +38,19 @@ export type FunctionName =
   | "todouble"
   | "tofloat"
   | "todatetime"
+  | "tounixtime"
   | "unixtime_seconds_todatetime"
   | "unixtime_nanoseconds_todatetime"
   | "unixtime_milliseconds_todatetime"
-  | "unixtime_microseconds_todatetime";
+  | "unixtime_microseconds_todatetime"
+  | "format_datetime"
+  | "add_datetime"
+  | "startofminute"
+  | "startofhour"
+  | "startofday"
+  | "startofmonth"
+  | "startofweek"
+  | "startofyear";
 
 type CommandType =
   | "hello"

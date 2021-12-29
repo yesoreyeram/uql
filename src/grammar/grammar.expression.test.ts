@@ -13,7 +13,7 @@ const tests: [string, { query: string; expected: unknown }][] = [
   [
     "expression",
     {
-      query: `project "foo"=( 1 + "two" - str("three") * 1 / 1.2 % -3.14 + 1.2 + sum(1,2) - 12)`,
+      query: `project "foo"=( 1 + "two" - str("three") * 1 / 1.2 % -3.14 + 1.2 + sum(1,2) - 12 == 1)`,
       expected: [
         {
           type: "project",
@@ -49,6 +49,38 @@ const tests: [string, { query: string; expected: unknown }][] = [
                 },
                 { type: "operation", value: "-" },
                 { type: "number", value: 12 },
+                { type: "operation", value: "==" },
+                { type: "number", value: 1 },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  ],
+  [
+    "expression2",
+    {
+      query: 'project "a"=(1 > 1 >= 1 < 2 <= 2 != 3)',
+      expected: [
+        {
+          type: "project",
+          value: [
+            {
+              alias: "a",
+              type: "expression",
+              args: [
+                { type: "number", value: 1 },
+                { type: "operation", value: ">" },
+                { type: "number", value: 1 },
+                { type: "operation", value: ">=" },
+                { type: "number", value: 1 },
+                { type: "operation", value: "<" },
+                { type: "number", value: 2 },
+                { type: "operation", value: "<=" },
+                { type: "number", value: 2 },
+                { type: "operation", value: "!=" },
+                { type: "number", value: 3 },
               ],
             },
           ],

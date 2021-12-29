@@ -10,6 +10,11 @@ declare var dash: any;
 declare var mul: any;
 declare var divide: any;
 declare var mod: any;
+declare var gt: any;
+declare var assignment: any;
+declare var lt: any;
+declare var eq: any;
+declare var ne: any;
 declare var identifier: any;
 declare var str: any;
 declare var sq_string: any;
@@ -47,7 +52,10 @@ declare var ws: any;
     mul:"*",
     divide:"/",
     mod:"%",
+    gt:">",
+    lt:"<",
     eq: "==",
+    ne: "!=",
     lparan: "(",
     rparan: ")",
     comma: ",",
@@ -147,6 +155,12 @@ const grammar: Grammar = {
     {"name": "expression_arg", "symbols": [(oqlLexer.has("mul") ? {type: "mul"} : mul)], "postprocess": d => ({ type: "operation", value: "*" })},
     {"name": "expression_arg", "symbols": [(oqlLexer.has("divide") ? {type: "divide"} : divide)], "postprocess": d => ({ type: "operation", value: "/" })},
     {"name": "expression_arg", "symbols": [(oqlLexer.has("mod") ? {type: "mod"} : mod)], "postprocess": d => ({ type: "operation", value: "%" })},
+    {"name": "expression_arg", "symbols": [(oqlLexer.has("gt") ? {type: "gt"} : gt), (oqlLexer.has("assignment") ? {type: "assignment"} : assignment)], "postprocess": d => ({ type: "operation", value: ">=" })},
+    {"name": "expression_arg", "symbols": [(oqlLexer.has("gt") ? {type: "gt"} : gt)], "postprocess": d => ({ type: "operation", value: ">" })},
+    {"name": "expression_arg", "symbols": [(oqlLexer.has("lt") ? {type: "lt"} : lt), (oqlLexer.has("assignment") ? {type: "assignment"} : assignment)], "postprocess": d => ({ type: "operation", value: "<=" })},
+    {"name": "expression_arg", "symbols": [(oqlLexer.has("lt") ? {type: "lt"} : lt)], "postprocess": d => ({ type: "operation", value: "<" })},
+    {"name": "expression_arg", "symbols": [(oqlLexer.has("eq") ? {type: "eq"} : eq)], "postprocess": d => ({ type: "operation", value: "==" })},
+    {"name": "expression_arg", "symbols": [(oqlLexer.has("ne") ? {type: "ne"} : ne)], "postprocess": d => ({ type: "operation", value: "!=" })},
     {"name": "expression_arg", "symbols": ["function"], "postprocess": d => ({ type: "function", value: d[0] })},
     {"name": "function$ebnf$1", "symbols": []},
     {"name": "function$ebnf$1", "symbols": ["function$ebnf$1", "function_args"], "postprocess": (d) => d[0].concat([d[1]])},
@@ -177,10 +191,19 @@ const grammar: Grammar = {
     {"name": "function_name", "symbols": [{"literal":"todouble"}], "postprocess": as_string},
     {"name": "function_name", "symbols": [{"literal":"tofloat"}], "postprocess": as_string},
     {"name": "function_name", "symbols": [{"literal":"todatetime"}], "postprocess": as_string},
+    {"name": "function_name", "symbols": [{"literal":"tounixtime"}], "postprocess": as_string},
     {"name": "function_name", "symbols": [{"literal":"unixtime_seconds_todatetime"}], "postprocess": as_string},
     {"name": "function_name", "symbols": [{"literal":"unixtime_nanoseconds_todatetime"}], "postprocess": as_string},
     {"name": "function_name", "symbols": [{"literal":"unixtime_milliseconds_todatetime"}], "postprocess": as_string},
     {"name": "function_name", "symbols": [{"literal":"unixtime_microseconds_todatetime"}], "postprocess": as_string},
+    {"name": "function_name", "symbols": [{"literal":"format_datetime"}], "postprocess": as_string},
+    {"name": "function_name", "symbols": [{"literal":"add_datetime"}], "postprocess": as_string},
+    {"name": "function_name", "symbols": [{"literal":"startofminute"}], "postprocess": as_string},
+    {"name": "function_name", "symbols": [{"literal":"startofhour"}], "postprocess": as_string},
+    {"name": "function_name", "symbols": [{"literal":"startofday"}], "postprocess": as_string},
+    {"name": "function_name", "symbols": [{"literal":"startofmonth"}], "postprocess": as_string},
+    {"name": "function_name", "symbols": [{"literal":"startofweek"}], "postprocess": as_string},
+    {"name": "function_name", "symbols": [{"literal":"startofyear"}], "postprocess": as_string},
     {"name": "function_args", "symbols": ["function_arg", "__"], "postprocess": as_array(0)},
     {"name": "function_args", "symbols": ["function_arg", "__", {"literal":","}, "__", "function_args"], "postprocess": merge(0,4)},
     {"name": "function_arg", "symbols": ["str_type"], "postprocess": pick(0)},

@@ -1,6 +1,6 @@
 {
   "name": "uql",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "UQL - Unstructured Query Language",
   "author": "Sriramajeyam Sugumaran",
   "license": "Apache-2.0",
@@ -21,6 +21,7 @@
   "homepage": "https://github.com/yesoreyeram/uql#readme",
   "dependencies": {
     "csv-parse": "4.12.0",
+    "dayjs": "^1.10.7",
     "fast-xml-parser": "^4.0.0-beta.8",
     "lodash": "^4.17.21",
     "moo": "^0.5.1",

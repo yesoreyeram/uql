@@ -2,6 +2,11 @@
 
 Change history of the project. All the feature updates, bug fixes, breaking changes will be documented here.
 
+## [ 0.0.5 ]
+
+- Date utils added (`tounixtime`,`format_datetime`,`add_datetime`,`startofminute`,`startofhour`,`startofday`,`startofmonth`,`startofweek`,`startofyear`)
+- Bug fixes
+
 ## [ 0.0.4 ]
 
 - Basic parsing functions added via `parse-json`, `parse-csv` and `parse-xml`

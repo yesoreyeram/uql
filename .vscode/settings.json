@@ -1,10 +1,17 @@
 {
   "cSpell.words": [
+    "datetime",
     "dcount",
     "lparan",
     "nearley",
     "nearleyc",
     "rparan",
+    "startofday",
+    "startofhour",
+    "startofminute",
+    "startofmonth",
+    "startofweek",
+    "startofyear",
     "tobool",
     "todatetime",
     "todouble",
@@ -14,6 +21,7 @@
     "tolower",
     "tonumber",
     "tostring",
+    "tounixtime",
     "toupper",
     "unixtime",
     "vibgyor"

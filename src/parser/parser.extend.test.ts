@@ -45,4 +45,47 @@ describe("extend", () => {
       expect(value).toBeLessThanOrEqual(10);
     });
   });
+  describe("date", () => {
+    it("default", async () => {
+      const result = await uql(`extend "in"=todatetime("in") | extend "in"=format_datetime("in",'DD/MM/YYYY')  | project "in"`, { data: [{ in: "1990-02-27" }] });
+      expect(result).toStrictEqual([{ in: "27/02/1990" }]);
+    });
+    it("format_datetime", async () => {
+      const result = await uql(`extend "in"=todatetime("in") | extend "in"=format_datetime("in",'dddd')  | project "in"`, { data: [{ in: "1990-02-27" }] });
+      expect(result).toStrictEqual([{ in: "Tuesday" }]);
+    });
+    it("add_datetime", async () => {
+      expect(await uql(`extend "in"=todatetime("in") | extend "in"=add_datetime("in",'1d')  | project "in"`, { data: [{ in: "1990-02-27" }] })).toStrictEqual([{ in: new Date("1990-02-28") }]);
+      expect(await uql(`extend "in"=todatetime("in") | extend "in"=add_datetime("in",'-1d')  | project "in"`, { data: [{ in: "1990-02-27" }] })).toStrictEqual([{ in: new Date("1990-02-26") }]);
+      expect(await uql(`extend "in"=todatetime("in") | extend "in"=add_datetime("in",'-1h')  | project "in"`, { data: [{ in: "1990-02-27" }] })).toStrictEqual([
+        { in: new Date("1990-02-26 23:00:00") },
+      ]);
+      expect(await uql(`extend "in"=todatetime("in") | extend "in"=add_datetime("in",'-1y')  | project "in"`, { data: [{ in: "1990-02-27" }] })).toStrictEqual([
+        { in: new Date("1989-02-27 00:00:00") },
+      ]);
+      expect(await uql(`extend "in"=todatetime("in") | extend "in"=add_datetime("in",'10y')  | project "in"`, { data: [{ in: "1990-02-27" }] })).toStrictEqual([
+        { in: new Date("2000-02-27 00:00:00") },
+      ]);
+    });
+    it("start of", async () => {
+      expect(await uql(`extend "in"=todatetime("in") | extend "in"=startofyear("in")  | project "in"`, { data: [{ in: "1990-02-27 13:23:56.876" }] })).toStrictEqual([
+        { in: new Date("1990-01-01 00:00:00.000") },
+      ]);
+      expect(await uql(`extend "in"=todatetime("in") | extend "in"=startofmonth("in")  | project "in"`, { data: [{ in: "1990-02-27 13:23:56.876" }] })).toStrictEqual([
+        { in: new Date("1990-02-01 00:00:00.000") },
+      ]);
+      expect(await uql(`extend "in"=todatetime("in") | extend "in"=startofweek("in")  | project "in"`, { data: [{ in: "1990-02-27 13:23:56.876" }] })).toStrictEqual([
+        { in: new Date("1990-02-25 00:00:00.000") },
+      ]);
+      expect(await uql(`extend "in"=todatetime("in") | extend "in"=startofday("in")  | project "in"`, { data: [{ in: "1990-02-27 13:23:56.876" }] })).toStrictEqual([
+        { in: new Date("1990-02-27 00:00:00.000") },
+      ]);
+      expect(await uql(`extend "in"=todatetime("in") | extend "in"=startofhour("in")  | project "in"`, { data: [{ in: "1990-02-27 13:23:56.876" }] })).toStrictEqual([
+        { in: new Date("1990-02-27 13:00:00.000") },
+      ]);
+      expect(await uql(`extend "in"=todatetime("in") | extend "in"=startofminute("in")  | project "in"`, { data: [{ in: "1990-02-27 13:23:56.876" }] })).toStrictEqual([
+        { in: new Date("1990-02-27 13:23:00.000") },
+      ]);
+    });
+  });
 });

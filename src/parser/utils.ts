@@ -2,6 +2,7 @@ import { get, set, sum, min, max, mean, uniq, isArray, random } from "lodash";
 import { type_function, type_summarize_assignment, type_parse_arg, FunctionName } from "../types";
 import { Options as csv_parser_Options } from "csv-parse/lib";
 import { X2jOptionsOptional } from "fast-xml-parser";
+import * as dayjs from "dayjs";
 
 export const summarize = (o: object, metrics: type_summarize_assignment[], pi: unknown[]): object => {
   metrics.forEach((i) => {
@@ -88,6 +89,40 @@ export const get_value = (operator: FunctionName, args: any[]): unknown => {
     case "todatetime":
       if (typeof args[0] === "number") return new Date(args[0] + "");
       return new Date(args[0] || "");
+    case "tounixtime":
+      if (typeof args[0] === "object" && typeof args[0].getTime === "function") return args[0].getTime();
+      return args[0];
+    case "format_datetime":
+      if (typeof args[0] === "object" && typeof args[0].getTime === "function" && typeof args[1] === "string") return dayjs(args[0]).format(args[1]);
+      return args[0];
+    case "add_datetime":
+      if (typeof args[0] === "object" && typeof args[0].getTime === "function" && typeof args[1] === "string") {
+        let numberParts = args[1].match(/[\-\d]+/g) || [];
+        let textParts = args[1].match(/[A-Za-z]+/g) || [];
+        if (numberParts.length > 0 && textParts.length > 0) {
+          let o = dayjs(args[0]).add(numberParts[0] === "-" ? -1 : +numberParts[0], textParts[0]);
+          return o.toDate();
+        }
+      }
+      return args[0];
+    case "startofminute":
+      if (typeof args[0] === "object" && typeof args[0].getTime === "function") return dayjs(args[0]).startOf("m").toDate();
+      return args[0];
+    case "startofhour":
+      if (typeof args[0] === "object" && typeof args[0].getTime === "function") return dayjs(args[0]).startOf("h").toDate();
+      return args[0];
+    case "startofday":
+      if (typeof args[0] === "object" && typeof args[0].getTime === "function") return dayjs(args[0]).startOf("d").toDate();
+      return args[0];
+    case "startofweek":
+      if (typeof args[0] === "object" && typeof args[0].getTime === "function") return dayjs(args[0]).startOf("w").toDate();
+      return args[0];
+    case "startofmonth":
+      if (typeof args[0] === "object" && typeof args[0].getTime === "function") return dayjs(args[0]).startOf("M").toDate();
+      return args[0];
+    case "startofyear":
+      if (typeof args[0] === "object" && typeof args[0].getTime === "function") return dayjs(args[0]).startOf("y").toDate();
+      return args[0];
     case "unixtime_seconds_todatetime":
       if (typeof args[0] === "string") return new Date(+args[0] * 1000);
       return new Date(args[0] * 1000);
