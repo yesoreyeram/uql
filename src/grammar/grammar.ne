@@ -118,6 +118,9 @@ function_name
     |  "min"                                                {% as_string %}
     |  "max"                                                {% as_string %}
     |  "mean"                                               {% as_string %}
+    |  "first"                                              {% as_string %}
+    |  "last"                                               {% as_string %}
+    |  "latest"                                             {% as_string %}
     |  "strcat"                                             {% as_string %}
     |  "dcount"                                             {% as_string %}
     |  "distinct"                                           {% as_string %}

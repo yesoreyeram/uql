@@ -1,6 +1,6 @@
 # UQL - Unstructured Query Language
 
-Unstructured query language (UQL) - It is a query language to query the unstructured or array like objects in javascript. It is like azure kusto query language (KQL) but for in memory data.
+Unstructured query language (UQL) - It is a query language to query the JSON like data in Javascript. It is like azure Kusto query language (KQL) but for in memory data.
 
 ## Installation
 

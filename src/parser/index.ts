@@ -1,4 +1,4 @@
-import { isArray, orderBy, get, set, forEach, groupBy } from "lodash";
+import { isArray, orderBy, get, set, forEach, groupBy, first, toString } from "lodash";
 import { Parser, Grammar } from "nearley";
 import grammar from "../grammar/grammar";
 import * as csv_parser from "csv-parse/lib/sync";
@@ -100,6 +100,24 @@ export const parse = (input: Command[], options?: { data?: any }): Promise<unkno
               case "mean":
                 if (isArray(pv.output)) {
                   pv.output = get_value("mean", pv.output);
+                  return pv;
+                }
+                return pv;
+              case "first":
+                if (isArray(pv.output)) {
+                  pv.output = get_value("first", pv.output);
+                  return pv;
+                }
+                return pv;
+              case "last":
+                if (isArray(pv.output)) {
+                  pv.output = get_value("last", pv.output);
+                  return pv;
+                }
+                return pv;
+              case "latest":
+                if (isArray(pv.output)) {
+                  pv.output = get_value("latest", pv.output);
                   return pv;
                 }
                 return pv;
@@ -272,7 +290,19 @@ export const parse = (input: Command[], options?: { data?: any }): Promise<unkno
               });
               pv.output = o;
             } else if (groupByValues.length > 1) {
-              reject("group by multiple fields not supported yet");
+              let groups = groupBy(pv.output as unknown[], (a: any) => {
+                return item.by.map((g) => toString(a[g.value])).join("#___#");
+              });
+              let out: unknown[] = [];
+              forEach(groups, (group) => {
+                let o: Record<string, unknown> = {};
+                item.by.forEach((gi) => {
+                  o[gi.value] = (first(group) as any)?.[gi.value];
+                });
+                let s = summarize(o, item.metrics, group);
+                out.push(s);
+              });
+              pv.output = out;
               return pv;
             } else {
               pv.output = summarize({}, item.metrics, pv.output as unknown[]);

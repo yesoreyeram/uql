@@ -1,4 +1,4 @@
-import { get, set, sum, min, max, mean, uniq, isArray, random } from "lodash";
+import { get, set, sum, min, max, mean, uniq, isArray, random, first, last } from "lodash";
 import { type_function, type_summarize_assignment, type_parse_arg, FunctionName } from "../types";
 import { Options as csv_parser_Options } from "csv-parse/lib";
 import { X2jOptionsOptional } from "fast-xml-parser";
@@ -32,6 +32,15 @@ export const summarize = (o: object, metrics: type_summarize_assignment[], pi: u
         break;
       case "max":
         val = args.length > 0 ? max(pi.map((p) => get(p, args[0].value))) : max(pi);
+        set(o, statName, val);
+        break;
+      case "first":
+        val = args.length > 0 ? first(pi.map((p) => get(p, args[0].value))) : first(pi);
+        set(o, statName, val);
+        break;
+      case "last":
+      case "latest":
+        val = args.length > 0 ? last(pi.map((p) => get(p, args[0].value))) : last(pi);
         set(o, statName, val);
         break;
       default:
@@ -74,6 +83,11 @@ export const get_value = (operator: FunctionName, args: any[]): unknown => {
       return max(args);
     case "mean":
       return mean(args);
+    case "first":
+      return first(args);
+    case "last":
+    case "latest":
+      return last(args);
     case "toint":
     case "tolong":
     case "todouble":
