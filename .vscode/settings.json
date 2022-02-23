@@ -1,29 +1,10 @@
 {
-  "cSpell.words": [
-    "datetime",
-    "dcount",
-    "lparan",
-    "nearley",
-    "nearleyc",
-    "rparan",
-    "startofday",
-    "startofhour",
-    "startofminute",
-    "startofmonth",
-    "startofweek",
-    "startofyear",
-    "tobool",
-    "todatetime",
-    "todouble",
-    "tofloat",
-    "toint",
-    "tolong",
-    "tolower",
-    "tonumber",
-    "tostring",
-    "tounixtime",
-    "toupper",
-    "unixtime",
-    "vibgyor"
-  ]
+  "cSpell.customDictionaries": {
+    "custom-dictionary-workspace": {
+      "name": "custom-dictionary-workspace",
+      "path": "${workspaceFolder:uql}/.cspell/custom-dictionary-workspace.txt",
+      "addWords": true,
+      "scope": "workspace"
+    }
+  }
 }
