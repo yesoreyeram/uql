@@ -3,6 +3,7 @@ import { Parser, Grammar } from "nearley";
 import grammar from "../grammar/grammar";
 import * as csv_parser from "csv-parse/lib/sync";
 import { XMLParser } from "fast-xml-parser";
+import { load as yaml_loader } from "js-yaml";
 import { Command } from "../types";
 import { summarize, get_value, get_extended_object, get_parse_csv_options, get_parse_xml_options } from "./utils";
 
@@ -325,6 +326,16 @@ export const parse = (input: Command[], options?: { data?: any }): Promise<unkno
               let xml_parser_options = get_parse_xml_options(cv.args);
               let parser = new XMLParser(xml_parser_options);
               pv.output = parser.parse(pv.output);
+            }
+            return pv;
+          case "parse-yaml":
+            if (typeof pv.output === "string") {
+              try {
+                let parser = yaml_loader(pv.output);
+                pv.output = parser;
+              } catch (ex) {
+                throw ex;
+              }
             }
             return pv;
           default:

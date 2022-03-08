@@ -1,11 +1,31 @@
 import { get } from "lodash";
 import { uql } from "./index";
 
-const sample_date = {
+const sample_data = {
   csv_countries_and_population: `country,population
 india,300
 uk,100
 usa,200`,
+  yaml_example: `
+---
+doe: "a deer, a female deer"
+ray: "a drop of golden sun"
+pi: 3.14159
+xmas: true
+french-hens: 3
+calling-birds:
+  - huey
+  - dewey
+  - louie
+  - fred
+xmas-fifth-day:
+  calling-birds: four
+  french-hens: 3
+  golden-rings: 5
+  partridges:
+    count: 1
+    location: "a pear tree"
+  turtle-doves: two`,
   xml_countries_and_population: `<countries>
 <country><name>india</name><population>300</population></country>
 <country><name>uk</name><population>100</population></country>
@@ -50,7 +70,7 @@ describe("parser", () => {
   });
   describe("parse-csv", () => {
     it("default", async () => {
-      const result = await uql("parse-csv", { data: sample_date.csv_countries_and_population });
+      const result = await uql("parse-csv", { data: sample_data.csv_countries_and_population });
       expect(result).toStrictEqual([
         { country: "india", population: "300" },
         { country: "uk", population: "100" },
@@ -58,7 +78,7 @@ describe("parser", () => {
       ]);
     });
     it("with options", async () => {
-      const result = await uql("parse-csv --delimiter ':'", { data: sample_date.csv_countries_and_population.replace(/\,/g, ":") });
+      const result = await uql("parse-csv --delimiter ':'", { data: sample_data.csv_countries_and_population.replace(/\,/g, ":") });
       expect(result).toStrictEqual([
         { country: "india", population: "300" },
         { country: "uk", population: "100" },
@@ -76,7 +96,7 @@ acw_ard_broad.tsv	acw	asd sas	sds sds	sss		False	Broad	False	1090`,
   });
   describe("parse-xml", () => {
     it("default", async () => {
-      const result = await uql(`parse-xml | scope "countries.country"`, { data: sample_date.xml_countries_and_population });
+      const result = await uql(`parse-xml | scope "countries.country"`, { data: sample_data.xml_countries_and_population });
       expect(result).toStrictEqual([
         { name: "india", population: 300 },
         { name: "uk", population: 100 },
@@ -93,8 +113,31 @@ acw_ard_broad.tsv	acw	asd sas	sds sds	sss		False	Broad	False	1090`,
       expect(get(result, "root['$.a']")).toStrictEqual("nice");
     });
     it("rss feed", async () => {
-      const result: any = await uql(`parse-xml`, { data: sample_date.xml_aws_status_sample });
+      const result: any = await uql(`parse-xml`, { data: sample_data.xml_aws_status_sample });
       expect(result.rss.channel.item[0].title).toStrictEqual("Service is operating normally: [RESOLVED] Internet Connectivity");
+    });
+  });
+  describe("parse-yaml", () => {
+    it("default", async () => {
+      const result: any = await uql("parse-yaml", { data: sample_data.yaml_example });
+      expect(result).toStrictEqual({
+        doe: "a deer, a female deer",
+        ray: "a drop of golden sun",
+        pi: 3.14159,
+        xmas: true,
+        "french-hens": 3,
+        "calling-birds": ["huey", "dewey", "louie", "fred"],
+        "xmas-fifth-day": {
+          "calling-birds": "four",
+          "french-hens": 3,
+          "golden-rings": 5,
+          partridges: {
+            count: 1,
+            location: "a pear tree",
+          },
+          "turtle-doves": "two",
+        },
+      });
     });
   });
 });

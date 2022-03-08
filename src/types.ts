@@ -71,7 +71,8 @@ type CommandType =
   | "scope"
   | "parse-json"
   | "parse-csv"
-  | "parse-xml";
+  | "parse-xml"
+  | "parse-yaml";
 type CommandBase<T extends CommandType> = { type: T };
 
 type CommandHello = {} & CommandBase<"hello">;
@@ -85,6 +86,7 @@ type CommandScope = { value: type_ref_type } & CommandBase<"scope">;
 type CommandParseJSON = { args: type_parse_arg[][] } & CommandBase<"parse-json">;
 type CommandParseCSV = { args: type_parse_arg[][] } & CommandBase<"parse-csv">;
 type CommandParseXML = { args: type_parse_arg[][] } & CommandBase<"parse-xml">;
+type CommandParseYAML = { args: type_parse_arg[][] } & CommandBase<"parse-yaml">;
 type CommandCount = {} & CommandBase<"count">;
 type CommandLimit = {
   value: number;
@@ -128,6 +130,7 @@ export type Command =
   | CommandParseJSON
   | CommandParseCSV
   | CommandParseXML
+  | CommandParseYAML
   | CommandExtend
   | CommandSummarize
   | CommandRange;

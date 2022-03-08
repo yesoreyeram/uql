@@ -2,6 +2,10 @@
 
 Change history of the project. All the feature updates, bug fixes, breaking changes will be documented here.
 
+## [0.0.7]
+
+- `parse-yaml` support added
+
 ## [0.0.6]
 
 - Summarize by multiple props
