@@ -35,4 +35,22 @@ describe("project", () => {
       ]);
     });
   });
+  describe("object", () => {
+    it("single", async () => {
+      const result = await uql(`project "name"`, { data: { name: "sriramajeyam", score: 12, languages: ["tamil", "english", "sourashtra"] } });
+      expect(result).toStrictEqual("sriramajeyam");
+    });
+    it("single with alias", async () => {
+      const result = await uql(`project "full name"="name"`, { data: { name: "sriramajeyam", score: 12, languages: ["tamil", "english", "sourashtra"] } });
+      expect(result).toStrictEqual("sriramajeyam");
+    });
+    it("single", async () => {
+      const result = await uql(`project "languages"`, { data: { name: "sriramajeyam", score: 12, languages: ["tamil", "english", "sourashtra"] } });
+      expect(result).toStrictEqual(["tamil", "english", "sourashtra"]);
+    });
+    it("multiple", async () => {
+      const result = await uql(`project "name", "score"`, { data: { name: "sriramajeyam", score: 12, languages: ["tamil", "english", "sourashtra"] } });
+      expect(result).toStrictEqual({ name: "sriramajeyam", score: 12 });
+    });
+  });
 });

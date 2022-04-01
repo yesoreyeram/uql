@@ -23,7 +23,7 @@
     },
     number: {
       // @ts-ignore Ignore the error for now until finding a better regex
-      match: /-?[0-9]+(?:\.[0-9]+)?/,
+      match: /-?[\d.]+(?:e-?\d+)?/,
       value: (s) => Number(s),
     },
     pipe: "|",

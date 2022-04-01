@@ -89,14 +89,18 @@ export const get_value = (operator: FunctionName, args: any[]): unknown => {
     case "latest":
       return last(args);
     case "parse_url":
-      if (typeof args[0] === "string") {
-        const url = new URL(args[0]);
-        if (args.length === 3 && (args[1] === "search" || args[1] === "query")) {
-          return url.searchParams.get(args[2]) || "";
-        } else if (args.length === 2) {
-          return (url as any)[args[1]] || "";
-        } else {
-          return url.toString();
+      if (typeof args[0] === "string" && args[0] !== "") {
+        try {
+          const url = new URL(args[0]);
+          if (args.length === 3 && (args[1] === "search" || args[1] === "query")) {
+            return url.searchParams.get(args[2]) || "";
+          } else if (args.length === 2) {
+            return (url as any)[args[1]] || "";
+          } else {
+            return url.toString();
+          }
+        } catch (ex) {
+          return "";
         }
       }
       return "";

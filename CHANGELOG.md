@@ -2,10 +2,11 @@
 
 Change history of the project. All the feature updates, bug fixes, breaking changes will be documented here.
 
-## [0.0.9]
+## [0.0.12]
 
 - Feature: `parse_url` support added
 - Feature: `parse_urlquery` support added
+- Bug fix: Fixed a bug by which the `project` command should work correctly on non-array objects
 
 ## [0.0.8]
 

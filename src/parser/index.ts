@@ -271,7 +271,8 @@ export const parse = (input: Command[], options?: { data?: any }): Promise<unkno
             } else if (typeof pv.output === "object") {
               let refs = cv.value.filter((v) => v.type === "ref");
               let functions = cv.value.filter((v) => v.type === "function");
-              let oo = {};
+              let oo: Record<string, any> = {};
+              let isSingle = cv.value.filter((v) => v.type === "ref" || v.type === "function").length === 1;
               refs.forEach((r) => {
                 if (r.type === "ref") {
                   let key = r.alias || r.value;
@@ -290,12 +291,17 @@ export const parse = (input: Command[], options?: { data?: any }): Promise<unkno
                   set(oo, key, value);
                 }
               });
-              pv.output == oo;
+              if (isSingle && refs.length === 1 && refs[0].type === "ref") {
+                pv.output = oo[refs[0].alias || refs[0].value];
+              } else if (isSingle && functions.length === 1 && functions[0].type === "function") {
+                pv.output = oo[functions[0].alias || functions[0].operator];
+              } else {
+                pv.output = oo;
+              }
               return pv;
             } else {
               return pv;
             }
-            return pv;
           case "project-away":
             if (typeof pv.output === "number" || typeof pv.output === "string" || !isArray(pv.output)) return pv;
             else if (isArray(pv.output)) {
@@ -386,10 +392,13 @@ export const uql = (query: string, options?: { data?: any }): Promise<unknown> =
     if (!query) {
       resolve("hello there! provide a valid query");
     } else {
-      getAST(query).then((res) => {
-        const result = parse(res, options);
-        resolve(result);
-      });
+      getAST(query)
+        .then((res) => {
+          parse(res, options)
+            .then((result) => resolve(result))
+            .catch((ex) => reject(ex));
+        })
+        .catch((ex) => reject(ex));
     }
   });
 };
