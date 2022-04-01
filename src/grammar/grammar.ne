@@ -5,7 +5,10 @@
   import * as moo from "moo";
   const oqlLexer = moo.compile({
     ws: /[ \t]+/,
-    comment: /\/\/.*?$/,
+    comment: {
+        match: /#[^\n]*/,
+        value: s => s.substring(1)
+    },
     nl: {
       match: "\n",
       lineBreaks: true,
@@ -37,6 +40,7 @@
     rparan: ")",
     comma: ",",
     assignment: "=",
+    return: "\r\n",
     identifier: {
       match: /[a-z_][a-zA-Z_0-9]*/,
       type: moo.keywords({
@@ -59,9 +63,11 @@ input
     -> commands                                             {% pick(0) %}
 commands
     ->  command __                                          {% as_array(0) %}
+    |   command __ "\r\n" __ pipeo __ commands              {% merge(0,6) %}
     |   command __ nlo __ pipeo __ commands                 {% merge(0,6) %}
 command 
-    -> "hello"                                              {% d => ({ type: "hello" }) %}
+    -> line_comment                                         {% pick(0) %}
+    |  "hello"                                              {% d => ({ type: "hello" }) %}
     |  "ping"                                               {% d => ({ type: "ping", value: "pong" }) %}
     |  "echo" __ str                                        {% d => ({ type: "echo", value: d[2] }) %}
     |  "count"                                              {% d => ({ type: "count" }) %}
@@ -240,6 +246,8 @@ num_type
 ref_types
     -> ref_type                                             {% as_array(0) %}
     |  ref_type __ "," __ ref_types                         {% merge(0,4) %}
+line_comment    
+    -> %comment                                             {% d => ({ type: "comment", value : d[0]?.value || '' }) %}
 str             -> %string                                  {% as_string %}                 # string
 number          -> %number                                  {% as_number %}                 # number
 nlo             -> %nl:*                                    {% dispose %}                   # optional newline

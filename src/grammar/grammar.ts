@@ -18,6 +18,7 @@ declare var ne: any;
 declare var identifier: any;
 declare var str: any;
 declare var sq_string: any;
+declare var comment: any;
 declare var string: any;
 declare var number: any;
 declare var nl: any;
@@ -28,7 +29,10 @@ declare var ws: any;
   import * as moo from "moo";
   const oqlLexer = moo.compile({
     ws: /[ \t]+/,
-    comment: /\/\/.*?$/,
+    comment: {
+        match: /#[^\n]*/,
+        value: s => s.substring(1)
+    },
     nl: {
       match: "\n",
       lineBreaks: true,
@@ -60,6 +64,7 @@ declare var ws: any;
     rparan: ")",
     comma: ",",
     assignment: "=",
+    return: "\r\n",
     identifier: {
       match: /[a-z_][a-zA-Z_0-9]*/,
       type: moo.keywords({
@@ -107,7 +112,9 @@ const grammar: Grammar = {
   ParserRules: [
     {"name": "input", "symbols": ["commands"], "postprocess": pick(0)},
     {"name": "commands", "symbols": ["command", "__"], "postprocess": as_array(0)},
+    {"name": "commands", "symbols": ["command", "__", {"literal":"\r\n"}, "__", "pipeo", "__", "commands"], "postprocess": merge(0,6)},
     {"name": "commands", "symbols": ["command", "__", "nlo", "__", "pipeo", "__", "commands"], "postprocess": merge(0,6)},
+    {"name": "command", "symbols": ["line_comment"], "postprocess": pick(0)},
     {"name": "command", "symbols": [{"literal":"hello"}], "postprocess": d => ({ type: "hello" })},
     {"name": "command", "symbols": [{"literal":"ping"}], "postprocess": d => ({ type: "ping", value: "pong" })},
     {"name": "command", "symbols": [{"literal":"echo"}, "__", "str"], "postprocess": d => ({ type: "echo", value: d[2] })},
@@ -271,6 +278,7 @@ const grammar: Grammar = {
     {"name": "num_type", "symbols": ["number"], "postprocess": d => ({ type: "number", value: d[0] })},
     {"name": "ref_types", "symbols": ["ref_type"], "postprocess": as_array(0)},
     {"name": "ref_types", "symbols": ["ref_type", "__", {"literal":","}, "__", "ref_types"], "postprocess": merge(0,4)},
+    {"name": "line_comment", "symbols": [(oqlLexer.has("comment") ? {type: "comment"} : comment)], "postprocess": d => ({ type: "comment", value : d[0]?.value || '' })},
     {"name": "str", "symbols": [(oqlLexer.has("string") ? {type: "string"} : string)], "postprocess": as_string},
     {"name": "number", "symbols": [(oqlLexer.has("number") ? {type: "number"} : number)], "postprocess": as_number},
     {"name": "nlo$ebnf$1", "symbols": []},

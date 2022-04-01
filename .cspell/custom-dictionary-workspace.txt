@@ -1,18 +1,19 @@
 # Custom Dictionary Words
-UQL
-Kusto
-nearley
-nearleyc
 datetime
 dcount
+kusto
 lparan
+nearley
+nearleyc
 rparan
+sriramajeyam
 startofday
 startofhour
 startofminute
 startofmonth
 startofweek
 startofyear
+sugumaran
 tobool
 todatetime
 todouble
@@ -25,4 +26,5 @@ tostring
 tounixtime
 toupper
 unixtime
+UQL
 vibgyor

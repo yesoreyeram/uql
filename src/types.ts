@@ -56,6 +56,7 @@ export type FunctionName =
   | "startofyear";
 
 type CommandType =
+  | "comment"
   | "hello"
   | "ping"
   | "echo"
@@ -75,6 +76,7 @@ type CommandType =
   | "parse-yaml";
 type CommandBase<T extends CommandType> = { type: T };
 
+type CommandComment = { value: string } & CommandBase<"comment">;
 type CommandHello = {} & CommandBase<"hello">;
 type CommandPing = {
   value: string;
@@ -117,6 +119,7 @@ type CommandRange = {
   value: { start: number; end: number; step: number } | { start: string; end: number; step: string };
 } & CommandBase<"range">;
 export type Command =
+  | CommandComment
   | CommandHello
   | CommandPing
   | CommandEcho

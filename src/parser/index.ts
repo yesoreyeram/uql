@@ -28,6 +28,8 @@ export const parse = (input: Command[], options?: { data?: any }): Promise<unkno
     const result: { output: unknown; context: Record<string, unknown> } = input.reduce(
       (pv: { context: Record<string, unknown>; output: unknown }, cv: Command) => {
         switch (cv.type) {
+          case "comment":
+            return pv;
           case "hello":
             pv.output = "hello";
             return pv;

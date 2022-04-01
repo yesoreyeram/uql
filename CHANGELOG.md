@@ -2,6 +2,11 @@
 
 Change history of the project. All the feature updates, bug fixes, breaking changes will be documented here.
 
+## [0.0.8]
+
+- Feature: new lines starting with `#` will be considered comments
+- Bug fix: fixed a bug where new lines in windows (`\r\n`) doesn't work
+
 ## [0.0.7]
 
 - `parse-yaml` support added

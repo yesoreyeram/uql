@@ -42,9 +42,13 @@ const tests: [string, { query: string; expected: unknown }][] = [
     },
   ],
   ["hello with newline", { query: "hello\n|hello", expected: [{ type: "hello" }, { type: "hello" }] }],
+  ["hello with newline with return (windows)", { query: "hello\r\n|hello", expected: [{ type: "hello" }, { type: "hello" }] }],
   ["hello with newline", { query: "hello\n | hello ", expected: [{ type: "hello" }, { type: "hello" }] }],
   ["hello with newline", { query: "hello \n | hello ", expected: [{ type: "hello" }, { type: "hello" }] }],
   ["hello with newline", { query: "hello \n |hello", expected: [{ type: "hello" }, { type: "hello" }] }],
+  ["comment", { query: "# hello", expected: [{ type: "comment", value: " hello" }] }],
+  ["command with comment", { query: "hello \n|# hello", expected: [{ type: "hello" }, { type: "comment", value: " hello" }] }],
+  ["comment with command", { query: "# hello world count()\r\n| hello", expected: [{ type: "comment", value: " hello world count()\r" }, { type: "hello" }] }],
   ["scope", { query: `scope "foo.bar"`, expected: [{ type: "scope", value: { type: "ref", value: "foo.bar" } }] }],
 ];
 
