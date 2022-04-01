@@ -40,6 +40,37 @@ export const parse = (input: Command[], options?: { data?: any }): Promise<unkno
           case "scope":
             pv.output = get(pv.output, cv.value.value);
             return pv;
+          case "mv-expand":
+            if (typeof pv.output === "string") {
+              return pv;
+            } else if (typeof pv.output === "number") {
+              return pv;
+            } else if (isArray(pv.output)) {
+              pv.output = pv.output
+                .filter((item) => {
+                  let v = get(item, cv.value.value);
+                  return v && isArray(v) && v.length > 0;
+                })
+                .flatMap((item) => {
+                  const expandingItem = get(item, cv.value.value);
+                  if (expandingItem && isArray(expandingItem)) {
+                    return expandingItem
+                      .map((e) => {
+                        return set({ ...item }, [cv.value.alias || cv.value.value], e);
+                      })
+                      .map((item) => {
+                        if (cv.value.alias) {
+                          delete item[cv.value.value];
+                        }
+                        return item;
+                      });
+                  }
+                  return item;
+                });
+              return pv;
+            } else {
+              return pv;
+            }
           case "count":
             if (typeof pv.output === "string") {
               pv.output = pv.output.length;

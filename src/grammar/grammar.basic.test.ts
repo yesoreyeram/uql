@@ -50,6 +50,8 @@ const tests: [string, { query: string; expected: unknown }][] = [
   ["command with comment", { query: "hello \n|# hello", expected: [{ type: "hello" }, { type: "comment", value: " hello" }] }],
   ["comment with command", { query: "# hello world count()\r\n| hello", expected: [{ type: "comment", value: " hello world count()\r" }, { type: "hello" }] }],
   ["scope", { query: `scope "foo.bar"`, expected: [{ type: "scope", value: { type: "ref", value: "foo.bar" } }] }],
+  ["mv-expand", { query: `mv-expand "foo"`, expected: [{ type: "mv-expand", value: { type: "ref", value: "foo" } }] }],
+  ["mv-expand with alias", { query: `mv-expand "bar"="foo"`, expected: [{ type: "mv-expand", value: { type: "ref", value: "foo", alias: "bar" } }] }],
 ];
 
 describe("grammar basic", () => {

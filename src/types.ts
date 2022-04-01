@@ -70,6 +70,7 @@ type CommandType =
   | "summarize"
   | "range"
   | "scope"
+  | "mv-expand"
   | "parse-json"
   | "parse-csv"
   | "parse-xml"
@@ -85,6 +86,7 @@ type CommandEcho = {
   value: string;
 } & CommandBase<"echo">;
 type CommandScope = { value: type_ref_type } & CommandBase<"scope">;
+type CommandMvExpand = { value: type_ref_type & { alias: string } } & CommandBase<"mv-expand">;
 type CommandParseJSON = { args: type_parse_arg[][] } & CommandBase<"parse-json">;
 type CommandParseCSV = { args: type_parse_arg[][] } & CommandBase<"parse-csv">;
 type CommandParseXML = { args: type_parse_arg[][] } & CommandBase<"parse-xml">;
@@ -130,6 +132,7 @@ export type Command =
   | CommandProject
   | CommandProjectAway
   | CommandScope
+  | CommandMvExpand
   | CommandParseJSON
   | CommandParseCSV
   | CommandParseXML

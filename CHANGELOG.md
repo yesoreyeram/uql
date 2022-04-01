@@ -5,6 +5,7 @@ Change history of the project. All the feature updates, bug fixes, breaking chan
 ## [0.0.8]
 
 - Feature: new lines starting with `#` will be considered comments
+- New command: `mv-expand` added. This expand multi value array into multiple records
 - Bug fix: fixed a bug where new lines in windows (`\r\n`) doesn't work
 
 ## [0.0.7]
