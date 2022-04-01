@@ -2,6 +2,11 @@
 
 Change history of the project. All the feature updates, bug fixes, breaking changes will be documented here.
 
+## [0.0.9]
+
+- Feature: `parse_url` support added
+- Feature: `parse_urlquery` support added
+
 ## [0.0.8]
 
 - Feature: new lines starting with `#` will be considered comments

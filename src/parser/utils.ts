@@ -1,4 +1,4 @@
-import { get, set, sum, min, max, mean, uniq, isArray, random, first, last } from "lodash";
+import { get, set, sum, min, max, mean, uniq, isArray, random, first, last, forEach } from "lodash";
 import { type_function, type_summarize_assignment, type_parse_arg, FunctionName } from "../types";
 import { Options as csv_parser_Options } from "csv-parse/lib";
 import { X2jOptionsOptional } from "fast-xml-parser";
@@ -88,6 +88,30 @@ export const get_value = (operator: FunctionName, args: any[]): unknown => {
     case "last":
     case "latest":
       return last(args);
+    case "parse_url":
+      if (typeof args[0] === "string") {
+        const url = new URL(args[0]);
+        if (args.length === 3 && (args[1] === "search" || args[1] === "query")) {
+          return url.searchParams.get(args[2]) || "";
+        } else if (args.length === 2) {
+          return (url as any)[args[1]] || "";
+        } else {
+          return url.toString();
+        }
+      }
+      return "";
+    case "parse_urlquery":
+      if (typeof args[0] === "string") {
+        const searchParams = new URLSearchParams(args[0]);
+        if (args.length == 2) {
+          return searchParams.get(args[1]) || "";
+        } else {
+          let o: Record<string, string> = {};
+          searchParams.forEach((value, key) => (o[key] = value));
+          return o;
+        }
+      }
+      return "";
     case "toint":
     case "tolong":
     case "todouble":

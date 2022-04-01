@@ -40,6 +40,8 @@ export type FunctionName =
   | "tostring"
   | "todouble"
   | "tofloat"
+  | "parse_url"
+  | "parse_urlquery"
   | "todatetime"
   | "tounixtime"
   | "unixtime_seconds_todatetime"

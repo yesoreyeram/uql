@@ -146,6 +146,8 @@ function_name
     |  "tostring"                                           {% as_string %}
     |  "todouble"                                           {% as_string %}
     |  "tofloat"                                            {% as_string %}
+    |  "parse_url"                                          {% as_string %}
+    |  "parse_urlquery"                                     {% as_string %}
     |  "todatetime"                                         {% as_string %}
     |  "tounixtime"                                         {% as_string %}
     |  "unixtime_seconds_todatetime"                        {% as_string %}
