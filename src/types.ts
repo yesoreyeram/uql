@@ -53,6 +53,7 @@ export type FunctionName =
   | "tofloat"
   | "parse_url"
   | "parse_urlquery"
+  | "kv"
   | "todatetime"
   | "tounixtime"
   | "unixtime_seconds_todatetime"

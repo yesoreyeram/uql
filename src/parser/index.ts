@@ -231,7 +231,7 @@ export const parse = (input: Command[], options?: { data?: any }): Promise<unkno
             else if (isArray(pv.output)) {
               pv.output = pv.output.map((o) => {
                 cv.value.forEach((ci) => {
-                  o = get_extended_object(o, ci);
+                  o = get_extended_object(o, ci, pv.output);
                 });
                 return o;
               });
@@ -287,7 +287,7 @@ export const parse = (input: Command[], options?: { data?: any }): Promise<unkno
                     else if (arg.type === "string") return arg.value;
                     else if (arg.type === "number") return +arg.value;
                   });
-                  let value = get_value(f.operator, args);
+                  let value = get_value(f.operator, args, pv.output);
                   set(oo, key, value);
                 }
               });

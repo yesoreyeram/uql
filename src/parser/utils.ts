@@ -1,4 +1,4 @@
-import { get, set, sum, min, max, mean, uniq, isArray, random, first, last } from "lodash";
+import { get, set, sum, min, max, mean, uniq, isArray, random, first, last, isNil, forEach } from "lodash";
 import { type_function, type_summarize_assignment, type_parse_arg, FunctionName } from "../types";
 import { Options as csv_parser_Options } from "csv-parse/lib";
 import { X2jOptionsOptional } from "fast-xml-parser";
@@ -50,7 +50,7 @@ export const summarize = (o: object, metrics: type_summarize_assignment[], pi: u
   return o;
 };
 
-export const get_value = (operator: FunctionName, args: any[]): unknown => {
+export const get_value = (operator: FunctionName, args: any[], previous_value?: any): unknown => {
   switch (operator) {
     case "tolower":
       return (args[0] + "").toLowerCase();
@@ -171,6 +171,18 @@ export const get_value = (operator: FunctionName, args: any[]): unknown => {
         }
       }
       return "";
+    case "kv":
+      let out: { key: string | number; value: any }[] = [];
+      if (args.length > 0 && typeof args[0] === "object") {
+        forEach(args[0], (value, key) => {
+          out.push({ key, value });
+        });
+      } else if (args.length === 0 && previous_value && typeof previous_value === "object") {
+        forEach(previous_value, (value, key) => {
+          out.push({ key, value });
+        });
+      }
+      return out;
     case "toint":
     case "tolong":
     case "todouble":
@@ -241,7 +253,7 @@ export const get_value = (operator: FunctionName, args: any[]): unknown => {
   }
 };
 
-export const get_extended_object = (o: object, assignment: type_function): object => {
+export const get_extended_object = (o: object, assignment: type_function, previous_value?: any): object => {
   let args = assignment.args.map((arg) => {
     if (arg.type === "ref") return get(o, arg.value);
     else if (arg.type === "string" || arg.type === "identifier") {
@@ -251,7 +263,7 @@ export const get_extended_object = (o: object, assignment: type_function): objec
     } else if (arg.type === "number") return +arg.value;
     else return arg;
   });
-  let value = get_value(assignment.operator, args);
+  let value = get_value(assignment.operator, args, previous_value);
   set(o, assignment.alias || assignment.operator, value);
   return o;
 };
@@ -284,6 +296,7 @@ export const get_parse_csv_options = (args: type_parse_arg[][]): csv_parser_Opti
   }
   return options;
 };
+
 export const get_parse_xml_options = (args: type_parse_arg[][]): X2jOptionsOptional => {
   let options: X2jOptionsOptional = { ignoreAttributes: false, allowBooleanAttributes: true, commentPropName: "#comments" };
   if (args[0] && args[0].length > 0) {

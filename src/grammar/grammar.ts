@@ -215,6 +215,7 @@ const grammar: Grammar = {
     {"name": "function_name", "symbols": [{"literal":"tofloat"}], "postprocess": as_string},
     {"name": "function_name", "symbols": [{"literal":"parse_url"}], "postprocess": as_string},
     {"name": "function_name", "symbols": [{"literal":"parse_urlquery"}], "postprocess": as_string},
+    {"name": "function_name", "symbols": [{"literal":"kv"}], "postprocess": as_string},
     {"name": "function_name", "symbols": [{"literal":"todatetime"}], "postprocess": as_string},
     {"name": "function_name", "symbols": [{"literal":"tounixtime"}], "postprocess": as_string},
     {"name": "function_name", "symbols": [{"literal":"unixtime_seconds_todatetime"}], "postprocess": as_string},

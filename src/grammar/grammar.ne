@@ -159,6 +159,7 @@ function_name
     |  "tofloat"                                            {% as_string %}
     |  "parse_url"                                          {% as_string %}
     |  "parse_urlquery"                                     {% as_string %}
+    |  "kv"                                                 {% as_string %}
     |  "todatetime"                                         {% as_string %}
     |  "tounixtime"                                         {% as_string %}
     |  "unixtime_seconds_todatetime"                        {% as_string %}
