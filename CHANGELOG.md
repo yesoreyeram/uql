@@ -2,6 +2,10 @@
 
 Change history of the project. All the feature updates, bug fixes, breaking changes will be documented here.
 
+## [0.0.13]
+
+- Feature: More math functions added. (floor/ceil/round/sign/pow/sin/cos/tan/log/log2/log10)
+
 ## [0.0.12]
 
 - Feature: `parse_url` support added

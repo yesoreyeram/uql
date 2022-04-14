@@ -1,4 +1,4 @@
-import { get, set, sum, min, max, mean, uniq, isArray, random, first, last, forEach } from "lodash";
+import { get, set, sum, min, max, mean, uniq, isArray, random, first, last } from "lodash";
 import { type_function, type_summarize_assignment, type_parse_arg, FunctionName } from "../types";
 import { Options as csv_parser_Options } from "csv-parse/lib";
 import { X2jOptionsOptional } from "fast-xml-parser";
@@ -88,6 +88,61 @@ export const get_value = (operator: FunctionName, args: any[]): unknown => {
     case "last":
     case "latest":
       return last(args);
+    case "sign":
+      if (args.length > 0 && typeof args[0] === "number") {
+        return Math.sign(args[0]);
+      }
+      return null;
+    case "sin":
+      if (args.length > 0 && typeof args[0] === "number") {
+        return Math.sin(args[0]);
+      }
+      return null;
+    case "cos":
+      if (args.length > 0 && typeof args[0] === "number") {
+        return Math.cos(args[0]);
+      }
+      return null;
+    case "tan":
+      if (args.length > 0 && typeof args[0] === "number") {
+        return Math.tan(args[0]);
+      }
+      return null;
+    case "pow":
+      if (args.length > 1 && typeof args[0] === "number" && typeof args[1] === "number") {
+        return Math.pow(args[0], args[1]);
+      }
+      return null;
+    case "round":
+      if (args.length > 0 && typeof args[0] === "number") {
+        return Math.round(args[0]);
+      }
+      return null;
+    case "ceil":
+      if (args.length > 0 && typeof args[0] === "number") {
+        return Math.ceil(args[0]);
+      }
+      return null;
+    case "floor":
+      if (args.length > 0 && typeof args[0] === "number") {
+        return Math.floor(args[0]);
+      }
+      return null;
+    case "log":
+      if (args.length > 0 && typeof args[0] === "number") {
+        return Math.log(args[0]);
+      }
+      return null;
+    case "log2":
+      if (args.length > 0 && typeof args[0] === "number") {
+        return Math.log2(args[0]);
+      }
+      return null;
+    case "log10":
+      if (args.length > 0 && typeof args[0] === "number") {
+        return Math.log10(args[0]);
+      }
+      return null;
     case "parse_url":
       if (typeof args[0] === "string" && args[0] !== "") {
         try {

@@ -129,6 +129,17 @@ function_name
     |  "first"                                              {% as_string %}
     |  "last"                                               {% as_string %}
     |  "latest"                                             {% as_string %}
+    |  "sign"                                               {% as_string %}
+    |  "sin"                                                {% as_string %}
+    |  "cos"                                                {% as_string %}
+    |  "tan"                                                {% as_string %}
+    |  "pow"                                                {% as_string %}
+    |  "round"                                              {% as_string %}
+    |  "ceil"                                               {% as_string %}
+    |  "floor"                                              {% as_string %}
+    |  "log"                                                {% as_string %}
+    |  "log2"                                               {% as_string %}
+    |  "log10"                                              {% as_string %}
     |  "strcat"                                             {% as_string %}
     |  "dcount"                                             {% as_string %}
     |  "distinct"                                           {% as_string %}

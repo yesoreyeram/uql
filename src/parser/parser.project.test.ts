@@ -53,4 +53,74 @@ describe("project", () => {
       expect(result).toStrictEqual({ name: "sriramajeyam", score: 12 });
     });
   });
+  describe("math functions", () => {
+    it("should calculate the floor/ceil/round/sign/pow correctly", async () => {
+      const result = await uql(`extend "one"=ceil(1.2), "two"=floor(1.2), "three"=round(1.2), "four"=round(1.6), "five"=sign(-1.2), "six"=pow(2,3)`, { data: [{}] });
+      expect(result).toStrictEqual([
+        {
+          one: 2,
+          two: 1,
+          three: 1,
+          four: 2,
+          five: -1,
+          six: 8,
+        },
+      ]);
+    });
+    it("should calculate the floor/ceil/round/sign/pow correctly with ref fields", async () => {
+      const result = await uql(`project "one"=ceil("a"), "two"=floor("a"), "three"=round("a"), "four"=round("b"), "five"=sign("e"), "six"=pow("c","d")`, {
+        data: [{ a: 1.2, b: 1.6, c: 2, d: 3, e: -1.2 }],
+      });
+      expect(result).toStrictEqual([
+        {
+          one: 2,
+          two: 1,
+          three: 1,
+          four: 2,
+          five: -1,
+          six: 8,
+        },
+      ]);
+    });
+    it("should calculate the log/log2/log10 calculations correctly", async () => {
+      const result = await uql(`extend "one"=log(1.2), "two"=log2(1.2), "three"=log10(1.2)`, { data: [{}] });
+      expect(result).toStrictEqual([
+        {
+          one: Math.log(1.2),
+          two: Math.log2(1.2),
+          three: Math.log10(1.2),
+        },
+      ]);
+    });
+    it("should calculate the log/log2/log10 calculations correctly with ref fields", async () => {
+      const result = await uql(`project "one"=log("a"), "two"=log2("a"), "three"=log10("a")`, { data: [{ a: 1.2 }] });
+      expect(result).toStrictEqual([
+        {
+          one: Math.log(1.2),
+          two: Math.log2(1.2),
+          three: Math.log10(1.2),
+        },
+      ]);
+    });
+    it("should calculate the sin/cos/tan calculations correctly", async () => {
+      const result = await uql(`extend "one"=sin(1.2), "two"=cos(1.2), "three"=tan(1.2)`, { data: [{}] });
+      expect(result).toStrictEqual([
+        {
+          one: Math.sin(1.2),
+          two: Math.cos(1.2),
+          three: Math.tan(1.2),
+        },
+      ]);
+    });
+    it("should calculate the sin/cos/tan calculations correctly with ref fields", async () => {
+      const result = await uql(`project "one"=sin("a"), "two"=cos("a"), "three"=tan("a")`, { data: [{ a: 1.2 }] });
+      expect(result).toStrictEqual([
+        {
+          one: Math.sin(1.2),
+          two: Math.cos(1.2),
+          three: Math.tan(1.2),
+        },
+      ]);
+    });
+  });
 });
