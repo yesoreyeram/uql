@@ -63,8 +63,8 @@ input
     -> commands                                             {% pick(0) %}
 commands
     ->  command __                                          {% as_array(0) %}
-    |   command __ "\r\n" __ pipeo __ commands              {% merge(0,6) %}
-    |   command __ nlo __ pipeo __ commands                 {% merge(0,6) %}
+    |   command __ %comment:* "\r\n" __ pipeo __ commands   {% merge(0,7) %}
+    |   command __ %comment:* nlo __ pipeo __ commands      {% merge(0,7) %}
 command 
     -> line_comment                                         {% pick(0) %}
     |  "hello"                                              {% d => ({ type: "hello" }) %}

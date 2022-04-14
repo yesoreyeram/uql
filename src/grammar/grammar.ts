@@ -3,6 +3,7 @@
 // Bypasses TS6133. Allow declared but unused functions.
 // @ts-ignore
 function id(d: any[]): any { return d[0]; }
+declare var comment: any;
 declare var lparan: any;
 declare var rparan: any;
 declare var plus: any;
@@ -18,7 +19,6 @@ declare var ne: any;
 declare var identifier: any;
 declare var str: any;
 declare var sq_string: any;
-declare var comment: any;
 declare var string: any;
 declare var number: any;
 declare var nl: any;
@@ -112,8 +112,12 @@ const grammar: Grammar = {
   ParserRules: [
     {"name": "input", "symbols": ["commands"], "postprocess": pick(0)},
     {"name": "commands", "symbols": ["command", "__"], "postprocess": as_array(0)},
-    {"name": "commands", "symbols": ["command", "__", {"literal":"\r\n"}, "__", "pipeo", "__", "commands"], "postprocess": merge(0,6)},
-    {"name": "commands", "symbols": ["command", "__", "nlo", "__", "pipeo", "__", "commands"], "postprocess": merge(0,6)},
+    {"name": "commands$ebnf$1", "symbols": []},
+    {"name": "commands$ebnf$1", "symbols": ["commands$ebnf$1", (oqlLexer.has("comment") ? {type: "comment"} : comment)], "postprocess": (d) => d[0].concat([d[1]])},
+    {"name": "commands", "symbols": ["command", "__", "commands$ebnf$1", {"literal":"\r\n"}, "__", "pipeo", "__", "commands"], "postprocess": merge(0,7)},
+    {"name": "commands$ebnf$2", "symbols": []},
+    {"name": "commands$ebnf$2", "symbols": ["commands$ebnf$2", (oqlLexer.has("comment") ? {type: "comment"} : comment)], "postprocess": (d) => d[0].concat([d[1]])},
+    {"name": "commands", "symbols": ["command", "__", "commands$ebnf$2", "nlo", "__", "pipeo", "__", "commands"], "postprocess": merge(0,7)},
     {"name": "command", "symbols": ["line_comment"], "postprocess": pick(0)},
     {"name": "command", "symbols": [{"literal":"hello"}], "postprocess": d => ({ type: "hello" })},
     {"name": "command", "symbols": [{"literal":"ping"}], "postprocess": d => ({ type: "ping", value: "pong" })},
