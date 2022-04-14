@@ -246,8 +246,14 @@ export const get_value = (operator: FunctionName, args: any[], previous_value?: 
       return new Date(args[0] / 1000 / 1000);
     case "random":
       return random(...args);
-    case "dcount":
     case "distinct":
+      if (args.length > 0) {
+        return uniq(args[0]);
+      } else if (args.length === 0 && previous_value && typeof previous_value === "object" && isArray(previous_value)) {
+        return uniq(previous_value);
+      }
+      return null;
+    case "dcount":
     default:
       throw "not implemented";
   }

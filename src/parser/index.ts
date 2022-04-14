@@ -1,4 +1,4 @@
-import { isArray, orderBy, get, set, forEach, groupBy, first, toString } from "lodash";
+import { isArray, orderBy, get, set, forEach, groupBy, first, toString, uniq } from "lodash";
 import { Parser, Grammar } from "nearley";
 import grammar from "../grammar/grammar";
 import * as csv_parser from "csv-parse/lib/sync";
@@ -39,6 +39,19 @@ export const parse = (input: Command[], options?: { data?: any }): Promise<unkno
             return pv;
           case "scope":
             pv.output = get(pv.output, cv.value.value);
+            return pv;
+          case "distinct":
+            if (cv.value === undefined) {
+              pv.output = uniq(pv.output as unknown[]);
+            } else {
+              if (typeof pv.output === "object" && isArray(pv.output) && cv.value) {
+                let a = pv.output.map((o) => get(o, cv.value?.value || ""));
+                pv.output = uniq(a);
+              } else {
+                let value = get(pv.output, cv.value.value);
+                pv.output = uniq(value);
+              }
+            }
             return pv;
           case "mv-expand":
             if (typeof pv.output === "string") {

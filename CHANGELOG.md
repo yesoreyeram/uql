@@ -6,6 +6,7 @@ Change history of the project. All the feature updates, bug fixes, breaking chan
 
 - Feature: More math functions added. (floor/ceil/round/sign/pow/sin/cos/tan/log/log2/log10)
 - Feature: New function `kv` which converts object into array of key value pairs
+- Feature: New root level command `distinct` which returns uniq values
 
 ## [0.0.12]
 

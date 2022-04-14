@@ -67,6 +67,10 @@ describe("parser", () => {
       const result = await uql("parse-json", { data: "[{},{}]" });
       expect(result).toStrictEqual([{}, {}]);
     });
+    it("json object", async () => {
+      const result = await uql("parse-json", { data: [{}, {}] });
+      expect(result).toStrictEqual([{}, {}]);
+    });
   });
   describe("parse-csv", () => {
     it("default", async () => {

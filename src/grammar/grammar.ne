@@ -82,6 +82,7 @@ command
     |  command_parse_xml                                    {% d => ({ type: "parse-xml", args: d[0] })%}
     |  command_parse_yaml                                   {% d => ({ type: "parse-yaml", args: d[0] })%}
     |  command_scope                                        {% d => ({ type: "scope", value: d[0] })%}
+    |  command_distinct                                     {% d => ({ type: "distinct", value: d[0] })%}
     |  command_mv_expand                                    {% d => ({ type: "mv-expand", value: d[0] })%}
     |  command_summarize                                    {% d => ({ type: "summarize", value: d[0] })%}
     |  command_range                                        {% d => ({ type: "range", value: d[0] })%}
@@ -203,6 +204,9 @@ command_project_away
 # Command : Scope 
 command_scope
     -> "scope" _ ref_type                                   {% d => d[2] %}
+# Command : Distinct 
+command_distinct
+    -> "distinct" __ ref_type:*                             {% d => d[2] ? d[2][0] : undefined %}
 # Command : mv-exapand 
 command_mv_expand
     -> "mv" %dash "expand" _ ref_type                       {% d => d[4] %}

@@ -70,4 +70,39 @@ describe("mv-expand", () => {
     });
     expect(result).toStrictEqual({ total_age: 10, count: 5 });
   });
+  it("should respect subsequent commands", async () => {
+    const data = {
+      server1: {
+        name: "server-1",
+        ip: "0.0.0.1",
+        disks: [
+          { drive: "C", size: 1024 },
+          { drive: "D", size: 2048 },
+        ],
+      },
+      server2: {
+        name: "server-2",
+        ip: "0.0.0.2",
+        disks: [
+          { drive: "C", size: 2048 },
+          { drive: "D", size: 3096 },
+        ],
+      },
+    };
+    const result = await uql(
+      `parse-json
+    | project kv() 
+    | project "name"="value.name", "ip"="value.ip", "disks"="value.disks"
+    | mv-expand "disk"="disks" 
+    | project "name", "ip", "driveName"="disk.drive", "driveSize"="disk.size"
+    | project-away "disk"`,
+      { data }
+    );
+    expect(result).toStrictEqual([
+      { name: "server-1", ip: "0.0.0.1", driveName: "C", driveSize: 1024 },
+      { name: "server-1", ip: "0.0.0.1", driveName: "D", driveSize: 2048 },
+      { name: "server-2", ip: "0.0.0.2", driveName: "C", driveSize: 2048 },
+      { name: "server-2", ip: "0.0.0.2", driveName: "D", driveSize: 3096 },
+    ]);
+  });
 });
