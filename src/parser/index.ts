@@ -254,7 +254,11 @@ export const parse = (input: Command[], options?: { data?: any }): Promise<unkno
             else if (isArray(pv.output)) {
               pv.output = pv.output.map((o) => {
                 cv.value.forEach((ci) => {
-                  o = get_extended_object(o, ci, pv.output);
+                  if (ci.type === "function") {
+                    o = get_extended_object(o, ci, pv.output);
+                  } else if (ci.type === "ref") {
+                    set(o, ci.alias || ci.value, get(o, ci.value));
+                  }
                 });
                 return o;
               });

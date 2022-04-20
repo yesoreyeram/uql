@@ -2,6 +2,11 @@
 
 Change history of the project. All the feature updates, bug fixes, breaking changes will be documented here.
 
+## [0.0.15]
+
+- Feature: new root level command `jsonata`
+- Feature: `extend` command now support aliasing for ref fields
+
 ## [0.0.14]
 
 - Feature: Support for comments at the end of the line. Everything that stay after `#` will consider as comment

@@ -1,5 +1,5 @@
 type type_str_type = { type: "string"; value: string };
-type type_ref_type = { type: "ref"; value: string };
+type type_ref_type = { type: "ref"; value: string; alias?: string };
 type type_num_type = { type: "number"; value: number };
 type type_identifier_type = { type: "identifier"; value: string };
 type type_function_arg = type_str_type | type_ref_type | type_num_type | type_identifier_type;
@@ -130,7 +130,7 @@ type CommandProjectAway = {
   value: type_ref_type[];
 } & CommandBase<"project-away">;
 type CommandExtend = {
-  value: type_function[];
+  value: type_function[] | type_ref_type[];
 } & CommandBase<"extend">;
 type CommandSummarize = {
   value: type_summarize_item;

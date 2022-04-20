@@ -88,4 +88,51 @@ describe("extend", () => {
       ]);
     });
   });
+  describe("basic", () => {
+    it("default", async () => {
+      const result3 = await uql(`project-away "b" | extend "a1"="a", "c"`, {
+        data: [
+          { a: 12, b: 20, c: 2 },
+          { a: 6, b: 32, c: 3 },
+        ],
+      });
+      expect(result3).toStrictEqual([
+        { a: 12, a1: 12, c: 2 },
+        { a: 6, a1: 6, c: 3 },
+      ]);
+    });
+    it("advanced", async () => {
+      const xml_data = `<nmapresult>
+      <hosts>
+          <host name="host1">
+              <ports>
+                  <port name="http">80</port>
+                  <port name="https">443</port>
+              </ports>
+           </host>
+          <host name="host2">
+              <ports>
+                  <port name="http">80</port>
+                  <port name="ssh">22</port>
+              </ports>
+          </host>
+      </hosts>
+      </nmapresult>`;
+      const result4 = await uql(
+        `parse-xml 
+      | scope "nmapresult.hosts.host" 
+      | project "host"="@_name", "ports"="ports.port"
+      | mv-expand "port"="ports" 
+      | extend "portName"="port.@_name", "portNumber"="port.#text"
+      | project-away "port"`,
+        { data: xml_data }
+      );
+      expect(result4).toStrictEqual([
+        { host: "host1", portNumber: 80, portName: "http" },
+        { host: "host1", portNumber: 443, portName: "https" },
+        { host: "host2", portNumber: 80, portName: "http" },
+        { host: "host2", portNumber: 22, portName: "ssh" },
+      ]);
+    });
+  });
 });

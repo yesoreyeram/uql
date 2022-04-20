@@ -36,6 +36,7 @@ module.exports = {
     "vibgyor",
     "jonny",
     "kamal",
+    "nmapresult",
     "APAC",
     "Sussman",
     "Kernighan",
