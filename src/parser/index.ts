@@ -2,6 +2,7 @@ import { isArray, orderBy, get, set, forEach, groupBy, first, toString, uniq } f
 import { Parser, Grammar } from "nearley";
 import grammar from "../grammar/grammar";
 import * as csv_parser from "csv-parse/lib/sync";
+import * as jsonata from "jsonata";
 import { XMLParser } from "fast-xml-parser";
 import { load as yaml_loader } from "js-yaml";
 import { Command } from "../types";
@@ -39,6 +40,15 @@ export const parse = (input: Command[], options?: { data?: any }): Promise<unkno
             return pv;
           case "scope":
             pv.output = get(pv.output, cv.value.value);
+            return pv;
+          case "jsonata":
+            const expression = jsonata(cv.expression);
+            let out = expression.evaluate(pv.output);
+            if (out && typeof out === "object" && isArray(out)) {
+              // https://github.com/jsonata-js/jsonata/issues/296
+              delete (out as any).sequence;
+            }
+            pv.output = out;
             return pv;
           case "distinct":
             if (cv.value === undefined) {

@@ -86,6 +86,7 @@ type CommandType =
   | "scope"
   | "distinct"
   | "mv-expand"
+  | "jsonata"
   | "parse-json"
   | "parse-csv"
   | "parse-xml"
@@ -107,6 +108,7 @@ type CommandParseJSON = { args: type_parse_arg[][] } & CommandBase<"parse-json">
 type CommandParseCSV = { args: type_parse_arg[][] } & CommandBase<"parse-csv">;
 type CommandParseXML = { args: type_parse_arg[][] } & CommandBase<"parse-xml">;
 type CommandParseYAML = { args: type_parse_arg[][] } & CommandBase<"parse-yaml">;
+type CommandJSONata = { expression: string } & CommandBase<"jsonata">;
 type CommandCount = {} & CommandBase<"count">;
 type CommandLimit = {
   value: number;
@@ -150,6 +152,7 @@ export type Command =
   | CommandScope
   | CommandDistinct
   | CommandMvExpand
+  | CommandJSONata
   | CommandParseJSON
   | CommandParseCSV
   | CommandParseXML

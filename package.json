@@ -26,6 +26,7 @@
     "dayjs": "^1.10.7",
     "fast-xml-parser": "^4.0.0-beta.8",
     "js-yaml": "^4.1.0",
+    "jsonata": "^1.8.6",
     "lodash": "^4.17.21",
     "moo": "^0.5.1",
     "nearley": "^2.20.1",

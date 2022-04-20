@@ -86,6 +86,7 @@ command
     |  command_mv_expand                                    {% d => ({ type: "mv-expand", value: d[0] })%}
     |  command_summarize                                    {% d => ({ type: "summarize", value: d[0] })%}
     |  command_range                                        {% d => ({ type: "range", value: d[0] })%}
+    |  "jsonata" __ str                                     {% d => ({ type: "jsonata", expression: d[2] }) %}
 # Command Function
 function_assignments
     -> function_assignment                                  {% as_array(0) %}

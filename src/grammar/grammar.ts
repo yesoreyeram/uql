@@ -138,6 +138,7 @@ const grammar: Grammar = {
     {"name": "command", "symbols": ["command_mv_expand"], "postprocess": d => ({ type: "mv-expand", value: d[0] })},
     {"name": "command", "symbols": ["command_summarize"], "postprocess": d => ({ type: "summarize", value: d[0] })},
     {"name": "command", "symbols": ["command_range"], "postprocess": d => ({ type: "range", value: d[0] })},
+    {"name": "command", "symbols": [{"literal":"jsonata"}, "__", "str"], "postprocess": d => ({ type: "jsonata", expression: d[2] })},
     {"name": "function_assignments", "symbols": ["function_assignment"], "postprocess": as_array(0)},
     {"name": "function_assignments", "symbols": ["function_assignment", "__", {"literal":","}, "__", "function_assignments"], "postprocess": merge(0,4)},
     {"name": "function_assignment$ebnf$1", "symbols": []},
