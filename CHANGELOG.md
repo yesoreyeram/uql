@@ -2,6 +2,17 @@
 
 Change history of the project. All the feature updates, bug fixes, breaking changes will be documented here.
 
+## [0.0.17]
+
+- Feature: new methods `percentage`,`split`,`replace_string`,`reverse`,`pack`,`array_to_map` and `array_from_entries`
+
+## [0.0.16]
+
+- Feature: new root level command `where` added to support basic filters
+- Feature: new root level command `project-reorder` added
+- Feature: new method `extract` added to extract part of the string using regex
+- Feature: new summarize methods `countif`, `sumif`, `minif` and `maxif`
+
 ## [0.0.15]
 
 - Feature: new root level command `jsonata`

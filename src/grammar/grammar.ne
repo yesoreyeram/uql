@@ -39,6 +39,8 @@
     lparan: "(",
     rparan: ")",
     comma: ",",
+    tilde: "~",
+    exclaim: "!",
     assignment: "=",
     return: "\r\n",
     identifier: {
@@ -76,12 +78,14 @@ command
     |  command_orderby                                      {% d => ({ type: "orderby", value: d[0] })%}
     |  command_extend                                       {% d => ({ type: "extend", value: d[0] })%}
     |  command_project_away                                 {% d => ({ type: "project-away", value: d[0] })%}
+    |  command_project_reorder                              {% d => ({ type: "project-reorder", value: d[0] })%}
     |  command_project                                      {% d => ({ type: "project", value: d[0] })%}
     |  command_parse_json                                   {% d => ({ type: "parse-json", args: d[0] })%}
     |  command_parse_csv                                    {% d => ({ type: "parse-csv", args: d[0] })%}
     |  command_parse_xml                                    {% d => ({ type: "parse-xml", args: d[0] })%}
     |  command_parse_yaml                                   {% d => ({ type: "parse-yaml", args: d[0] })%}
     |  command_scope                                        {% d => ({ type: "scope", value: d[0] })%}
+    |  command_where                                        {% d => ({ type: "where", value: d[0] })%}
     |  command_distinct                                     {% d => ({ type: "distinct", value: d[0] })%}
     |  command_mv_expand                                    {% d => ({ type: "mv-expand", value: d[0] })%}
     |  command_summarize                                    {% d => ({ type: "summarize", value: d[0] })%}
@@ -100,11 +104,10 @@ expression
     ->  %lparan __ expression_args:* %rparan                {% d => ({ type: "expression", args: d[2][0]||[] }) %}
 expression_args       
     -> expression_arg __                                    {% as_array(0) %}
-    |  expression_arg _ expression_args                     {% merge(0,2)  %}
+    |  expression_arg __ expression_args                    {% merge(0,2)  %}
 expression_arg
-    -> num_type                                             {% d => d[0] %}
-    |  str_type                                             {% d => d[0] %}
-    |  ref_type                                             {% d => d[0] %}
+    -> any_type                                             {% d => d[0] %}
+    |  %lparan __ function_args __ %rparan                  {% d => ({ type : "value_array", value: d[2] }) %}
     |  %plus                                                {% d => ({ type: "operation", value: "+" }) %}
     |  %dash                                                {% d => ({ type: "operation", value: "-" }) %}
     |  %mul                                                 {% d => ({ type: "operation", value: "*" }) %}
@@ -116,15 +119,53 @@ expression_arg
     |  %lt                                                  {% d => ({ type: "operation", value: "<" }) %}
     |  %eq                                                  {% d => ({ type: "operation", value: "==" }) %}
     |  %ne                                                  {% d => ({ type: "operation", value: "!=" }) %}
+    |  %assignment %tilde                                   {% d => ({ type: "operation", value: "=~" }) %}
+    |  %exclaim %tilde                                      {% d => ({ type: "operation", value: "!~" }) %}
+    |  "between"                                            {% d => ({ type: "operation", value: "between" }) %}
+    |  "inside"                                             {% d => ({ type: "operation", value: "inside" }) %}
+    |  "outside"                                            {% d => ({ type: "operation", value: "outside" }) %}
+    |  "matches" _ "regex"                                  {% d => ({ type: "operation", value: "matches regex" }) %}
+    |  %exclaim "matches" _ "regex"                         {% d => ({ type: "operation", value: "!matches regex" }) %}
+    |  "not" _ "matches" _ "regex"                          {% d => ({ type: "operation", value: "!matches regex" }) %}
+    |  "in"                                                 {% d => ({ type: "operation", value: "in" }) %}
+    |  %exclaim "in"                                        {% d => ({ type: "operation", value: "!in" }) %}
+    |  "not" _ "in"                                         {% d => ({ type: "operation", value: "!in" }) %}
+    |  "in" %tilde                                          {% d => ({ type: "operation", value: "in~" }) %}
+    |  %exclaim "in" %tilde                                 {% d => ({ type: "operation", value: "!in~" }) %}
+    |  "not" _ "in" %tilde                                  {% d => ({ type: "operation", value: "!in~" }) %}
+    |  "contains"                                           {% d => ({ type: "operation", value: "contains" }) %}
+    |  %exclaim "contains"                                  {% d => ({ type: "operation", value: "!contains" }) %}
+    |  "not" _ "contains"                                   {% d => ({ type: "operation", value: "!contains" }) %}
+    |  "contains_cs"                                        {% d => ({ type: "operation", value: "contains_cs" }) %}
+    |  %exclaim "contains_cs"                               {% d => ({ type: "operation", value: "!contains_cs" }) %}
+    |  "not" _ "contains_cs"                                {% d => ({ type: "operation", value: "!contains_cs" }) %}
+    |  "startswith"                                         {% d => ({ type: "operation", value: "startswith" }) %}
+    |  %exclaim "startswith"                                {% d => ({ type: "operation", value: "!startswith" }) %}
+    |  "not" _ "startswith"                                 {% d => ({ type: "operation", value: "!startswith" }) %}
+    |  "startswith_cs"                                      {% d => ({ type: "operation", value: "startswith_cs" }) %}
+    |  %exclaim "startswith_cs"                             {% d => ({ type: "operation", value: "!startswith_cs" }) %}
+    |  "not" _ "startswith_cs"                              {% d => ({ type: "operation", value: "!startswith_cs" }) %}
+    |  "endswith"                                           {% d => ({ type: "operation", value: "endswith" }) %}
+    |  %exclaim "endswith"                                  {% d => ({ type: "operation", value: "!endswith" }) %}
+    |  "not" _ "endswith"                                   {% d => ({ type: "operation", value: "!endswith" }) %}
+    |  "endswith_cs"                                        {% d => ({ type: "operation", value: "endswith_cs" }) %}
+    |  %exclaim "endswith_cs"                               {% d => ({ type: "operation", value: "!endswith_cs" }) %}
+    |  "not" _ "endswith_cs"                                {% d => ({ type: "operation", value: "!endswith_cs" }) %}
     |  function                                             {% d => ({ type: "function", value: d[0] }) %}
 function
     ->  function_name "(" __ function_args:* ")"            {% d => ({ type: "function", operator: d[0], args: d[3][0]||[] }) %}
+conditional_function_name
+    -> "countif" {% as_string %}
+    | "sumif"    {% as_string %}
+    | "minif"    {% as_string %}
+    | "maxif"    {% as_string %}
 function_name
     -> "count"                                              {% as_string %}
     |  "sum"                                                {% as_string %}
     |  "diff"                                               {% as_string %}
     |  "mul"                                                {% as_string %}
     |  "div"                                                {% as_string %}
+    |  "percentage"                                         {% as_string %}
     |  "min"                                                {% as_string %}
     |  "max"                                                {% as_string %}
     |  "mean"                                               {% as_string %}
@@ -149,9 +190,13 @@ function_name
     |  "toupper"                                            {% as_string %}
     |  "tolower"                                            {% as_string %}
     |  "strlen"                                             {% as_string %}
+    |  "split"                                              {% as_string %}
+    |  "replace_string"                                     {% as_string %}
+    |  "reverse"                                            {% as_string %}
     |  "trim"                                               {% as_string %}
     |  "trim_start"                                         {% as_string %}
     |  "trim_end"                                           {% as_string %}
+    |  "extract"                                            {% as_string %}
     |  "toint"                                              {% as_string %}
     |  "tonumber"                                           {% as_string %}
     |  "tolong"                                             {% as_string %}
@@ -176,13 +221,15 @@ function_name
     |  "startofmonth"                                       {% as_string %}
     |  "startofweek"                                        {% as_string %}
     |  "startofyear"                                        {% as_string %}
+    |  "pack"                                               {% as_string %}
+    |  "bag_pack"                                           {% as_string %}
+    |  "array_to_map"                                       {% as_string %}
+    |  "array_from_entries"                                 {% as_string %}
 function_args       
     -> function_arg __                                      {% as_array(0) %}
     |  function_arg __ "," __ function_args                 {% merge(0,4)  %}
 function_arg   
-    -> str_type                                             {% pick(0) %}
-    |  ref_type                                             {% pick(0) %}
-    |  num_type                                             {% pick(0) %}
+    -> any_type                                             {% pick(0) %}
     |  %identifier                                          {% d => { return { type: "identifier", value: d[0].value } } %}
 # Command : Order by
 command_orderby
@@ -199,12 +246,18 @@ command_extend
 # Command : Project
 command_project
     -> "project" _ function_assignments                     {% d => d[2] %}
+# Command : Project ReOrder
+command_project_reorder
+    -> "project" %dash "reorder" _ function_assignments     {% d => d[4] %}
 # Command : Project Away
 command_project_away
     -> "project" %dash "away" _ ref_types                   {% d => d[4] %}
 # Command : Scope 
 command_scope
     -> "scope" _ ref_type                                   {% d => d[2] %}
+# Command : Where 
+command_where
+    -> "where" _ expression_args                            {% d => d[2] %}
 # Command : Distinct 
 command_distinct
     -> "distinct" __ ref_type:*                             {% d => d[2] ? d[2][0] : undefined %}
@@ -241,9 +294,14 @@ summarize_assignments
      ->  summarize_assignment                                        {% d => [ d[0] ] %}
      |   summarize_assignment __ "," __ summarize_assignments        {% merge(0,4) %}
 summarize_assignment 
-     ->  str:*  "=":* summarize_function                             {% d => ({ operator: d[2].operator, alias: d[0][0], args: d[2].args })%}
+     ->  str:*  "=":* summarize_function                             {% d => {
+                return d[2].condition ? 
+                { operator: d[2].operator, alias: d[0][0], args: d[2].args, ref: d[2].ref, condition: d[2].condition }:
+                { operator: d[2].operator, alias: d[0][0], args: d[2].args }
+            }%}
 summarize_function
-     ->  function_name "(" summarize_args:* ")"                      {% d => ({ operator: d[0], args: d[2][0]||[] })%}
+     ->  function_name "(" summarize_args:* ")"                                 {% d => ({ operator: d[0], args: d[2][0]||[] })%}
+     |   conditional_function_name "(" ref_type __ "," __ expression_args __ ")"   {% d => ({ operator: d[0], ref: d[2], condition: d[6] })%}
 summarize_args       
      ->  summarize_arg __                                            {% as_array(0) %}   
      |   summarize_arg __ "," __ summarize_args                      {% merge(0,4) %}
@@ -270,6 +328,10 @@ num_type
 ref_types
     -> ref_type                                             {% as_array(0) %}
     |  ref_type __ "," __ ref_types                         {% merge(0,4) %}
+any_type
+    -> num_type                                             {% pick(0) %}
+    |  str_type                                             {% pick(0) %}
+    |  ref_type                                             {% pick(0) %}
 line_comment    
     -> %comment                                             {% d => ({ type: "comment", value : d[0]?.value || '' }) %}
 str             -> %string                                  {% as_string %}                 # string

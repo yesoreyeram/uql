@@ -1,54 +1,6 @@
-import { get, set, sum, min, max, mean, uniq, isArray, random, first, last, isNil, forEach } from "lodash";
-import { type_function, type_summarize_assignment, type_parse_arg, FunctionName } from "../types";
-import { Options as csv_parser_Options } from "csv-parse/lib";
-import { X2jOptionsOptional } from "fast-xml-parser";
+import { sum, min, max, mean, uniq, isArray, random, first, last, forEach, flatten, get } from "lodash";
 import * as dayjs from "dayjs";
-
-export const summarize = (o: object, metrics: type_summarize_assignment[], pi: unknown[]): object => {
-  metrics.forEach((i) => {
-    let args = i.args || [];
-    let statName = args.length > 0 ? `${args[0].value} (${i.operator})` : i.operator;
-    statName = i.alias ? i.alias : statName;
-    let val;
-    switch (i.operator) {
-      case "count":
-        set(o, statName, pi.length);
-        break;
-      case "dcount":
-        val = args.length > 0 ? pi.map((p) => get(p, args[0].value)) : [pi];
-        set(o, statName, uniq(val).length);
-        break;
-      case "mean":
-        val = args.length > 0 ? mean(pi.map((p) => get(p, args[0].value))) : mean(pi);
-        set(o, statName, val);
-        break;
-      case "sum":
-        val = args.length > 0 ? sum(pi.map((p) => get(p, args[0].value))) : sum(pi);
-        set(o, statName, val);
-        break;
-      case "min":
-        val = args.length > 0 ? min(pi.map((p) => get(p, args[0].value))) : min(pi);
-        set(o, statName, val);
-        break;
-      case "max":
-        val = args.length > 0 ? max(pi.map((p) => get(p, args[0].value))) : max(pi);
-        set(o, statName, val);
-        break;
-      case "first":
-        val = args.length > 0 ? first(pi.map((p) => get(p, args[0].value))) : first(pi);
-        set(o, statName, val);
-        break;
-      case "last":
-      case "latest":
-        val = args.length > 0 ? last(pi.map((p) => get(p, args[0].value))) : last(pi);
-        set(o, statName, val);
-        break;
-      default:
-        break;
-    }
-  });
-  return o;
-};
+import { FunctionName, type_where_arg } from "../types";
 
 export const get_value = (operator: FunctionName, args: any[], previous_value?: any): unknown => {
   switch (operator) {
@@ -58,6 +10,18 @@ export const get_value = (operator: FunctionName, args: any[], previous_value?: 
       return (args[0] + "").toUpperCase();
     case "strlen":
       return (args[0] + "").length;
+    case "reverse":
+      return typeof args[0] === "string" ? args[0].split("").reverse().join("") : null;
+    case "split":
+      if (args.length >= 1 && typeof args[0] === "string") {
+        return (args[0] || "").split(typeof args[1] === "string" ? args[1] : "");
+      }
+      return [];
+    case "replace_string":
+      if (args.length >= 2 && typeof args[0] === "string" && typeof args[1] === "string") {
+        return (args[0] || "").replace(new RegExp(args[1], args[3] || "g"), typeof args[2] === "string" ? args[2] : "");
+      }
+      return args[0] || "";
     case "trim":
       return (args[0] + "").trim();
     case "trim_start":
@@ -77,6 +41,11 @@ export const get_value = (operator: FunctionName, args: any[], previous_value?: 
       return args[0] * args[1];
     case "div":
       return args[0] / args[1];
+    case "percentage":
+      if (args.length === 2) {
+        return (args[0] / args[1]) * 100;
+      }
+      return null;
     case "min":
       return min(args);
     case "max":
@@ -143,6 +112,25 @@ export const get_value = (operator: FunctionName, args: any[], previous_value?: 
         return Math.log10(args[0]);
       }
       return null;
+    case "extract":
+      if (args.length >= 3) {
+        const reg: string = args[0] || "";
+        const index = args.length > 1 ? args[1] : 0;
+        const input: string = args[2] || "";
+        const match = input.match(reg);
+        const out = match === null ? null : match[index];
+        if (out !== null) {
+          switch (args[3]) {
+            case "number":
+              return +out;
+            case "date":
+              return new Date(out);
+            default:
+              return out;
+          }
+        }
+      }
+      return null;
     case "parse_url":
       if (typeof args[0] === "string" && args[0] !== "") {
         try {
@@ -183,6 +171,39 @@ export const get_value = (operator: FunctionName, args: any[], previous_value?: 
         });
       }
       return out;
+    case "array_to_map":
+      const outMap: Record<string, any> = {};
+      if (typeof args[0] === "object" && isArray(args[0])) {
+        args[0].forEach((item, idx) => {
+          outMap[args[idx + 1] || idx] = item;
+        });
+      } else if (typeof args[0] === "object") {
+        return args[0];
+      }
+      return outMap;
+    case "array_from_entries":
+      const arrayResult: any[] = [];
+      if (args.length >= 2 && typeof args[1] === "object" && isArray(args[1])) {
+        for (let index = 0; index < args[1].length; index++) {
+          let out: Record<string, any> = {};
+          args.forEach((arg, idx) => {
+            if (typeof arg === "string" && idx % 2 == 0) {
+              out[arg] = args[idx + 1]?.[index] ?? null;
+            }
+          });
+          arrayResult.push(out);
+        }
+      }
+      return arrayResult;
+    case "pack":
+    case "bag_pack":
+      const packResult: Record<string, any> = {};
+      args.forEach((arg, index) => {
+        if (index % 2 === 0) {
+          packResult[arg] = args[index + 1];
+        }
+      });
+      return packResult;
     case "toint":
     case "tolong":
     case "todouble":
@@ -202,8 +223,13 @@ export const get_value = (operator: FunctionName, args: any[], previous_value?: 
       if (typeof args[0] === "object" && typeof args[0].getTime === "function") return args[0].getTime();
       return args[0];
     case "format_datetime":
-      if (typeof args[0] === "object" && typeof args[0].getTime === "function" && typeof args[1] === "string") return dayjs(args[0]).format(args[1]);
-      return args[0];
+      try {
+        if (typeof args[0] === "object" && typeof args[0].getTime === "function" && typeof args[1] === "string") return dayjs(args[0]).format(args[1]);
+        return args[0];
+      } catch (ex) {
+        console.error(ex);
+        return null;
+      }
     case "add_datetime":
       if (typeof args[0] === "object" && typeof args[0].getTime === "function" && typeof args[1] === "string") {
         let numberParts = args[1].match(/[\-\d]+/g) || [];
@@ -259,76 +285,162 @@ export const get_value = (operator: FunctionName, args: any[], previous_value?: 
   }
 };
 
-export const get_extended_object = (o: object, assignment: type_function, previous_value?: any): object => {
-  let args = assignment.args.map((arg) => {
-    if (arg.type === "ref") return get(o, arg.value);
-    else if (arg.type === "string" || arg.type === "identifier") {
-      if (arg.value.toLowerCase() === "true") return true;
-      else if (arg.value.toLowerCase() === "false") return false;
-      return arg.value;
-    } else if (arg.type === "number") return +arg.value;
-    else return arg;
-  });
-  let value = get_value(assignment.operator, args, previous_value);
-  set(o, assignment.alias || assignment.operator, value);
-  return o;
-};
-
-export const get_parse_csv_options = (args: type_parse_arg[][]): csv_parser_Options => {
-  let options: csv_parser_Options = { columns: true, delimiter: ",", skipEmptyLines: false, skipLinesWithError: false, relaxColumnCount: false };
-  if (args[0] && args[0].length > 0) {
-    args[0].forEach((arg) => {
-      switch (arg.identifier) {
-        case "autoParse":
-        case "autoParseDate":
-        case "bom":
-        case "cast":
-        case "castDate":
-        case "relaxColumnCount":
-        case "skipEmptyLines":
-        case "skipLinesWithEmptyValues":
-        case "trim":
-          options[arg.identifier] = arg.value.toLowerCase() === "true";
-          break;
-        case "columns":
-          options[arg.identifier] = arg.value ? arg.value.split(",") : true;
-          break;
-        default:
-          // @ts-ignore
-          options[arg.identifier] = arg.value.toLowerCase() === "true" ? true : arg.value.toLowerCase() === "false" ? false : arg.value;
-          break;
+export const filterData = (output: any, args: type_where_arg[]): any => {
+  if (typeof output === "object" && isArray(output) && args.length >= 3 && args[1].type === "operation") {
+    return output.filter((o) => {
+      let lhs = args[0].value;
+      let rhs = args[2].value;
+      let rhs_rgs =
+        args[2].type === "value_array"
+          ? flatten(
+              args[2].value.map((v) => {
+                if (v.type === "ref") return get(o, v.value);
+                return v.value;
+              })
+            )
+          : [];
+      if (args[0].type === "ref") {
+        lhs = get(o, args[0].value);
       }
-    });
-  }
-  return options;
-};
-
-export const get_parse_xml_options = (args: type_parse_arg[][]): X2jOptionsOptional => {
-  let options: X2jOptionsOptional = { ignoreAttributes: false, allowBooleanAttributes: true, commentPropName: "#comments" };
-  if (args[0] && args[0].length > 0) {
-    args[0].forEach((arg) => {
-      switch (arg.identifier) {
-        case "ignoreAttributes":
-        case "allowBooleanAttributes":
-        case "alwaysCreateTextNode":
-        case "preserveOrder":
-        case "parseTagValue":
-        case "parseAttributeValue":
-        case "trimValues":
-          options[arg.identifier] = arg.value.toLowerCase() === "true";
-          break;
-        case "commentPropName":
-          options["commentPropName"] = arg.value || "#comment";
-          break;
-        case "attributeNamePrefix":
-          options["attributeNamePrefix"] = arg.value || "@_";
-          break;
-        default:
-          // @ts-ignore
-          options[arg.identifier] = arg.value.toLowerCase() === "true" ? true : arg.value.toLowerCase() === "false" ? false : arg.value;
-          break;
+      if (args[2].type === "ref") {
+        rhs = get(o, args[2].value);
       }
+      if (args[1].type === "operation") {
+        switch (args[1].value) {
+          case "==":
+            return lhs === rhs;
+          case "!=":
+            return lhs !== rhs;
+          case ">":
+            return lhs > rhs;
+          case ">=":
+            return lhs >= rhs;
+          case "<":
+            return lhs < rhs;
+          case "<=":
+            return lhs <= rhs;
+          case "between":
+            if (args[2].type === "value_array" && rhs_rgs.length >= 2) {
+              return lhs >= rhs_rgs[0] && lhs <= rhs_rgs[1];
+            }
+            return false;
+          case "inside":
+            if (args[2].type === "value_array" && rhs_rgs.length >= 2) {
+              return lhs > rhs_rgs[0] && lhs < rhs_rgs[1];
+            }
+            return false;
+          case "outside":
+            if (args[2].type === "value_array" && rhs_rgs.length >= 2) {
+              return lhs < rhs_rgs[0] || lhs > rhs_rgs[1];
+            }
+            return false;
+          case "in":
+            if (args[2].type === "value_array") {
+              return rhs_rgs.includes(lhs);
+            }
+            return false;
+          case "!in":
+            if (args[2].type === "value_array") {
+              return !rhs_rgs.includes(lhs);
+            }
+            return false;
+          case "in~":
+            if (args[2].type === "value_array") {
+              return rhs_rgs.map((t) => (typeof t === "string" ? t.toLowerCase() : t)).includes(typeof lhs === "string" ? lhs.toLowerCase() : lhs);
+            }
+            return false;
+          case "!in~":
+            if (args[2].type === "value_array") {
+              return !rhs_rgs.map((t) => (typeof t === "string" ? t.toLowerCase() : t)).includes(typeof lhs === "string" ? lhs.toLowerCase() : lhs);
+            }
+            return false;
+          case "=~":
+            if (typeof lhs === "string" && typeof rhs === "string") {
+              return lhs.toLowerCase().includes(rhs.toLowerCase());
+            }
+            return false;
+          case "!~":
+            if (typeof lhs === "string" && typeof rhs === "string") {
+              return !lhs.toLowerCase().includes(rhs.toLowerCase());
+            }
+            return false;
+          case "matches regex":
+            if (typeof lhs === "string" && typeof rhs === "string") {
+              return lhs.match(rhs) !== null;
+            }
+            return false;
+          case "!matches regex":
+            if (typeof lhs === "string" && typeof rhs === "string") {
+              return lhs.match(rhs) === null;
+            }
+            return false;
+          case "contains":
+            if (typeof lhs === "string" && typeof rhs === "string") {
+              return lhs.toLowerCase().includes(rhs.toLowerCase());
+            }
+            return false;
+          case "!contains":
+            if (typeof lhs === "string" && typeof rhs === "string") {
+              return !lhs.toLowerCase().includes(rhs.toLowerCase());
+            }
+            return false;
+          case "contains_cs":
+            if (typeof lhs === "string" && typeof rhs === "string") {
+              return lhs.includes(rhs);
+            }
+            return false;
+          case "!contains_cs":
+            if (typeof lhs === "string" && typeof rhs === "string") {
+              return !lhs.includes(rhs);
+            }
+            return false;
+          case "startswith":
+            if (typeof lhs === "string" && typeof rhs === "string") {
+              return lhs.toLowerCase().startsWith(rhs.toLowerCase());
+            }
+            return false;
+          case "!startswith":
+            if (typeof lhs === "string" && typeof rhs === "string") {
+              return !lhs.toLowerCase().startsWith(rhs.toLowerCase());
+            }
+            return false;
+          case "startswith_cs":
+            if (typeof lhs === "string" && typeof rhs === "string") {
+              return lhs.startsWith(rhs);
+            }
+            return false;
+          case "!startswith_cs":
+            console.log(lhs, rhs);
+            if (typeof lhs === "string" && typeof rhs === "string") {
+              return !lhs.startsWith(rhs);
+            }
+            return false;
+          case "endswith":
+            if (typeof lhs === "string" && typeof rhs === "string") {
+              return lhs.toLowerCase().endsWith(rhs.toLowerCase());
+            }
+            return false;
+          case "!endswith":
+            if (typeof lhs === "string" && typeof rhs === "string") {
+              return !lhs.toLowerCase().endsWith(rhs.toLowerCase());
+            }
+            return false;
+          case "endswith_cs":
+            if (typeof lhs === "string" && typeof rhs === "string") {
+              return lhs.endsWith(rhs);
+            }
+            return false;
+          case "!endswith_cs":
+            console.log(lhs, rhs);
+            if (typeof lhs === "string" && typeof rhs === "string") {
+              return !lhs.endsWith(rhs);
+            }
+            return false;
+        }
+      }
+      return false;
     });
+  } else {
+    return [];
   }
-  return options;
 };

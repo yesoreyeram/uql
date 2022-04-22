@@ -1,12 +1,12 @@
 {
   "name": "uql",
-  "version": "0.0.15",
+  "version": "0.0.17",
   "description": "UQL - Unstructured Query Language",
   "author": "Sriramajeyam Sugumaran",
   "license": "Apache-2.0",
   "main": "dist/index.js",
   "scripts": {
-    "spellcheck": "cspell -c cspell.config.js \"**/*.{ts,tsx,js,go,md,mdx,yml,yaml,json,scss,css}\"",
+    "spellcheck": "cspell -c cspell.config.json \"**/*.{ts,tsx,js,go,md,mdx,yml,yaml,json,scss,css}\"",
     "lint": "yarn spellcheck",
     "compile": "nearleyc src/grammar/grammar.ne -o src/grammar/grammar.ts && tsc",
     "test": "yarn lint && yarn compile && jest",

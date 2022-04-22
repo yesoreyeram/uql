@@ -1,22 +1,56 @@
-type type_str_type = { type: "string"; value: string };
-type type_ref_type = { type: "ref"; value: string; alias?: string };
-type type_num_type = { type: "number"; value: number };
-type type_identifier_type = { type: "identifier"; value: string };
-type type_function_arg = type_str_type | type_ref_type | type_num_type | type_identifier_type;
+export type type_str_type = { type: "string"; value: string };
+export type type_ref_type = { type: "ref"; value: string; alias?: string };
+export type type_num_type = { type: "number"; value: number };
+export type type_any_type = type_str_type | type_num_type | type_ref_type;
+export type type_identifier_type = { type: "identifier"; value: string };
+export type type_function_arg = type_any_type | type_identifier_type;
+export type type_where_arg = type_any_type | { type: "value_array"; value: type_any_type[] } | { type: "operation"; value: Operator };
 export type type_function = { alias?: string; operator: FunctionName; args: type_function_arg[]; type: "function" };
-type type_orderby_arg = { field: string; direction: "asc" | "desc" };
-type type_summarize_arg = type_str_type;
-type type_summarize_function = { operator: FunctionName; args: type_summarize_arg[] };
+export type type_orderby_arg = { field: string; direction: "asc" | "desc" };
+export type type_summarize_arg = type_str_type;
+export type type_summarize_function = { operator: FunctionName; args: type_summarize_arg[] } | { operator: ConditionalFunctionName; condition: type_where_arg[]; ref: type_ref_type };
 export type type_summarize_assignment = { alias?: string } & type_summarize_function;
-type type_summarize_item = { metrics: type_summarize_assignment[]; by: type_summarize_arg[] };
+export type type_summarize_item = { metrics: type_summarize_assignment[]; by: type_summarize_arg[] };
 export type type_parse_arg = { identifier: string; value: string };
 
+export type Operator =
+  | ">"
+  | ">="
+  | "<"
+  | "<="
+  | "=="
+  | "!="
+  | "=~"
+  | "!~"
+  | "in"
+  | "!in"
+  | "in~"
+  | "!in~"
+  | "between"
+  | "inside"
+  | "outside"
+  | "matches regex"
+  | "!matches regex"
+  | "contains"
+  | "!contains"
+  | "contains_cs"
+  | "!contains_cs"
+  | "startswith"
+  | "!startswith"
+  | "startswith_cs"
+  | "!startswith_cs"
+  | "endswith"
+  | "!endswith"
+  | "endswith_cs"
+  | "!endswith_cs";
+export type ConditionalFunctionName = "countif" | "sumif" | "minif" | "maxif";
 export type FunctionName =
   | "count"
   | "sum"
   | "diff"
   | "mul"
   | "div"
+  | "percentage"
   | "min"
   | "max"
   | "mean"
@@ -35,12 +69,16 @@ export type FunctionName =
   | "log2"
   | "log10"
   | "strcat"
+  | "extract"
   | "dcount"
   | "distinct"
   | "random"
   | "toupper"
   | "tolower"
   | "strlen"
+  | "split"
+  | "replace_string"
+  | "reverse"
   | "trim"
   | "trim_start"
   | "trim_end"
@@ -67,9 +105,13 @@ export type FunctionName =
   | "startofday"
   | "startofmonth"
   | "startofweek"
-  | "startofyear";
+  | "startofyear"
+  | "pack"
+  | "bag_pack"
+  | "array_to_map"
+  | "array_from_entries";
 
-type CommandType =
+export type CommandType =
   | "comment"
   | "hello"
   | "ping"
@@ -80,10 +122,12 @@ type CommandType =
   | "orderby"
   | "project"
   | "project-away"
+  | "project-reorder"
   | "extend"
   | "summarize"
   | "range"
   | "scope"
+  | "where"
   | "distinct"
   | "mv-expand"
   | "jsonata"
@@ -91,6 +135,7 @@ type CommandType =
   | "parse-csv"
   | "parse-xml"
   | "parse-yaml";
+
 type CommandBase<T extends CommandType> = { type: T };
 
 type CommandComment = { value: string } & CommandBase<"comment">;
@@ -102,6 +147,7 @@ type CommandEcho = {
   value: string;
 } & CommandBase<"echo">;
 type CommandScope = { value: type_ref_type } & CommandBase<"scope">;
+type CommandWhere = { value: type_where_arg[] } & CommandBase<"where">;
 type CommandDistinct = { value: type_ref_type | undefined } & CommandBase<"distinct">;
 type CommandMvExpand = { value: type_ref_type & { alias: string } } & CommandBase<"mv-expand">;
 type CommandParseJSON = { args: type_parse_arg[][] } & CommandBase<"parse-json">;
@@ -126,6 +172,9 @@ type CommandOrderBy = {
 type CommandProject = {
   value: (type_function | (type_ref_type & { alias: string }))[];
 } & CommandBase<"project">;
+type CommandProjectReorder = {
+  value: type_ref_type[];
+} & CommandBase<"project-reorder">;
 type CommandProjectAway = {
   value: type_ref_type[];
 } & CommandBase<"project-away">;
@@ -149,7 +198,9 @@ export type Command =
   | CommandOrderBy
   | CommandProject
   | CommandProjectAway
+  | CommandProjectReorder
   | CommandScope
+  | CommandWhere
   | CommandDistinct
   | CommandMvExpand
   | CommandJSONata
@@ -160,3 +211,5 @@ export type Command =
   | CommandExtend
   | CommandSummarize
   | CommandRange;
+
+export type CommandResult = { context: Record<string, unknown>; output: unknown };
