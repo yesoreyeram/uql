@@ -14,6 +14,12 @@ describe("utils", () => {
     it("reverse", () => {
       expect(get_value("reverse", ["hello"])).toStrictEqual("olleh");
     });
+    it("atob", () => {
+      expect(get_value("atob", ["dGVzdA=="])).toStrictEqual("test");
+    });
+    it("btoa", () => {
+      expect(get_value("btoa", ["test"])).toStrictEqual("dGVzdA==");
+    });
     it("split", () => {
       expect(get_value("split", ["hello"])).toStrictEqual(["h", "e", "l", "l", "o"]);
       expect(get_value("split", ["hello world", " "])).toStrictEqual(["hello", "world"]);

@@ -163,7 +163,9 @@ function_name
     -> "add_datetime"                                       {% as_string %}
     |  "array_from_entries"                                 {% as_string %}
     |  "array_to_map"                                       {% as_string %}
+    |  "atob"                                               {% as_string %}
     |  "bag_pack"                                           {% as_string %}
+    |  "btoa"                                               {% as_string %}
     |  "ceil"                                               {% as_string %}
     |  "cos"                                                {% as_string %}
     |  "count"                                              {% as_string %}

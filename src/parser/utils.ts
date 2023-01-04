@@ -22,6 +22,10 @@ export const get_value = (operator: FunctionName, args: any[], previous_value?: 
         return (args[0] || "").replace(new RegExp(args[1], args[3] || "g"), typeof args[2] === "string" ? args[2] : "");
       }
       return args[0] || "";
+    case "atob":
+      return Buffer.from(args[0], "base64").toString("ascii");
+    case "btoa":
+      return Buffer.from(args[0]).toString("base64");
     case "trim":
       return (args[0] + "").trim();
     case "trim_start":
@@ -235,7 +239,7 @@ export const get_value = (operator: FunctionName, args: any[], previous_value?: 
         let numberParts = args[1].match(/[\-\d]+/g) || [];
         let textParts = args[1].match(/[A-Za-z]+/g) || [];
         if (numberParts.length > 0 && textParts.length > 0) {
-          let o = dayjs(args[0]).add(numberParts[0] === "-" ? -1 : +numberParts[0], textParts[0]);
+          let o = dayjs(args[0]).add(numberParts[0] === "-" ? -1 : +(numberParts[0] || ""), textParts[0]);
           return o.toDate();
         }
       }

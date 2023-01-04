@@ -2,6 +2,10 @@
 
 Change history of the project. All the feature updates, bug fixes, breaking changes will be documented here.
 
+## [0.0.18]
+
+- Feature: new method `atob` and `btoa` added
+
 ## [0.0.17]
 
 - Feature: new methods `percentage`,`split`,`replace_string`,`reverse`,`pack`,`array_to_map` and `array_from_entries`
