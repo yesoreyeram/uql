@@ -1,5 +1,5 @@
-import { get, set, sum, min, max, mean, uniq, first, last, forEach, groupBy, toString, isArray } from "lodash";
-import { filterData } from "../utils";
+import { set, sum, min, max, mean, uniq, first, last, forEach, groupBy, toString, isArray } from "lodash";
+import { filterData, get_single_value } from "../utils";
 import { Command, CommandResult, ConditionalFunctionName, type_summarize_assignment, type_summarize_function } from "../../types";
 
 export const summarize = (pv: CommandResult, cv: Extract<Command, { type: "summarize" }>): CommandResult => {
@@ -54,15 +54,15 @@ const UQLsummarize = (o: object, metrics: type_summarize_assignment[], pi: unkno
             set(o, statName, input.length);
             break;
           case "sumif":
-            val = input.length > 0 ? sum(input.map((p) => get(p, i.ref.value))) : sum(input);
+            val = input.length > 0 ? sum(input.map((p) => get_single_value(p, i.ref.value))) : sum(input);
             set(o, statName, val);
             break;
           case "minif":
-            val = input.length > 0 ? min(input.map((p) => get(p, i.ref.value))) : min(input);
+            val = input.length > 0 ? min(input.map((p) => get_single_value(p, i.ref.value))) : min(input);
             set(o, statName, val);
             break;
           case "maxif":
-            val = input.length > 0 ? max(input.map((p) => get(p, i.ref.value))) : max(input);
+            val = input.length > 0 ? max(input.map((p) => get_single_value(p, i.ref.value))) : max(input);
             set(o, statName, val);
             break;
           default:
@@ -79,32 +79,32 @@ const UQLsummarize = (o: object, metrics: type_summarize_assignment[], pi: unkno
           set(o, statName, pi.length);
           break;
         case "dcount":
-          val = args.length > 0 ? pi.map((p) => get(p, args[0].value)) : [pi];
+          val = args.length > 0 ? pi.map((p) => get_single_value(p, args[0].value)) : [pi];
           set(o, statName, uniq(val).length);
           break;
         case "mean":
-          val = args.length > 0 ? mean(pi.map((p) => get(p, args[0].value))) : mean(pi);
+          val = args.length > 0 ? mean(pi.map((p) => get_single_value(p, args[0].value))) : mean(pi);
           set(o, statName, val);
           break;
         case "sum":
-          val = args.length > 0 ? sum(pi.map((p) => get(p, args[0].value))) : sum(pi);
+          val = args.length > 0 ? sum(pi.map((p) => get_single_value(p, args[0].value))) : sum(pi);
           set(o, statName, val);
           break;
         case "min":
-          val = args.length > 0 ? min(pi.map((p) => get(p, args[0].value))) : min(pi);
+          val = args.length > 0 ? min(pi.map((p) => get_single_value(p, args[0].value))) : min(pi);
           set(o, statName, val);
           break;
         case "max":
-          val = args.length > 0 ? max(pi.map((p) => get(p, args[0].value))) : max(pi);
+          val = args.length > 0 ? max(pi.map((p) => get_single_value(p, args[0].value))) : max(pi);
           set(o, statName, val);
           break;
         case "first":
-          val = args.length > 0 ? first(pi.map((p) => get(p, args[0].value))) : first(pi);
+          val = args.length > 0 ? first(pi.map((p) => get_single_value(p, args[0].value))) : first(pi);
           set(o, statName, val);
           break;
         case "last":
         case "latest":
-          val = args.length > 0 ? last(pi.map((p) => get(p, args[0].value))) : last(pi);
+          val = args.length > 0 ? last(pi.map((p) => get_single_value(p, args[0].value))) : last(pi);
           set(o, statName, val);
           break;
         default:

@@ -1,5 +1,5 @@
-import { get, set, isArray } from "lodash";
-import { get_value } from "./../utils";
+import { set, isArray } from "lodash";
+import { get_single_value, get_value } from "./../utils";
 import { Command, CommandResult, type_function } from "../../types";
 
 export const extend = (pv: CommandResult, cv: Extract<Command, { type: "extend" }>): CommandResult => {
@@ -10,7 +10,7 @@ export const extend = (pv: CommandResult, cv: Extract<Command, { type: "extend" 
         if (ci.type === "function") {
           o = get_extended_object(o, ci, output);
         } else if (ci.type === "ref") {
-          set(o, ci.alias || ci.value, get(o, ci.value));
+          set(o, ci.alias || ci.value, get_single_value(o, ci.value));
         }
       });
       return o;
@@ -21,7 +21,7 @@ export const extend = (pv: CommandResult, cv: Extract<Command, { type: "extend" 
 
 const get_extended_object = (o: object, assignment: type_function, previous_value?: any): object => {
   let args = assignment.args.map((arg) => {
-    if (arg.type === "ref") return get(o, arg.value);
+    if (arg.type === "ref") return get_single_value(o, arg.value);
     else if (arg.type === "string" || arg.type === "identifier") {
       if (arg.value.toLowerCase() === "true") return true;
       else if (arg.value.toLowerCase() === "false") return false;

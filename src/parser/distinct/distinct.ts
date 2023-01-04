@@ -1,5 +1,6 @@
-import { get, uniq, isArray } from "lodash";
+import { uniq, isArray } from "lodash";
 import { Command, CommandResult } from "../../types";
+import { get_single_value } from "../utils";
 
 export const distinct = (pv: CommandResult, cv: Extract<Command, { type: "distinct" }>): CommandResult => {
   let output = pv.output;
@@ -7,11 +8,13 @@ export const distinct = (pv: CommandResult, cv: Extract<Command, { type: "distin
     output = uniq(pv.output as unknown[]);
   } else {
     if (typeof pv.output === "object" && isArray(pv.output) && cv.value) {
-      let a = pv.output.map((o) => get(o, cv.value?.value || ""));
+      let a = pv.output.map((o) => get_single_value(o, cv.value?.value || ""));
       output = uniq(a);
     } else {
-      let value = get(pv.output, cv.value.value);
-      output = uniq(value);
+      let value = get_single_value(pv.output, cv.value.value);
+      if (typeof value === "object") {
+        output = uniq(value);
+      }
     }
   }
   return { ...pv, output };

@@ -1,16 +1,17 @@
-import { isArray, get, set } from "lodash";
+import { isArray, set } from "lodash";
 import { Command, CommandResult } from "../../types";
+import { get_single_value } from "../utils";
 
 export const mvExpand = (pv: CommandResult, cv: Extract<Command, { type: "mv-expand" }>): CommandResult => {
   let output = pv.output;
   if (typeof output === "object" && isArray(output)) {
     output = output
       .filter((item) => {
-        let v = get(item, cv.value.value);
+        let v = get_single_value(item, cv.value.value);
         return v && isArray(v) && v.length > 0;
       })
       .flatMap((item) => {
-        const expandingItem = get(item, cv.value.value);
+        const expandingItem = get_single_value(item, cv.value.value);
         if (expandingItem && isArray(expandingItem)) {
           return expandingItem
             .map((e) => {

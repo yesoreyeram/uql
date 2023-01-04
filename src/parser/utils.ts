@@ -2,6 +2,10 @@ import { sum, min, max, mean, uniq, isArray, random, first, last, forEach, flatt
 import * as dayjs from "dayjs";
 import { FunctionName, type_where_arg } from "../types";
 
+export const get_single_value = (input: any, query: string): string | number | any[] => {
+  return get(input, query);
+};
+
 export const get_value = (operator: FunctionName, args: any[], previous_value?: any): unknown => {
   switch (operator) {
     case "tolower":
@@ -17,6 +21,11 @@ export const get_value = (operator: FunctionName, args: any[], previous_value?: 
         return (args[0] || "").split(typeof args[1] === "string" ? args[1] : "");
       }
       return [];
+    case "substring":
+      if (typeof args[0] === "string") {
+        return args[0].substring(args[1], args[2]);
+      }
+      return "";
     case "replace_string":
       if (args.length >= 2 && typeof args[0] === "string" && typeof args[1] === "string") {
         return (args[0] || "").replace(new RegExp(args[1], args[3] || "g"), typeof args[2] === "string" ? args[2] : "");
@@ -298,16 +307,16 @@ export const filterData = (output: any, args: type_where_arg[]): any => {
         args[2].type === "value_array"
           ? flatten(
               args[2].value.map((v) => {
-                if (v.type === "ref") return get(o, v.value);
+                if (v.type === "ref") return get_single_value(o, v.value);
                 return v.value;
               })
             )
           : [];
       if (args[0].type === "ref") {
-        lhs = get(o, args[0].value);
+        lhs = get_single_value(o, args[0].value);
       }
       if (args[2].type === "ref") {
-        rhs = get(o, args[2].value);
+        rhs = get_single_value(o, args[2].value);
       }
       if (args[1].type === "operation") {
         switch (args[1].value) {

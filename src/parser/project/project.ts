@@ -1,5 +1,5 @@
-import { get, set, isArray } from "lodash";
-import { get_value } from "./../utils";
+import { set, isArray } from "lodash";
+import { get_single_value, get_value } from "./../utils";
 import { Command, CommandResult } from "../../types";
 
 export const project = (pv: CommandResult, cv: Extract<Command, { type: "project" }>): CommandResult => {
@@ -13,14 +13,14 @@ export const project = (pv: CommandResult, cv: Extract<Command, { type: "project
         refs.forEach((r) => {
           if (r.type === "ref") {
             let key = r.alias || r.value;
-            set(oo, key, get(o, r.value));
+            set(oo, key, get_single_value(o, r.value));
           }
         });
         functions.forEach((f) => {
           if (f.type === "function") {
             let key = f.alias || f.operator;
             let args = f.args.map((arg) => {
-              if (arg.type === "ref") return get(o, arg.value);
+              if (arg.type === "ref") return get_single_value(o, arg.value);
               else if (arg.type === "string") return arg.value;
               else if (arg.type === "number") return +arg.value;
             });
@@ -38,14 +38,14 @@ export const project = (pv: CommandResult, cv: Extract<Command, { type: "project
       refs.forEach((r) => {
         if (r.type === "ref") {
           let key = r.alias || r.value;
-          set(oo, key, get(output, r.value));
+          set(oo, key, get_single_value(output, r.value));
         }
       });
       functions.forEach((f) => {
         if (f.type === "function") {
           let key = f.alias || f.operator;
           let args = f.args.map((arg) => {
-            if (arg.type === "ref") return get(output, arg.value);
+            if (arg.type === "ref") return get_single_value(output, arg.value);
             else if (arg.type === "string") return arg.value;
             else if (arg.type === "number") return +arg.value;
           });
