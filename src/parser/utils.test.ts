@@ -35,6 +35,9 @@ describe("utils", () => {
       expect(get_value("replace_string", ["hello world", undefined, undefined])).toStrictEqual("hello world");
       expect(get_value("replace_string", ["banana", "an", "or"])).toStrictEqual("borora");
     });
+    it("substring", () => {
+      expect(get_value("substring", ["Hello world!", 1, 4])).toStrictEqual("ell");
+    });
     it("trim", () => {
       expect(get_value("trim", [" hello "])).toStrictEqual("hello");
     });

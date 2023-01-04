@@ -268,6 +268,7 @@ const grammar: Grammar = {
     {"name": "function_name", "symbols": [{"literal":"startofyear"}], "postprocess": as_string},
     {"name": "function_name", "symbols": [{"literal":"strcat"}], "postprocess": as_string},
     {"name": "function_name", "symbols": [{"literal":"strlen"}], "postprocess": as_string},
+    {"name": "function_name", "symbols": [{"literal":"substring"}], "postprocess": as_string},
     {"name": "function_name", "symbols": [{"literal":"sum"}], "postprocess": as_string},
     {"name": "function_name", "symbols": [{"literal":"tan"}], "postprocess": as_string},
     {"name": "function_name", "symbols": [{"literal":"tobool"}], "postprocess": as_string},

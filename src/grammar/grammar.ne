@@ -207,6 +207,7 @@ function_name
     |  "startofyear"                                        {% as_string %}
     |  "strcat"                                             {% as_string %}
     |  "strlen"                                             {% as_string %}
+    |  "substring"                                          {% as_string %}
     |  "sum"                                                {% as_string %}
     |  "tan"                                                {% as_string %}
     |  "tobool"                                             {% as_string %}

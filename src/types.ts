@@ -92,6 +92,7 @@ export type FunctionName =
   | "startofyear"
   | "strcat"
   | "strlen"
+  | "substring"
   | "sum"
   | "tan"
   | "tobool"

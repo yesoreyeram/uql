@@ -5,6 +5,7 @@ Change history of the project. All the feature updates, bug fixes, breaking chan
 ## [0.0.18]
 
 - Feature: new method `atob` and `btoa` added
+- Feature: new method `substring` added
 
 ## [0.0.17]
 
