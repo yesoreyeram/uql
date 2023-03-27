@@ -62,6 +62,9 @@ export const evaluate = (commands: Command[], options?: { data?: any }): Promise
         case "summarize":
           previousValue = parsers.summarize(previousValue, currentCommand);
           break;
+        case "pivot":
+          previousValue = parsers.pivot(previousValue, currentCommand);
+          break;
         case "parse-json":
           previousValue = parsers.parseJson(previousValue, currentCommand);
           break;

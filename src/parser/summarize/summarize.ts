@@ -42,7 +42,7 @@ const IsConditionalSummaryMetric = (i: type_summarize_assignment): i is Extract<
   return false;
 };
 
-const UQLsummarize = (o: object, metrics: type_summarize_assignment[], pi: unknown[]): object => {
+export const UQLsummarize = (o: object, metrics: type_summarize_assignment[], pi: unknown[]): object => {
   metrics.forEach((i) => {
     if (IsConditionalSummaryMetric(i)) {
       const input: any[] = filterData(pi, i.condition);

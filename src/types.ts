@@ -9,7 +9,7 @@ export type type_function = { alias?: string; operator: FunctionName; args: type
 export type type_orderby_arg = { field: string; direction: "asc" | "desc" };
 export type type_summarize_arg = type_str_type;
 export type type_summarize_function = { operator: FunctionName; args: type_summarize_arg[] } | { operator: ConditionalFunctionName; condition: type_where_arg[]; ref: type_ref_type };
-export type type_summarize_assignment = { alias?: string } & type_summarize_function;
+export type type_summarize_assignment = ({ alias?: string } & type_summarize_function) | { alias?: string; operator: Operator; args: type_summarize_arg[] };
 export type type_summarize_item = { metrics: type_summarize_assignment[]; by: type_summarize_arg[] };
 export type type_parse_arg = { identifier: string; value: string };
 
@@ -128,6 +128,7 @@ export type CommandType =
   | "project-reorder"
   | "extend"
   | "summarize"
+  | "pivot"
   | "range"
   | "scope"
   | "where"
@@ -187,6 +188,12 @@ type CommandExtend = {
 type CommandSummarize = {
   value: type_summarize_item;
 } & CommandBase<"summarize">;
+type CommandPivot = {
+  value: {
+    metric: type_summarize_assignment;
+    fields?: type_ref_type[];
+  };
+} & CommandBase<"pivot">;
 type CommandRange = {
   value: { start: number; end: number; step: number } | { start: string; end: number; step: string };
 } & CommandBase<"range">;
@@ -213,6 +220,7 @@ export type Command =
   | CommandParseYAML
   | CommandExtend
   | CommandSummarize
+  | CommandPivot
   | CommandRange;
 
 export type CommandResult = { context: Record<string, unknown>; output: unknown };

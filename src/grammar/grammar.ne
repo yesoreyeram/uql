@@ -89,6 +89,7 @@ command
     |  command_distinct                                     {% d => ({ type: "distinct", value: d[0] })%}
     |  command_mv_expand                                    {% d => ({ type: "mv-expand", value: d[0] })%}
     |  command_summarize                                    {% d => ({ type: "summarize", value: d[0] })%}
+    |  command_pivot                                        {% d => ({ type: "pivot", value: d[0] })%}
     |  command_range                                        {% d => ({ type: "range", value: d[0] })%}
     |  "jsonata" __ str                                     {% d => ({ type: "jsonata", expression: d[2] }) %}
 # Command Function
@@ -287,6 +288,9 @@ parse_arg
     -> %dash %dash %identifier __ str                       {% d => ({ identifier: d[2].value, value: d[4] }) %}
     |  %dash %dash %identifier __ str_type                  {% d => ({ identifier: d[2].value, value: d[4].value }) %}
     |  %dash %dash %identifier __ %identifier               {% d => ({ identifier: d[2].value, value: d[4].value }) %}
+# Command : Pivot
+command_pivot
+    -> "pivot" __ summarize_assignment __ ",":* __ ref_types:* {% d => ({ metric : d[2], fields : d[6] !== undefined && d[6].length > 0 ? d[6][0]: [] })%}
 # Command : Summarize
 command_summarize 
      ->  summarize_item                                              {% pick(0) %}

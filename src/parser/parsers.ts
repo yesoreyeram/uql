@@ -21,6 +21,7 @@ export * from "./project-away/project-away";
 export * from "./project-reorder/project-reorder";
 export * from "./extend/extend";
 export * from "./summarize/summarize";
+export * from "./pivot/pivot";
 export * from "./mv-expand/mv-expand";
 
 export * from "./parse-json/parse-json";

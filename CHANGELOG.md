@@ -2,6 +2,10 @@
 
 Change history of the project. All the feature updates, bug fixes, breaking changes will be documented here.
 
+## [0.0.19]
+
+- Feature: new root level command`pivot` added
+
 ## [0.0.18]
 
 - Feature: new method `atob` and `btoa` added
