@@ -85,15 +85,15 @@ describe("uql", () => {
         { data }
       )
     ).toStrictEqual([
-      { timestamp: new Date("2069-11-11 22:38:20"), disk: "DISK-F1266E1D0AAC2C3F", host: "HOST-F1266E1D0AAC2C3C", value: 11.1, metricId: "builtin:host.disk.avail" },
-      { timestamp: new Date("2069-11-11 22:38:20"), disk: "DISK-F1266E1D0AAC2C3D", host: "HOST-F1266E1D0AAC2C3C", value: 111.1, metricId: "builtin:host.disk.avail" },
-      { timestamp: new Date("2069-11-11 22:38:20"), disk: undefined, host: "HOST-F1266E1D0AAC2C3C", value: 1.1, metricId: "builtin:host.cpu.idle" },
-      { timestamp: new Date("2069-11-11 23:38:20"), disk: "DISK-F1266E1D0AAC2C3F", host: "HOST-F1266E1D0AAC2C3C", value: 22.2, metricId: "builtin:host.disk.avail" },
-      { timestamp: new Date("2069-11-11 23:38:20"), disk: "DISK-F1266E1D0AAC2C3D", host: "HOST-F1266E1D0AAC2C3C", value: 222.2, metricId: "builtin:host.disk.avail" },
-      { timestamp: new Date("2069-11-11 23:38:20"), disk: undefined, host: "HOST-F1266E1D0AAC2C3C", value: 2.2, metricId: "builtin:host.cpu.idle" },
-      { timestamp: new Date("2069-11-12 00:38:20"), disk: "DISK-F1266E1D0AAC2C3F", host: "HOST-F1266E1D0AAC2C3C", value: 33.3, metricId: "builtin:host.disk.avail" },
-      { timestamp: new Date("2069-11-12 00:38:20"), disk: "DISK-F1266E1D0AAC2C3D", host: "HOST-F1266E1D0AAC2C3C", value: 333.3, metricId: "builtin:host.disk.avail" },
-      { timestamp: new Date("2069-11-12 00:38:20"), disk: undefined, host: "HOST-F1266E1D0AAC2C3C", value: 3.3, metricId: "builtin:host.cpu.idle" },
+      { timestamp: new Date("2069-11-11T22:38:20.000Z"), disk: "DISK-F1266E1D0AAC2C3F", host: "HOST-F1266E1D0AAC2C3C", value: 11.1, metricId: "builtin:host.disk.avail" },
+      { timestamp: new Date("2069-11-11T22:38:20.000Z"), disk: "DISK-F1266E1D0AAC2C3D", host: "HOST-F1266E1D0AAC2C3C", value: 111.1, metricId: "builtin:host.disk.avail" },
+      { timestamp: new Date("2069-11-11T22:38:20.000Z"), disk: undefined, host: "HOST-F1266E1D0AAC2C3C", value: 1.1, metricId: "builtin:host.cpu.idle" },
+      { timestamp: new Date("2069-11-11T23:38:20.000Z"), disk: "DISK-F1266E1D0AAC2C3F", host: "HOST-F1266E1D0AAC2C3C", value: 22.2, metricId: "builtin:host.disk.avail" },
+      { timestamp: new Date("2069-11-11T23:38:20.000Z"), disk: "DISK-F1266E1D0AAC2C3D", host: "HOST-F1266E1D0AAC2C3C", value: 222.2, metricId: "builtin:host.disk.avail" },
+      { timestamp: new Date("2069-11-11T23:38:20.000Z"), disk: undefined, host: "HOST-F1266E1D0AAC2C3C", value: 2.2, metricId: "builtin:host.cpu.idle" },
+      { timestamp: new Date("2069-11-12T00:38:20.000Z"), disk: "DISK-F1266E1D0AAC2C3F", host: "HOST-F1266E1D0AAC2C3C", value: 33.3, metricId: "builtin:host.disk.avail" },
+      { timestamp: new Date("2069-11-12T00:38:20.000Z"), disk: "DISK-F1266E1D0AAC2C3D", host: "HOST-F1266E1D0AAC2C3C", value: 333.3, metricId: "builtin:host.disk.avail" },
+      { timestamp: new Date("2069-11-12T00:38:20.000Z"), disk: undefined, host: "HOST-F1266E1D0AAC2C3C", value: 3.3, metricId: "builtin:host.cpu.idle" },
     ]);
   });
 });
