@@ -57,14 +57,24 @@ describe("extend", () => {
     it("add_datetime", async () => {
       expect(await uql(`extend "in"=todatetime("in") | extend "in"=add_datetime("in",'1d')  | project "in"`, { data: [{ in: "1990-02-27" }] })).toStrictEqual([{ in: new Date("1990-02-28") }]);
       expect(await uql(`extend "in"=todatetime("in") | extend "in"=add_datetime("in",'-1d')  | project "in"`, { data: [{ in: "1990-02-27" }] })).toStrictEqual([{ in: new Date("1990-02-26") }]);
+      // Test using GMT
+      expect(await uql(`extend "in"=todatetime("in") | extend "in"=add_datetime("in",'-1h')  | project "in"`, { data: [{ in: "1990-02-27 00:00:00Z" }] })).toStrictEqual([
+        { in: new Date("1990-02-26T23:00:00.000Z") },
+      ]);
+      // Test using Local Time
       expect(await uql(`extend "in"=todatetime("in") | extend "in"=add_datetime("in",'-1h')  | project "in"`, { data: [{ in: "1990-02-27" }] })).toStrictEqual([
-        { in: new Date("1990-02-26 23:00:00") },
+        // 1h(in milliseconds) = 60 min * 60 seconds  * 1000 milliseconds
+        { in: new Date(new Date("1990-02-27").getTime()-60*60*1000) },
+      ]);
+      // Test using a Time Zone +01:00:
+      expect(await uql(`extend "in"=todatetime("in") | extend "in"=add_datetime("in",'-1h')  | project "in"`, { data: [{ in: "1990-02-27T00:00:00+01:00" }] })).toStrictEqual([
+        { in: new Date(new Date("1990-02-27T00:00:00+01:00").getTime()-60*60*1000) },
       ]);
       expect(await uql(`extend "in"=todatetime("in") | extend "in"=add_datetime("in",'-1y')  | project "in"`, { data: [{ in: "1990-02-27" }] })).toStrictEqual([
-        { in: new Date("1989-02-27 00:00:00") },
+        { in: new Date("1989-02-27") },
       ]);
       expect(await uql(`extend "in"=todatetime("in") | extend "in"=add_datetime("in",'10y')  | project "in"`, { data: [{ in: "1990-02-27" }] })).toStrictEqual([
-        { in: new Date("2000-02-27 00:00:00") },
+        { in: new Date("2000-02-27") },
       ]);
     });
     it("start of", async () => {
