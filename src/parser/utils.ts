@@ -248,7 +248,7 @@ export const get_value = (operator: FunctionName, args: any[], previous_value?: 
         let numberParts = args[1].match(/[\-\d]+/g) || [];
         let textParts = args[1].match(/[A-Za-z]+/g) || [];
         if (numberParts.length > 0 && textParts.length > 0) {
-          let o = dayjs(args[0]).add(numberParts[0] === "-" ? -1 : +(numberParts[0] || ""), textParts[0]);
+          let o = dayjs(args[0]).add(numberParts[0] === "-" ? -1 : +(numberParts[0] || ""), textParts[0] as dayjs.ManipulateType);
           return o.toDate();
         }
       }
@@ -423,7 +423,6 @@ export const filterData = (output: any, args: type_where_arg[]): any => {
             }
             return false;
           case "!startswith_cs":
-            console.log(lhs, rhs);
             if (typeof lhs === "string" && typeof rhs === "string") {
               return !lhs.startsWith(rhs);
             }
@@ -444,7 +443,6 @@ export const filterData = (output: any, args: type_where_arg[]): any => {
             }
             return false;
           case "!endswith_cs":
-            console.log(lhs, rhs);
             if (typeof lhs === "string" && typeof rhs === "string") {
               return !lhs.endsWith(rhs);
             }

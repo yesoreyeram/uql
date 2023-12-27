@@ -2,9 +2,13 @@
 
 Change history of the project. All the feature updates, bug fixes, breaking changes will be documented here.
 
+## [0.0.20]
+
+- Chore: Updated outdated dependencies
+
 ## [0.0.19]
 
-- Feature: new root level command`pivot` added
+- Feature: new root level command `pivot` added
 
 ## [0.0.18]
 
