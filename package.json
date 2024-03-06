@@ -1,6 +1,6 @@
 {
   "name": "uql",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "description": "UQL - Unstructured Query Language",
   "author": "Sriramajeyam Sugumaran",
   "license": "Apache-2.0",
@@ -24,9 +24,9 @@
   "dependencies": {
     "csv-parse": "4.12.0",
     "dayjs": "^1.10.7",
-    "fast-xml-parser": "^4.0.0-beta.8",
+    "fast-xml-parser": "^4.3.5",
     "js-yaml": "^4.1.0",
-    "jsonata": "1.8.6",
+    "jsonata": "1.8.7",
     "lodash": "^4.17.21",
     "moo": "^0.5.1",
     "nearley": "^2.20.1",
@@ -37,17 +37,12 @@
     "@types/js-yaml": "4.0.9",
     "@types/lodash": "4.14.202",
     "@types/moo": "^0.5.5",
-    "@types/node":"18.19.0",
     "@types/nearley": "^2.11.2",
+    "@types/node": "18.19.0",
     "@types/xml2js": "^0.4.9",
     "cspell": "^5.19.7",
     "jest": "29.7.0",
     "ts-jest": "29.1.1",
     "typescript": "5.3.3"
-  },
-  "resolutions": {
-    "@babel/traverse":"7.23.2",
-    "json5":"2.2.2",
-    "minimatch":"3.0.5"
   }
 }

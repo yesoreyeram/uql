@@ -2,6 +2,10 @@
 
 Change history of the project. All the feature updates, bug fixes, breaking changes will be documented here.
 
+## [0.0.21]
+
+- Chore: Updated dependencies including JSONata
+
 ## [0.0.20]
 
 - Chore: Updated outdated dependencies

@@ -1,4 +1,4 @@
-import { XMLParser, X2jOptionsOptional } from "fast-xml-parser";
+import { XMLParser, X2jOptions } from "fast-xml-parser";
 import { Command, CommandResult, type_parse_arg } from "../../types";
 
 export const parseXML = (pv: CommandResult, cv: Extract<Command, { type: "parse-xml" }>): CommandResult => {
@@ -11,8 +11,8 @@ export const parseXML = (pv: CommandResult, cv: Extract<Command, { type: "parse-
   return { ...pv, output };
 };
 
-const get_parse_xml_options = (args: type_parse_arg[][]): X2jOptionsOptional => {
-  let options: X2jOptionsOptional = { ignoreAttributes: false, allowBooleanAttributes: true, commentPropName: "#comments" };
+const get_parse_xml_options = (args: type_parse_arg[][]): X2jOptions => {
+  let options: X2jOptions = { ignoreAttributes: false, allowBooleanAttributes: true, commentPropName: "#comments" };
   if (args[0] && args[0].length > 0) {
     args[0].forEach((arg) => {
       switch (arg.identifier) {
