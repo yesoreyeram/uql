@@ -2,6 +2,11 @@
 
 Change history of the project. All the feature updates, bug fixes, breaking changes will be documented here.
 
+## [0.0.22]
+
+- Chore: Updated dependencies
+- CHore: Moved from the package `nearley` to the fork `@yesoreyeram/nearley`
+
 ## [0.0.21]
 
 - Chore: Updated dependencies including JSONata

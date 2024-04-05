@@ -3,7 +3,7 @@
 @{%
 
   import * as moo from "moo";
-  const oqlLexer = moo.compile({
+  const uqlLexer = moo.compile({
     ws: /[ \t]+/,
     comment: {
         match: /#[^\n]*/,
@@ -59,7 +59,7 @@
 
 %}
 
-@lexer oqlLexer
+@lexer uqlLexer
 
 input   
     -> commands                                             {% pick(0) %}

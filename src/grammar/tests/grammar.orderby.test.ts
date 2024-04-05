@@ -1,12 +1,12 @@
-import { Parser, Grammar } from "nearley";
+const { Parser, Grammar } = require("@yesoreyeram/nearley");
 import grammar from "../grammar";
 
-const oqlGrammar = Grammar.fromCompiled(grammar);
+const uqlGrammar = Grammar.fromCompiled(grammar);
 
 const get = (input: string): unknown[] => {
-  const oqlParser = new Parser(oqlGrammar);
-  oqlParser.feed(input);
-  return oqlParser.results;
+  const uqlParser = new Parser(uqlGrammar);
+  uqlParser.feed(input);
+  return uqlParser.results;
 };
 
 const tests: [string, { query: string; expected: unknown }][] = [

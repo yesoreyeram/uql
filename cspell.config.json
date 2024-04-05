@@ -1,12 +1,8 @@
 {
   "language": "en",
-  "ignorePaths": [
-    "node_modules/**",
-    "coverage/**",
-    "dist/**",
-    "src/grammar/grammar.ts"
-  ],
+  "ignorePaths": ["node_modules/**", "coverage/**", "dist/**", "src/grammar/grammar.ts"],
   "words": [
+    "yesoreyeram",
     "APAC",
     "Bloggs",
     "borora",
