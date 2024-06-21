@@ -161,56 +161,66 @@ conditional_function_name
     | "minif"    {% as_string %}
     | "maxif"    {% as_string %}
 function_name
-    -> "add_datetime"                                       {% as_string %}
+    -> "noop"                                               {% as_string %}
+    #  string functions
+    |  "replace_string"                                     {% as_string %}
+    |  "substring"                                          {% as_string %}
+    |  "split"                                              {% as_string %}
+    |  "strcat"                                             {% as_string %}
+    |  "strlen"                                             {% as_string %}
+    |  "toupper"                                            {% as_string %}
+    |  "trim_end"                                           {% as_string %}
+    |  "trim_start"                                         {% as_string %}
+    |  "trim"                                               {% as_string %}
+    |  "reverse"                                            {% as_string %}
+    |  "extract"                                            {% as_string %}
+    #  arrary functions
+    |  "distinct"                                           {% as_string %}
+    |  "pack"                                               {% as_string %}
     |  "array_from_entries"                                 {% as_string %}
     |  "array_to_map"                                       {% as_string %}
-    |  "atob"                                               {% as_string %}
     |  "bag_pack"                                           {% as_string %}
-    |  "btoa"                                               {% as_string %}
-    |  "ceil"                                               {% as_string %}
-    |  "cos"                                                {% as_string %}
-    |  "count"                                              {% as_string %}
-    |  "dcount"                                             {% as_string %}
-    |  "diff"                                               {% as_string %}
-    |  "distinct"                                           {% as_string %}
-    |  "div"                                                {% as_string %}
-    |  "extract"                                            {% as_string %}
-    |  "first"                                              {% as_string %}
-    |  "floor"                                              {% as_string %}
-    |  "format_datetime"                                    {% as_string %}
     |  "kv"                                                 {% as_string %}
-    |  "last"                                               {% as_string %}
-    |  "latest"                                             {% as_string %}
-    |  "log"                                                {% as_string %}
-    |  "log10"                                              {% as_string %}
-    |  "log2"                                               {% as_string %}
-    |  "max"                                                {% as_string %}
-    |  "mean"                                               {% as_string %}
-    |  "min"                                                {% as_string %}
-    |  "mul"                                                {% as_string %}
-    |  "pack"                                               {% as_string %}
+    #  url functions
     |  "parse_url"                                          {% as_string %}
     |  "parse_urlquery"                                     {% as_string %}
-    |  "percentage"                                         {% as_string %}
-    |  "pow"                                                {% as_string %}
-    |  "random"                                             {% as_string %}
-    |  "replace_string"                                     {% as_string %}
-    |  "reverse"                                            {% as_string %}
-    |  "round"                                              {% as_string %}
-    |  "sign"                                               {% as_string %}
+    #  math functions
+    |  "sum"                                                {% as_string %}
+    |  "diff"                                               {% as_string %}
+    |  "mul"                                                {% as_string %}
+    |  "div"                                                {% as_string %}
+    |  "min"                                                {% as_string %}
+    |  "max"                                                {% as_string %}
+    |  "mean"                                               {% as_string %}
+    |  "first"                                              {% as_string %}
+    |  "last"                                               {% as_string %}
+    |  "latest"                                             {% as_string %}
+    |  "count"                                              {% as_string %}
+    |  "dcount"                                             {% as_string %}
     |  "sin"                                                {% as_string %}
-    |  "split"                                              {% as_string %}
+    |  "cos"                                                {% as_string %}
+    |  "tan"                                                {% as_string %}
+    |  "log"                                                {% as_string %}
+    |  "log2"                                               {% as_string %}
+    |  "log10"                                              {% as_string %}
+    |  "floor"                                              {% as_string %}
+    |  "ceil"                                               {% as_string %}
+    |  "round"                                              {% as_string %}
+    |  "pow"                                                {% as_string %}
+    |  "percentage"                                         {% as_string %}
+    #  other functions 
+    |  "add_datetime"                                       {% as_string %}
+    |  "atob"                                               {% as_string %}
+    |  "btoa"                                               {% as_string %}
+    |  "format_datetime"                                    {% as_string %}
+    |  "random"                                             {% as_string %}
+    |  "sign"                                               {% as_string %}
     |  "startofday"                                         {% as_string %}
     |  "startofhour"                                        {% as_string %}
     |  "startofminute"                                      {% as_string %}
     |  "startofmonth"                                       {% as_string %}
     |  "startofweek"                                        {% as_string %}
     |  "startofyear"                                        {% as_string %}
-    |  "strcat"                                             {% as_string %}
-    |  "strlen"                                             {% as_string %}
-    |  "substring"                                          {% as_string %}
-    |  "sum"                                                {% as_string %}
-    |  "tan"                                                {% as_string %}
     |  "tobool"                                             {% as_string %}
     |  "todatetime"                                         {% as_string %}
     |  "todouble"                                           {% as_string %}
@@ -221,10 +231,6 @@ function_name
     |  "tonumber"                                           {% as_string %}
     |  "tostring"                                           {% as_string %}
     |  "tounixtime"                                         {% as_string %}
-    |  "toupper"                                            {% as_string %}
-    |  "trim_end"                                           {% as_string %}
-    |  "trim_start"                                         {% as_string %}
-    |  "trim"                                               {% as_string %}
     |  "unixtime_microseconds_todatetime"                   {% as_string %}
     |  "unixtime_milliseconds_todatetime"                   {% as_string %}
     |  "unixtime_nanoseconds_todatetime"                    {% as_string %}
