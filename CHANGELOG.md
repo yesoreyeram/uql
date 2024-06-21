@@ -2,6 +2,10 @@
 
 Change history of the project. All the feature updates, bug fixes, breaking changes will be documented here.
 
+## [0.0.23]
+
+- Feature: new methods `sinh`, `cosh`, `tanh`, `asin`, `acos`, `atan`, `asinh`, `acosh`, `acosh`, `atan2` and `abs` were added
+
 ## [0.0.22]
 
 - Chore: Updated dependencies

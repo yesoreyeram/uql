@@ -174,7 +174,7 @@ function_name
     |  "trim"                                               {% as_string %}
     |  "reverse"                                            {% as_string %}
     |  "extract"                                            {% as_string %}
-    #  arrary functions
+    #  array functions
     |  "distinct"                                           {% as_string %}
     |  "pack"                                               {% as_string %}
     |  "array_from_entries"                                 {% as_string %}
@@ -200,6 +200,17 @@ function_name
     |  "sin"                                                {% as_string %}
     |  "cos"                                                {% as_string %}
     |  "tan"                                                {% as_string %}
+    |  "sinh"                                               {% as_string %}
+    |  "cosh"                                               {% as_string %}
+    |  "tanh"                                               {% as_string %}
+    |  "asin"                                               {% as_string %}
+    |  "acos"                                               {% as_string %}
+    |  "atan"                                               {% as_string %}
+    |  "atan2"                                              {% as_string %}
+    |  "asinh"                                              {% as_string %}
+    |  "acosh"                                              {% as_string %}
+    |  "atanh"                                              {% as_string %}
+    |  "abs"                                                {% as_string %}
     |  "log"                                                {% as_string %}
     |  "log2"                                               {% as_string %}
     |  "log10"                                              {% as_string %}

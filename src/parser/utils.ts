@@ -75,9 +75,24 @@ export const get_value = (operator: FunctionName, args: any[], previous_value?: 
         return Math.sign(args[0]);
       }
       return null;
+    case "abs":
+      if (args.length > 0 && typeof args[0] === "number") {
+        return Math.abs(args[0]);
+      }
+      return null;
     case "sin":
       if (args.length > 0 && typeof args[0] === "number") {
         return Math.sin(args[0]);
+      }
+      return null;
+    case "sinh":
+      if (args.length > 0 && typeof args[0] === "number") {
+        return Math.sinh(args[0]);
+      }
+      return null;
+    case "asinh":
+      if (args.length > 0 && typeof args[0] === "number") {
+        return Math.asinh(args[0]);
       }
       return null;
     case "cos":
@@ -85,9 +100,34 @@ export const get_value = (operator: FunctionName, args: any[], previous_value?: 
         return Math.cos(args[0]);
       }
       return null;
+    case "cosh":
+      if (args.length > 0 && typeof args[0] === "number") {
+        return Math.cosh(args[0]);
+      }
+      return null;
+    case "acosh":
+      if (args.length > 0 && typeof args[0] === "number") {
+        return Math.acosh(args[0]);
+      }
+      return null;
     case "tan":
       if (args.length > 0 && typeof args[0] === "number") {
         return Math.tan(args[0]);
+      }
+      return null;
+    case "tanh":
+      if (args.length > 0 && typeof args[0] === "number") {
+        return Math.tanh(args[0]);
+      }
+      return null;
+    case "atanh":
+      if (args.length > 0 && typeof args[0] === "number") {
+        return Math.atanh(args[0]);
+      }
+      return null;
+    case "atan2":
+      if (args.length > 0 && typeof args[0] === "number" && typeof args[1] === "number") {
+        return Math.atan2(args[0], args[1]);
       }
       return null;
     case "pow":

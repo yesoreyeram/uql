@@ -122,5 +122,21 @@ describe("project", () => {
         },
       ]);
     });
+    it("should calculate the sinh/cosh/tanh calculations correctly with ref fields", async () => {
+      const result = await uql(`project "sinh"=sinh("a"), "cosh"=cosh("a"), "tanh"=tanh("a"), "asinh"=asinh("a"), "acosh"=acosh("a"), "atanh"=atanh("a"), "atan2"=atan2("a","a")`, {
+        data: [{ a: 1.2 }],
+      });
+      expect(result).toStrictEqual([
+        {
+          sinh: Math.sinh(1.2),
+          cosh: Math.cosh(1.2),
+          tanh: Math.tanh(1.2),
+          asinh: Math.asinh(1.2),
+          acosh: Math.acosh(1.2),
+          atanh: Math.atanh(1.2),
+          atan2: Math.atan2(1.2, 1.2),
+        },
+      ]);
+    });
   });
 });

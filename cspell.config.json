@@ -1,9 +1,15 @@
 {
   "language": "en",
-  "ignorePaths": ["node_modules/**", "coverage/**", "dist/**", "src/grammar/grammar.ts"],
+  "ignorePaths": [
+    "node_modules/**",
+    "coverage/**",
+    "dist/**",
+    "src/grammar/grammar.ts"
+  ],
   "words": [
-    "yesoreyeram",
+    "acosh",
     "APAC",
+    "asinh",
     "Bloggs",
     "borora",
     "countif",
@@ -57,6 +63,7 @@
     "UQL",
     "urlquery",
     "vibgyor",
-    "Weinberger"
+    "Weinberger",
+    "yesoreyeram"
   ]
 }
