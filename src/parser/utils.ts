@@ -1,5 +1,5 @@
 import { sum, min, max, mean, uniq, isArray, random, first, last, forEach, flatten, get } from "lodash";
-import * as dayjs from "dayjs";
+import { default as dayjs } from "dayjs";
 import { FunctionName, type_where_arg } from "../types";
 
 export const get_single_value = (input: any, query: string): string | number | any[] => {

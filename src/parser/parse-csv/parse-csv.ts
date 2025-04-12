@@ -1,4 +1,4 @@
-import * as csv_parser from "csv-parse/lib/sync";
+import { default as csv_parser } from "csv-parse/lib/sync";
 import { Options as csv_parser_Options } from "csv-parse/lib";
 import { Command, CommandResult, type_parse_arg } from "../../types";
 

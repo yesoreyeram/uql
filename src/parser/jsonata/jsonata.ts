@@ -1,5 +1,5 @@
 import { isArray } from "lodash";
-import * as JSONata from "jsonata";
+import { default as JSONata } from "jsonata";
 import { Command, CommandResult } from "../../types";
 
 export const jsonata = (pv: CommandResult, cv: Extract<Command, { type: "jsonata" }>): CommandResult => {
