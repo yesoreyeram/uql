@@ -29,4 +29,14 @@ describe("uql", () => {
       { timestamp: new Date("2069-11-12 00:38:20"), disk: undefined, host: "HOST-F1266E1D0AAC2C3C", value: 3.3, metricId: "builtin:host.cpu.idle" },
     ]);
   });
+  describe("project", () => {
+    it("replace_string", async () => {
+      expect(await uql(`parse-json | project "foo"=replace_string("str", 'foo', 'bar')`, { data: { str: "foo foo" } })).toStrictEqual("bar bar");
+      expect(await uql(`parse-json | project "foo"=replace_string("str", '(foo)', 'bar')`, { data: { str: "(foo) (foo)" } })).toStrictEqual("bar bar");
+      expect(await uql(`parse-json | project "foo"=replace_string("str", '[foo]', 'bar')`, { data: { str: "[foo] [foo]" } })).toStrictEqual("bar bar");
+      expect(await uql(`parse-json | project "foo"=replace_string("str", 'foo-baz', 'bar')`, { data: { str: "foo-baz foo-baz" } })).toStrictEqual("bar bar");
+      expect(await uql(`parse-json | project "foo"=replace_string("str", 'foo, baz', 'bar')`, { data: { str: "foo, baz foo, baz" } })).toStrictEqual("bar bar");
+      expect(await uql(`parse-json | project "foo"=replace_string("str", 'foo\\'s value', 'bar')`, { data: { str: "foo's value foo's value" } })).toStrictEqual("bar bar");
+    });
+  });
 });

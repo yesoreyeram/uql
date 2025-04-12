@@ -28,7 +28,10 @@ export const get_value = (operator: FunctionName, args: any[], previous_value?: 
       return "";
     case "replace_string":
       if (args.length >= 2 && typeof args[0] === "string" && typeof args[1] === "string") {
-        return (args[0] || "").replace(new RegExp(args[1], args[3] || "g"), typeof args[2] === "string" ? args[2] : "");
+        var input = args[0] || "";
+        var matcher = args[1] || "";
+        var replacer = typeof args[2] === "string" ? args[2] : "";
+        return input.replaceAll(matcher.replaceAll("\\'", "'"), replacer);
       }
       return args[0] || "";
     case "atob":
