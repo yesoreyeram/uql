@@ -1,11 +1,6 @@
 {
   "language": "en",
-  "ignorePaths": [
-    "node_modules/**",
-    "coverage/**",
-    "dist/**",
-    "src/grammar/grammar.ts"
-  ],
+  "ignorePaths": ["**/node_modules/**", "**/coverage/**", "**/dist/**", "uql/src/grammar/grammar.ts"],
   "words": [
     "acosh",
     "APAC",

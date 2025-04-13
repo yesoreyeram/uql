@@ -1,16 +1,16 @@
 {
-  "name": "uql",
-  "version": "0.0.24",
+  "name": "@yesoreyeram/uql",
+  "private": true,
   "description": "UQL - Unstructured Query Language",
   "author": "Sriramajeyam Sugumaran",
   "license": "Apache-2.0",
-  "main": "dist/index.js",
+  "workspaces": [
+    "uql"
+  ],
   "scripts": {
     "spellcheck": "cspell -c cspell.config.json \"**/*.{ts,tsx,js,go,md,mdx,yml,yaml,json,scss,css}\"",
-    "lint": "yarn spellcheck",
-    "compile": "nearleyc src/grammar/grammar.ne -o src/grammar/grammar.ts && tsc",
-    "test": "yarn lint && yarn compile && jest",
-    "build": "rm -rf dist && yarn test --coverage"
+    "test": "turbo run test",
+    "build": "turbo run build"
   },
   "repository": {
     "type": "git",
@@ -21,34 +21,13 @@
     "url": "https://github.com/yesoreyeram/uql/issues"
   },
   "homepage": "https://github.com/yesoreyeram/uql#readme",
+  "packageManager": "yarn@1.22.22",
   "dependencies": {
-    "@yesoreyeram/nearley": "^3.0.0-beta.2",
-    "csv-parse": "4.12.0",
-    "dayjs": "^1.10.7",
-    "fast-xml-parser": "^4.2.4",
-    "js-yaml": "^4.1.0",
-    "jsonata": "1.8.7",
-    "lodash": "^4.17.21",
-    "moo": "^0.5.2",
-    "xml2js": "0.6.2"
+    "@changesets/cli": "^2.28.1"
   },
   "devDependencies": {
-    "@types/jest": "29.5.11",
-    "@types/js-yaml": "4.0.9",
-    "@types/lodash": "4.14.202",
-    "@types/moo": "^0.5.9",
-    "@types/nearley": "^2.11.2",
-    "@types/node": "18.19.0",
-    "@types/xml2js": "^0.4.9",
     "cspell": "^5.19.7",
-    "jest": "30.0.0-alpha.7",
-    "ts-jest": "29.3.1",
-    "typescript": "5.3.3"
+    "turbo": "^2.5.0"
   },
-  "resolutions": {
-    "@babel/helpers": "^7.27.0",
-    "braces": "^3.0.3",
-    "cross-spawn": "^7.0.5",
-    "micromatch": "^4.0.8"
-  }
+  "resolutions": {}
 }
