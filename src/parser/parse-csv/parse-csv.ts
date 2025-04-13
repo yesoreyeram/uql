@@ -8,6 +8,9 @@ export const parseCsv = (pv: CommandResult, cv: Extract<Command, { type: "parse-
     let csv_parser_options = get_parse_csv_options(cv.args);
     let result: string[][] = csv_parser(pv.output, csv_parser_options);
     output = result;
+    if (csv_parser_options.columns === false) {
+      output = result.map((r) => r.reduce((p, c, ci) => ({ ...p, [`col_${ci}`]: c }), {}));
+    }
   }
   return { ...pv, output };
 };
@@ -29,7 +32,19 @@ const get_parse_csv_options = (args: type_parse_arg[][]): csv_parser_Options => 
           options[arg.identifier] = arg.value.toLowerCase() === "true";
           break;
         case "columns":
-          options[arg.identifier] = arg.value ? arg.value.split(",") : true;
+          if (arg.value) {
+            if (arg.value.toLowerCase() === "false") {
+              options[arg.identifier] = false;
+              break;
+            }
+            if (arg.value.toLowerCase() === "true") {
+              options[arg.identifier] = true;
+              break;
+            }
+            options[arg.identifier] = arg.value.split(",");
+            break;
+          }
+          options[arg.identifier] = true;
           break;
         default:
           // @ts-ignore
