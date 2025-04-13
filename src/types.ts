@@ -44,19 +44,15 @@ export type Operator =
   | "endswith_cs"
   | "!endswith_cs";
 export type ConditionalFunctionName = "countif" | "sumif" | "minif" | "maxif";
+
+export type StringManipulationFunctions = "replace_string" | "substring" | "split" | "strcat" | "strlen" | "toupper" | "trim_end" | "trim_start" | "trim" | "reverse" | "extract";
+export type TrigonometricRatioFunctions = "sin" | "cos" | "tan" | "sinh" | "cosh" | "tanh" | "asin" | "acos" | "atan" | "atan2" | "asinh" | "acosh" | "atanh";
+export type UrlParsingFunctions = "parse_url" | "parse_urlquery";
+
 export type FunctionName =
-  // #  string functions
-  | "replace_string"
-  | "substring"
-  | "split"
-  | "strcat"
-  | "strlen"
-  | "toupper"
-  | "trim_end"
-  | "trim_start"
-  | "trim"
-  | "reverse"
-  | "extract"
+  | StringManipulationFunctions
+  | UrlParsingFunctions
+  | TrigonometricRatioFunctions
   // #  array functions
   | "distinct"
   | "pack"
@@ -64,9 +60,6 @@ export type FunctionName =
   | "array_to_map"
   | "bag_pack"
   | "kv"
-  // #  url functions
-  | "parse_url"
-  | "parse_urlquery"
   // #  math functions
   | "sum"
   | "diff"
@@ -80,20 +73,6 @@ export type FunctionName =
   | "latest"
   | "count"
   | "dcount"
-  | "sin"
-  | "cos"
-  | "tan"
-  | "sinh"
-  | "cosh"
-  | "tanh"
-  | "abs"
-  | "asin"
-  | "acos"
-  | "atan"
-  | "atan2"
-  | "asinh"
-  | "acosh"
-  | "atanh"
   | "log"
   | "log2"
   | "log10"

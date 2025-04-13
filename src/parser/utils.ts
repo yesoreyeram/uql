@@ -1,6 +1,6 @@
 import { sum, min, max, mean, uniq, isArray, random, first, last, forEach, flatten, get } from "lodash";
 import { default as dayjs } from "dayjs";
-import { FunctionName, type_where_arg } from "../types";
+import { FunctionName, TrigonometricRatioFunctions, type_where_arg } from "../types";
 
 export const get_single_value = (input: any, query: string): string | number | any[] => {
   return get(input, query);
@@ -84,55 +84,19 @@ export const get_value = (operator: FunctionName, args: any[], previous_value?: 
       }
       return null;
     case "sin":
-      if (args.length > 0 && typeof args[0] === "number") {
-        return Math.sin(args[0]);
-      }
-      return null;
-    case "sinh":
-      if (args.length > 0 && typeof args[0] === "number") {
-        return Math.sinh(args[0]);
-      }
-      return null;
-    case "asinh":
-      if (args.length > 0 && typeof args[0] === "number") {
-        return Math.asinh(args[0]);
-      }
-      return null;
     case "cos":
-      if (args.length > 0 && typeof args[0] === "number") {
-        return Math.cos(args[0]);
-      }
-      return null;
-    case "cosh":
-      if (args.length > 0 && typeof args[0] === "number") {
-        return Math.cosh(args[0]);
-      }
-      return null;
-    case "acosh":
-      if (args.length > 0 && typeof args[0] === "number") {
-        return Math.acosh(args[0]);
-      }
-      return null;
     case "tan":
-      if (args.length > 0 && typeof args[0] === "number") {
-        return Math.tan(args[0]);
-      }
-      return null;
+    case "sinh":
+    case "cosh":
     case "tanh":
-      if (args.length > 0 && typeof args[0] === "number") {
-        return Math.tanh(args[0]);
-      }
-      return null;
-    case "atanh":
-      if (args.length > 0 && typeof args[0] === "number") {
-        return Math.atanh(args[0]);
-      }
-      return null;
+    case "asin":
+    case "acos":
+    case "atan":
     case "atan2":
-      if (args.length > 0 && typeof args[0] === "number" && typeof args[1] === "number") {
-        return Math.atan2(args[0], args[1]);
-      }
-      return null;
+    case "asinh":
+    case "acosh":
+    case "atanh":
+      return getTrigonometricRatioFunctionsValues(operator, args, previous_value);
     case "pow":
       if (args.length > 1 && typeof args[0] === "number" && typeof args[1] === "number") {
         return Math.pow(args[0], args[1]);
@@ -338,6 +302,42 @@ export const get_value = (operator: FunctionName, args: any[], previous_value?: 
     case "dcount":
     default:
       throw "not implemented";
+  }
+};
+
+export const getTrigonometricRatioFunctionsValues = (operator: TrigonometricRatioFunctions, args: any[], previous_value?: any) => {
+  if (!(args.length > 0 && typeof args[0] === "number")) {
+    return null;
+  }
+  switch (operator) {
+    case "sin":
+      return Math.sin(args[0]);
+    case "sinh":
+      return Math.sinh(args[0]);
+    case "asin":
+      return Math.asin(args[0]);
+    case "asinh":
+      return Math.asinh(args[0]);
+    case "cos":
+      return Math.cos(args[0]);
+    case "acos":
+      return Math.acos(args[0]);
+    case "cosh":
+      return Math.cosh(args[0]);
+    case "acosh":
+      return Math.acosh(args[0]);
+    case "tan":
+      return Math.tan(args[0]);
+    case "atan":
+      return Math.atan(args[0]);
+    case "tanh":
+      return Math.tanh(args[0]);
+    case "atanh":
+      return Math.atanh(args[0]);
+    case "atan2":
+      return Math.atan2(args[0], args[1]);
+    default:
+      return null;
   }
 };
 
