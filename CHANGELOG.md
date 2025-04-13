@@ -2,6 +2,15 @@
 
 Change history of the project. All the feature updates, bug fixes, breaking changes will be documented here.
 
+## [0.0.24]
+
+- Feature: Support for handling csv files without header row via columns option `parse-csv --columns 'false'`
+- Feature: [Handled](https://github.com/yesoreyeram/uql/blob/2182a5bb5d011e2f495bd1b8e31878ec86e5eb99/src/tests/uql.test.ts#L33-L40) escape characters in `replace_string` method
+- Fix: Implemented missing `asin`, `acos` and `atan` methods introduced in v0.0.23
+- Chore: Added github workflows for testing
+- Chore: Added more unit tests
+- Chore: Updated dependencies
+
 ## [0.0.23]
 
 - Feature: new methods `sinh`, `cosh`, `tanh`, `asin`, `acos`, `atan`, `asinh`, `acosh`, `acosh`, `atan2` and `abs` were added
