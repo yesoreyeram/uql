@@ -1,0 +1,40 @@
+## Introduction
+
+**UQL** (Unified Query Language) is a simple query language designed to query JSON objects using pipeline operator (series of operations).
+
+Most of the times, fields are referred within double quotes and string values are referred with single quotes. 
+
+If your data looks like this:
+
+```json
+[
+  {
+    "id": 1,
+    "name": { "firstName": "john", "lastName": "doe" },
+    "dob": "1985-01-01",
+    "city": "chennai"
+  },
+  {
+    "id": 2,
+    "name": { "firstName": "alice", "lastName": "bob" },
+    "dob": "1990-12-31",
+    "city": "london"
+  }
+]
+```
+
+then the following UQL query
+
+```uql
+parse-json
+| extend "full name"=strcat("name.firstName",' ',"name.lastName"), "dob"=todatetime("dob")
+| project-away "name"
+| order by "full name" asc
+```
+
+will produce four column table (id, dob, city, full name).
+
+|id|dob|city|full name|
+|--|--|--|--|
+|2|1990-12-31 00:00:00|london|alice bob|
+|1|1985-01-01 00:00:00|chennai|john doe|

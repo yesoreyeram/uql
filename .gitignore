@@ -1,6 +1,27 @@
-dist
+# deps
 node_modules
-.turbo
-coverage
+
+# logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# test
+coverage
+
+# build, cache & out
+dist
+.turbo
+.next
+
+# misc
+.DS_Store
+*.pem
+/.pnp
+.pnp.js
+
+# env
 .env
+.env*.local
+next-env.d.ts
