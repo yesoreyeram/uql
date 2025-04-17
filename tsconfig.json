@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "jsx": "react",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"]
+  },
+  "include": ["docs", "uql"],
+  "exclude": ["node_modules"]
+}
