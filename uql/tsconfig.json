@@ -2,6 +2,8 @@
   "compilerOptions": {
     "target": "es5",
     "lib": ["ES2021.String"],
+    "types": ["node", "jest"],
+    "typeRoots": ["../node_modules/@types"],
     "module": "commonjs",
     "declaration": true,
     "outDir": "./dist",

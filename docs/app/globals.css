@@ -119,7 +119,26 @@
   body {
     @apply bg-background text-foreground;
   }
-  .mdx-table tr:nth-child(even) {
-    background-color: #f2f2f2;
+  .mdx {
+    p {
+      margin-bottom: "20px";
+    }
+    table tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+    > .blockquote {
+      background-color: #f2f2f2;
+      padding-block-start: 10px;
+      padding-inline: 10px;
+      margin-inline: 14px;
+      > b {
+        font-weight: bolder;
+        padding-inline: 10px;
+      }
+      > p {
+        padding-block: 10px;
+        padding-inline: 10px;
+      }
+    }
   }
 }

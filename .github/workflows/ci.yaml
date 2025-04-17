@@ -5,15 +5,17 @@ on:
     branches:
       - main
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, 'ci skip') && !contains(github.event.head_commit.message, 'skip ci')"
-    name: Run Tests, Build & Deploy
+    name: Run Tests, Build
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Install dependencies
         run: yarn install --immutable --prefer-offline
+      - name: Audit dependencies
+        run: yarn audit;
       - name: Spellcheck
         run: yarn spellcheck;
       - name: Test
@@ -25,3 +27,18 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: docs/dist
+  deploy:
+    name: Deploy to Github Pages
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'ci skip') && !contains(github.event.head_commit.message, 'skip ci')"
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: upload_artifacts
+        uses: actions/deploy-pages@v4

@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "clean": "rm -rf ./.turbo && rm -rf ./.next && rm -rf ./dist/",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -13,7 +14,6 @@
     "@mdx-js/react": "^3.1.0",
     "@next/mdx": "^15.3.0",
     "@radix-ui/react-navigation-menu": "^1.2.6",
-    "@types/mdx": "^2.0.13",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.488.0",
@@ -28,12 +28,11 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/mdx": "^2.0.13",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.3.0",
-    "tailwindcss": "^4",
-    "typescript": "^5"
+    "tailwindcss": "^4"
   }
 }
