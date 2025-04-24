@@ -6,6 +6,7 @@
   "license": "Apache-2.0",
   "main": "dist/index.js",
   "scripts": {
+    "npm_publish": "npm publish --provenance --access public",
     "clean": "rm -rf ./.turbo && rm -f src/grammar/grammar.ts",
     "compile": "nearleyc src/grammar/grammar.ne -o src/grammar/grammar.ts && tsc",
     "test": "yarn compile && jest",

@@ -1,6 +1,7 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
+    "npm_publish": {},
     "clean": {},
     "dev": {},
     "start": {},

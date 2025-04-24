@@ -9,6 +9,7 @@
     "docs"
   ],
   "scripts": {
+    "npm_publish": "turbo run npm_publish",
     "spellcheck": "cspell -c cspell.config.json \"**/*.{ts,tsx,js,go,md,mdx,yml,yaml,json,scss,css}\"",
     "clean": "rm -rf ./.turbo && turbo run clean",
     "dev": "turbo run dev",
