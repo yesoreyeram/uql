@@ -105,6 +105,18 @@ describe("parser", () => {
       });
       expect(result).toStrictEqual([{ bar: "bar1" }, { bar: "bar2" }]);
     });
+    it("basic field without quotes", async () => {
+      const result = await uql(`project bar, baz`, {
+        data: [
+          { foo: "foo1", bar: "bar1", baz: "baz1" },
+          { foo: "foo2", bar: "bar2", baz: "baz2" },
+        ],
+      });
+      expect(result).toStrictEqual([
+        { bar: "bar1", baz: "baz1" },
+        { bar: "bar2", baz: "baz2" },
+      ]);
+    });
     it("multi", async () => {
       const result = await uql(`project "bar" , "foo" `, {
         data: [

@@ -94,8 +94,8 @@ describe("mv-expand", () => {
     | project kv() 
     | project "name"="value.name", "ip"="value.ip", "disks"="value.disks"
     | mv-expand "disk"="disks" 
-    | project "name", "ip", "driveName"="disk.drive", "driveSize"="disk.size"
-    | project-away "disk"`,
+    | project "name", ip, "driveName"="disk.drive", "driveSize"="disk.size", "disk"
+    | project-away disk`,
       { data }
     );
     expect(result).toStrictEqual([

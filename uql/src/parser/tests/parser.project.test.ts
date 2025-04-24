@@ -16,6 +16,10 @@ describe("project", () => {
       const result = await uql(`project "age"`, { data: sample_data.users });
       expect(result).toStrictEqual([{ age: 48 }, { age: 34 }, { age: 12 }, { age: 40 }, { age: 36 }]);
     });
+    it("default without quote", async () => {
+      const result = await uql(`project age`, { data: sample_data.users });
+      expect(result).toStrictEqual([{ age: 48 }, { age: 34 }, { age: 12 }, { age: 40 }, { age: 36 }]);
+    });
     it("nested", async () => {
       const result = await uql(`project "name.f"`, { data: sample_data.users });
       expect(result).toStrictEqual([{ name: { f: "foo1" } }, { name: { f: "foo2" } }, { name: { f: "foo3" } }, { name: { f: "foo4" } }, { name: { f: "foo5" } }]);

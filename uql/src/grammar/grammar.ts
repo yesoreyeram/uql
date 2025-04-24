@@ -19,8 +19,8 @@ declare var ne: any;
 declare var tilde: any;
 declare var exclaim: any;
 declare var identifier: any;
-declare var str: any;
 declare var sq_string: any;
+declare var str: any;
 declare var string: any;
 declare var number: any;
 declare var nl: any;
@@ -163,7 +163,7 @@ const grammar: Grammar = {
     {"name": "function_assignment$ebnf$6", "symbols": []},
     {"name": "function_assignment$ebnf$6", "symbols": ["function_assignment$ebnf$6", {"literal":"="}], "postprocess": (d) => d[0].concat([d[1]])},
     {"name": "function_assignment", "symbols": ["function_assignment$ebnf$5", "function_assignment$ebnf$6", "ref_type"], "postprocess": d => ({ alias: d[0][0], ...d[2] })},
-    {"name": "function_assignment", "symbols": ["ref_type"], "postprocess": d => d[0]},
+    {"name": "function_assignment", "symbols": ["field_ref_type"], "postprocess": d => d[0]},
     {"name": "expression$ebnf$1", "symbols": []},
     {"name": "expression$ebnf$1", "symbols": ["expression$ebnf$1", "expression_args"], "postprocess": (d) => d[0].concat([d[1]])},
     {"name": "expression", "symbols": [(uqlLexer.has("lparan") ? {type: "lparan"} : lparan), "__", "expression$ebnf$1", (uqlLexer.has("rparan") ? {type: "rparan"} : rparan)], "postprocess": d => ({ type: "expression", args: d[2][0]||[] })},
@@ -314,18 +314,18 @@ const grammar: Grammar = {
     {"name": "command_extend", "symbols": [{"literal":"extend"}, "_", "function_assignments"], "postprocess": d => d[2]},
     {"name": "command_project", "symbols": [{"literal":"project"}, "_", "function_assignments"], "postprocess": d => d[2]},
     {"name": "command_project_reorder", "symbols": [{"literal":"project"}, (uqlLexer.has("dash") ? {type: "dash"} : dash), {"literal":"reorder"}, "_", "function_assignments"], "postprocess": d => d[4]},
-    {"name": "command_project_away", "symbols": [{"literal":"project"}, (uqlLexer.has("dash") ? {type: "dash"} : dash), {"literal":"away"}, "_", "ref_types"], "postprocess": d => d[4]},
-    {"name": "command_scope", "symbols": [{"literal":"scope"}, "_", "ref_type"], "postprocess": d => d[2]},
+    {"name": "command_project_away", "symbols": [{"literal":"project"}, (uqlLexer.has("dash") ? {type: "dash"} : dash), {"literal":"away"}, "_", "field_ref_types"], "postprocess": d => d[4]},
+    {"name": "command_scope", "symbols": [{"literal":"scope"}, "_", "field_ref_type"], "postprocess": d => d[2]},
     {"name": "command_where", "symbols": [{"literal":"where"}, "_", "expression_args"], "postprocess": d => d[2]},
     {"name": "command_distinct$ebnf$1", "symbols": []},
-    {"name": "command_distinct$ebnf$1", "symbols": ["command_distinct$ebnf$1", "ref_type"], "postprocess": (d) => d[0].concat([d[1]])},
+    {"name": "command_distinct$ebnf$1", "symbols": ["command_distinct$ebnf$1", "field_ref_type"], "postprocess": (d) => d[0].concat([d[1]])},
     {"name": "command_distinct", "symbols": [{"literal":"distinct"}, "__", "command_distinct$ebnf$1"], "postprocess": d => d[2] ? d[2][0] : undefined},
-    {"name": "command_mv_expand", "symbols": [{"literal":"mv"}, (uqlLexer.has("dash") ? {type: "dash"} : dash), {"literal":"expand"}, "_", "ref_type"], "postprocess": d => d[4]},
+    {"name": "command_mv_expand", "symbols": [{"literal":"mv"}, (uqlLexer.has("dash") ? {type: "dash"} : dash), {"literal":"expand"}, "_", "field_ref_type"], "postprocess": d => d[4]},
     {"name": "command_mv_expand$ebnf$1", "symbols": []},
     {"name": "command_mv_expand$ebnf$1", "symbols": ["command_mv_expand$ebnf$1", "str"], "postprocess": (d) => d[0].concat([d[1]])},
     {"name": "command_mv_expand$ebnf$2", "symbols": []},
     {"name": "command_mv_expand$ebnf$2", "symbols": ["command_mv_expand$ebnf$2", {"literal":"="}], "postprocess": (d) => d[0].concat([d[1]])},
-    {"name": "command_mv_expand", "symbols": [{"literal":"mv"}, (uqlLexer.has("dash") ? {type: "dash"} : dash), {"literal":"expand"}, "_", "command_mv_expand$ebnf$1", "command_mv_expand$ebnf$2", "ref_type"], "postprocess": d => ({ alias: d[4][0], ...d[6] })},
+    {"name": "command_mv_expand", "symbols": [{"literal":"mv"}, (uqlLexer.has("dash") ? {type: "dash"} : dash), {"literal":"expand"}, "_", "command_mv_expand$ebnf$1", "command_mv_expand$ebnf$2", "field_ref_type"], "postprocess": d => ({ alias: d[4][0], ...d[6] })},
     {"name": "command_parse_json$ebnf$1", "symbols": []},
     {"name": "command_parse_json$ebnf$1", "symbols": ["command_parse_json$ebnf$1", "parse_args"], "postprocess": (d) => d[0].concat([d[1]])},
     {"name": "command_parse_json", "symbols": [{"literal":"parse"}, (uqlLexer.has("dash") ? {type: "dash"} : dash), {"literal":"json"}, "__", "command_parse_json$ebnf$1"], "postprocess": d => d[4]},
@@ -376,14 +376,20 @@ const grammar: Grammar = {
     {"name": "command_range", "symbols": ["range_item", "_", {"literal":"step"}, "_", "str"], "postprocess": d =>  ({...d[0], step : d[4]})},
     {"name": "range_item", "symbols": [{"literal":"range"}, "_", {"literal":"from"}, "_", "number", "_", {"literal":"to"}, "_", "number"], "postprocess": d => ({ start: d[4], end: d[8], step: 1 })},
     {"name": "range_item", "symbols": [{"literal":"range"}, "_", {"literal":"from"}, "_", "str", "_", {"literal":"to"}, "_", "str"], "postprocess": d => ({ start: d[4], end: d[8], step: "" })},
-    {"name": "str_type", "symbols": [(uqlLexer.has("str") ? {type: "str"} : str), {"literal":"("}, "str", {"literal":")"}], "postprocess": d => ({ type: "string", value: d[2] })},
-    {"name": "str_type", "symbols": [(uqlLexer.has("sq_string") ? {type: "sq_string"} : sq_string)], "postprocess": d => ({ type: "string", value:d[0].value})},
+    {"name": "field_ref_type", "symbols": ["str"], "postprocess": d => ({ type: "ref", value: d[0] })},
+    {"name": "field_ref_type", "symbols": [{"literal":"["}, "str", {"literal":"]"}], "postprocess": d => ({ type: "ref", value: d[1] })},
+    {"name": "field_ref_type", "symbols": [{"literal":"["}, (uqlLexer.has("sq_string") ? {type: "sq_string"} : sq_string), {"literal":"]"}], "postprocess": d => ({ type: "ref", value: d[1] })},
+    {"name": "field_ref_type", "symbols": [(uqlLexer.has("identifier") ? {type: "identifier"} : identifier)], "postprocess": d => { return { type: "ref", value: d[0].value } }},
+    {"name": "field_ref_types", "symbols": ["field_ref_type"], "postprocess": as_array(0)},
+    {"name": "field_ref_types", "symbols": ["field_ref_type", "__", {"literal":","}, "__", "field_ref_types"], "postprocess": merge(0,4)},
     {"name": "ref_type", "symbols": ["str"], "postprocess": d => ({ type: "ref", value: d[0] })},
     {"name": "ref_type", "symbols": [{"literal":"["}, "str", {"literal":"]"}], "postprocess": d => ({ type: "ref", value: d[1] })},
     {"name": "ref_type", "symbols": [{"literal":"["}, (uqlLexer.has("sq_string") ? {type: "sq_string"} : sq_string), {"literal":"]"}], "postprocess": d => ({ type: "ref", value: d[1] })},
-    {"name": "num_type", "symbols": ["number"], "postprocess": d => ({ type: "number", value: d[0] })},
     {"name": "ref_types", "symbols": ["ref_type"], "postprocess": as_array(0)},
     {"name": "ref_types", "symbols": ["ref_type", "__", {"literal":","}, "__", "ref_types"], "postprocess": merge(0,4)},
+    {"name": "str_type", "symbols": [(uqlLexer.has("str") ? {type: "str"} : str), {"literal":"("}, "str", {"literal":")"}], "postprocess": d => ({ type: "string", value: d[2] })},
+    {"name": "str_type", "symbols": [(uqlLexer.has("sq_string") ? {type: "sq_string"} : sq_string)], "postprocess": d => ({ type: "string", value:d[0].value})},
+    {"name": "num_type", "symbols": ["number"], "postprocess": d => ({ type: "number", value: d[0] })},
     {"name": "any_type", "symbols": ["num_type"], "postprocess": pick(0)},
     {"name": "any_type", "symbols": ["str_type"], "postprocess": pick(0)},
     {"name": "any_type", "symbols": ["ref_type"], "postprocess": pick(0)},
