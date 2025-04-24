@@ -1,19 +1,18 @@
-import type { Metadata } from "next";
 import "./globals.css";
+import { RootProvider } from "fumadocs-ui/provider";
+import { Inter } from "next/font/google";
+import type { ReactNode } from "react";
 
-export const metadata: Metadata = {
-  title: "UQL",
-  description: "UQL",
-};
+const inter = Inter({
+  subsets: ["latin"],
+});
 
-type Props = Readonly<{
-  children: React.ReactNode;
-}>;
-
-export default function RootLayout({ children }: Props) {
+export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`antialiased`}>{children}</body>
+    <html lang="en" className={inter.className} suppressHydrationWarning>
+      <body className="flex flex-col min-h-screen">
+        <RootProvider>{children}</RootProvider>
+      </body>
     </html>
   );
 }

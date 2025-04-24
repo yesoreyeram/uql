@@ -1,10 +1,13 @@
-## Basic UQL commands
+---
+title: UQL Commands
+description: Available UQL commands and examples
+---
 
 ### project
 
 `project` command is used to select the columns to include in the results. If you want to select a property inside a nested object, you can use dot notation. Optionally, you can also alias the fields.
 
-```uql
+```sql
 parse-json
 | project "id", "name.firstName", "date of birth"="dob"
 ```
@@ -13,7 +16,7 @@ parse-json
 
 `project-away` command is exactly opposite as `project`. It just drops specific columns from the data. It doesn't support alias or dot notation selector.
 
-```uql
+```sql
 parse-json
 | project-away "id", "city"
 ```
@@ -22,7 +25,7 @@ parse-json
 
 `order by` command sorts the input based on any column. sort direction should be either `asc` or `desc`
 
-```uql
+```sql
 parse-json
 | order by "full name" asc
 ```
@@ -31,7 +34,7 @@ parse-json
 
 `extend` command is similar to `project`. but instead of selecting the columns, it just adds/replace columns in existing data. `extends` expects an alias and a function.
 
-```uql
+```sql
 parse-json
 | extend "dob"=todatetime("dob"), "city"=toupper("city")
 ```
@@ -88,12 +91,12 @@ following are some of the available functions
 
 For example, the data `[ { "a": 12, "b" : 20 }, { "a" : 6, "b": 32} ]` and the following uql query
 
-```uql
+```sql
 parse-json
-| project "a", "triple"=sum("a","a","a"),"thrice"=mul("a",3), sum("a","b"),  diff("a","b"), mul("a","b")
+| extend "a", "triple"=sum("a","a","a"),"thrice"=mul("a",3), sum("a","b"),  diff("a","b"), mul("a","b")
 ```
 
-wil produce the following output
+will produce the following output
 
 | a   | triple | thrice | sum | diff | mul |
 | --- | ------ | ------ | --- | ---- | --- |
@@ -142,7 +145,7 @@ For example, the following data
 
 and the following uql query
 
-```uql
+```sql
 parse-json
 | summarize "number of cities"=count(), "total population"=sum("population") by "country"
 | extend "country"=toupper("country")
@@ -165,7 +168,7 @@ will produce the output table like this
 - 2nd argument is the row field name. Example: `"country"`
 - 3rd argument is the column field name. Example: `"occupation"`
 
-#### Pivot example 1
+**Pivot example 1**
 
 ```csv
 name,age,country,occupation,salary
@@ -179,7 +182,7 @@ Chelsey Dietrich,32,USA,Software Engineer,3500
 
 and the following query
 
-```uql
+```sql
 parse-csv
 | extend "salary"=tonumber("salary")
 | pivot sum("salary"), "country", "occupation"
@@ -195,7 +198,7 @@ will produce
 
 where as the following summarize query
 
-```uql
+```sql
 parse-csv
 | extend "salary"=tonumber("salary")
 | summarize "salary"=sum("salary") by "country", "occupation"
@@ -233,7 +236,7 @@ so choose either `summarize` or `pivot` according to you needs
 
 count gives the number of results.
 
-```uql
+```sql
 parse-json
 | count
 ```
@@ -243,7 +246,7 @@ parse-json
 `limit` command restricts the number of results returned.
 For example, the following query returns only 10 results
 
-```uql
+```sql
 parse-json
 | limit 10
 ```
@@ -264,7 +267,7 @@ example
 
 and the following uql query just results the "users" and ignores the other root level properties.
 
-```uql
+```sql
 parse-json
 | scope "users"
 ```
@@ -309,11 +312,11 @@ This command can be also used with arguments
 Example: For the data `{ "data": { "a": {"name":"a1"}, "b": {"name":"b1"}, "c": {"name":"c1"} } }` and the query `parse-json | project kv("data")` will yield the same results
 
 
-### JSONata
+### jsonata
 
 `jsonata` command accepts a JSONata query and apply over the previous input
 
-```uql
+```sql
 parse-json
 | scope "library"
 | jsonata "library.loans@$L.books@$B[$L.isbn=$B.isbn].customers[$L.customer=id].{ 'customer': name, 'book': $B.title, 'due': $L.return}"
@@ -322,18 +325,15 @@ parse-json
 
 Like any other command, `jsonata` command can be combined/piped with multiple commands. You can use JSONata for filtering the data as well.
 
-<BlockQuote type="note">
 > When using jsonata command inside the uql, wrap it with double quote and any field name within jsonata must be referred with single quote. Entire jsonata command should be written in single line.
-</BlockQuote>
-
 
 ### comments
 
 Any new line that starts with `#` will be treated as a comment. Comments can also be placed at the end of each line
 
-#### example
+**Example UQL with comments**
 
-```uql
+```sql
 parse-csv
 | extend "salary"=tonumber("salary")
 | summarize "mean_salary"=mean("salary") by "country" # something
