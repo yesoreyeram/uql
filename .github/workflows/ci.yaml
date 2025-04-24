@@ -44,5 +44,5 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Deploy to GitHub Pages
-        id: upload_artifacts
+        if: github.ref == 'refs/heads/main'
         uses: actions/deploy-pages@v4
