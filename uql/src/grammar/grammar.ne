@@ -100,7 +100,7 @@ function_assignment
     -> str:* "=":* expression                               {% d => ({ alias: d[0][0], ...d[2] })%}
     |  str:* "=":* function                                 {% d => ({ alias: d[0][0], ...d[2] })%}
     |  str:* "=":* ref_type                                 {% d => ({ alias: d[0][0], ...d[2] })%}
-    |  ref_type                                             {% d => d[0] %}
+    |  field_ref_type                                       {% d => d[0] %}
 expression
     ->  %lparan __ expression_args:* %rparan                {% d => ({ type: "expression", args: d[2][0]||[] }) %}
 expression_args       
@@ -272,20 +272,20 @@ command_project_reorder
     -> "project" %dash "reorder" _ function_assignments     {% d => d[4] %}
 # Command : Project Away
 command_project_away
-    -> "project" %dash "away" _ ref_types                   {% d => d[4] %}
+    -> "project" %dash "away" _ field_ref_types             {% d => d[4] %}
 # Command : Scope 
 command_scope
-    -> "scope" _ ref_type                                   {% d => d[2] %}
+    -> "scope" _ field_ref_type                             {% d => d[2] %}
 # Command : Where 
 command_where
     -> "where" _ expression_args                            {% d => d[2] %}
 # Command : Distinct 
 command_distinct
-    -> "distinct" __ ref_type:*                             {% d => d[2] ? d[2][0] : undefined %}
-# Command : mv-exapand 
+    -> "distinct" __ field_ref_type:*                       {% d => d[2] ? d[2][0] : undefined %}
+# Command : mv-expand 
 command_mv_expand
-    -> "mv" %dash "expand" _ ref_type                       {% d => d[4] %}
-    |  "mv" %dash "expand" _ str:* "=":* ref_type           {% d => ({ alias: d[4][0], ...d[6] })%}
+    -> "mv" %dash "expand" _ field_ref_type                 {% d => d[4] %}
+    |  "mv" %dash "expand" _ str:* "=":* field_ref_type     {% d => ({ alias: d[4][0], ...d[6] })%}
 # Command : Parse json
 command_parse_json
     -> "parse" %dash "json" __ parse_args:*                 {% d => d[4] %}
@@ -340,18 +340,26 @@ range_item
     -> "range" _ "from" _ number _ "to" _ number            {% d => ({ start: d[4], end: d[8], step: 1 })%}
     |  "range" _ "from" _ str _ "to" _ str                  {% d => ({ start: d[4], end: d[8], step: "" })%}
 #region Utils
-str_type        
-    -> %str "(" str ")"                                     {% d => ({ type: "string", value: d[2] })%}
-    |  %sq_string                                           {% d => ({ type: "string", value:d[0].value}) %}
+field_ref_type        
+    -> str                                                  {% d => ({ type: "ref", value: d[0] })%}
+    | "[" str "]"                                           {% d => ({ type: "ref", value: d[1] })%}
+    | "[" %sq_string "]"                                    {% d => ({ type: "ref", value: d[1] })%}
+    | %identifier                                           {% d => { return { type: "ref", value: d[0].value } } %}
+field_ref_types
+    -> field_ref_type                                       {% as_array(0) %}
+    |  field_ref_type __ "," __ field_ref_types             {% merge(0,4) %}
 ref_type        
     -> str                                                  {% d => ({ type: "ref", value: d[0] })%}
     | "[" str "]"                                           {% d => ({ type: "ref", value: d[1] })%}
     | "[" %sq_string "]"                                    {% d => ({ type: "ref", value: d[1] })%}
-num_type        
-    -> number                                               {% d => ({ type: "number", value: d[0] })%}
 ref_types
     -> ref_type                                             {% as_array(0) %}
     |  ref_type __ "," __ ref_types                         {% merge(0,4) %}
+str_type        
+    -> %str "(" str ")"                                     {% d => ({ type: "string", value: d[2] })%}
+    |  %sq_string                                           {% d => ({ type: "string", value:d[0].value}) %}
+num_type        
+    -> number                                               {% d => ({ type: "number", value: d[0] })%}
 any_type
     -> num_type                                             {% pick(0) %}
     |  str_type                                             {% pick(0) %}
