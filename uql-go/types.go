@@ -252,8 +252,14 @@ type ParseArg struct {
 // RangeValue represents a range value
 type RangeValue struct {
 	Start interface{} // number or string
-	End   float64
+	End   interface{} // number or string
 	Step  interface{} // number or string
+}
+
+// MvExpandValue represents an mv-expand value
+type MvExpandValue struct {
+	Field string
+	Alias string
 }
 
 // Command represents a UQL command

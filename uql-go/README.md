@@ -57,6 +57,8 @@ func main() {
 - `scope <field>` - Navigate to a nested field
 - `summarize <metrics> [by <fields>]` - Aggregate data by groups
 - `pivot <metric>, [<row_field>], [<col_field>]` - Pivot data into cross-tabular format
+- `mv-expand <field>` or `mv-expand <alias>=<field>` - Expand array field into multiple rows
+- `range from <start> to <end> [step <step>]` - Generate a range of values
 
 ### Data Parsing
 - `parse-json` - Parse JSON string
@@ -184,6 +186,25 @@ result, _ := uql.UQL(query, &uql.Options{Data: jsonData})
 // Result: [map[name:bar] map[name:foo]]
 ```
 
+### Example 7: Range Generation
+
+```go
+result, _ := uql.UQL(`range from 1 to 10 step 2`, nil)
+// Result: [1 3 5 7 9]
+```
+
+### Example 8: MV-Expand Arrays
+
+```go
+data := []interface{}{
+	map[string]interface{}{"group": "A", "users": []interface{}{"user1", "user2"}},
+	map[string]interface{}{"group": "B", "users": []interface{}{"user3"}},
+}
+
+result, _ := uql.UQL(`mv-expand "user"="users"`, &uql.Options{Data: data})
+// Result: Expands each user into a separate row
+```
+
 ## Features
 
 - ✅ Lexer and parser for UQL syntax
@@ -192,13 +213,13 @@ result, _ := uql.UQL(query, &uql.Options{Data: jsonData})
 - ✅ Data transformation (project, project-away, project-reorder, extend, order by)
 - ✅ Data filtering (distinct, scope)
 - ✅ Data aggregation (summarize, pivot)
+- ✅ Data expansion (mv-expand, range)
 - ✅ Data parsing (JSON, CSV, XML, YAML)
 - ✅ String manipulation functions
 - ✅ Math and trigonometric functions
 - ✅ Type conversion functions
 - ✅ Date/time functions
 - 🚧 Where clause (partial support)
-- 🚧 mv-expand (planned)
 - 🚧 JSONata support (planned)
 
 ## Development

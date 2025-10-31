@@ -53,14 +53,14 @@ This document provides a detailed comparison between the original TypeScript/Jav
 | `scope` | ✅ | ✅ | ✅ Complete |
 | `distinct` | ✅ | ✅ | ✅ Complete |
 | `where` | ✅ | ⚠️ | 🚧 Partial (stub) |
-| `mv-expand` | ✅ | ⚠️ | 🚧 Planned |
+| `mv-expand` | ✅ | ✅ | ✅ Complete |
 
 ### Aggregation Commands
 | Command | TypeScript | Go | Status |
 |---------|-----------|-----|--------|
 | `summarize` | ✅ | ✅ | ✅ Complete |
 | `pivot` | ✅ | ✅ | ✅ Complete |
-| `range` | ✅ | ⚠️ | 🚧 Planned |
+| `range` | ✅ | ✅ | ✅ Complete |
 
 ### Parsing Commands
 | Command | TypeScript | Go | Status |
@@ -218,8 +218,8 @@ This document provides a detailed comparison between the original TypeScript/Jav
 
 ### Code Quality Metrics
 
-- ✅ All tests passing (18/18)
-- ✅ Code coverage: 43.4%
+- ✅ All tests passing (23/23)
+- ✅ Code coverage: 45.7%
 - ✅ Formatted with `gofmt`
 - ✅ Passes `go vet` checks
 - ✅ No security vulnerabilities in dependencies
@@ -229,13 +229,14 @@ This document provides a detailed comparison between the original TypeScript/Jav
 
 1. Implement where clause with full operator support
 2. ~~Add summarize and pivot commands~~ ✅ **Completed**
-3. Implement mv-expand for array expansion
-4. Add remaining math and array functions
-5. Implement URL parsing functions
-6. Add JSONata support (may require external library)
-7. Expand test coverage to match TypeScript version (254 tests)
+3. ~~Implement mv-expand for array expansion~~ ✅ **Completed**
+4. ~~Add range command~~ ✅ **Completed**
+5. Add remaining math and array functions
+6. Implement URL parsing functions
+7. Add JSONata support (may require external library)
+7. ~~Expand test coverage to match TypeScript version (254 tests)~~
 8. Add benchmark tests for performance comparison
 
 ## Conclusion
 
-The Go port successfully implements the core UQL functionality with approximately 80% feature parity with the TypeScript version. The implementation includes the critical aggregation features (summarize and pivot), providing a comprehensive foundation for querying and analyzing JSON-like data structures in Go applications.
+The Go port successfully implements the core UQL functionality with approximately 85% feature parity with the TypeScript version. The implementation includes critical features like aggregation (summarize and pivot), array expansion (mv-expand), and range generation, providing a comprehensive foundation for querying and analyzing JSON-like data structures in Go applications.

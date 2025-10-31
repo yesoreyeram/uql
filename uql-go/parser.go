@@ -537,6 +537,24 @@ func (p *Parser) parseCommand() (Command, error) {
 			return Command{}, err
 		}
 		return Command{Type: CmdPivot, Value: pivotItem}, nil
+	case "range":
+		if err := p.skipWhitespace(); err != nil {
+			return Command{}, err
+		}
+		rangeItem, err := p.parseRange()
+		if err != nil {
+			return Command{}, err
+		}
+		return Command{Type: CmdRange, Value: rangeItem}, nil
+	case "mv-expand":
+		if err := p.skipWhitespace(); err != nil {
+			return Command{}, err
+		}
+		mvExpandItem, err := p.parseMvExpand()
+		if err != nil {
+			return Command{}, err
+		}
+		return Command{Type: CmdMvExpand, Value: mvExpandItem}, nil
 	default:
 		return Command{}, fmt.Errorf("unknown command: %s", cmdName)
 	}
@@ -1004,6 +1022,147 @@ func (p *Parser) parsePivot() (PivotItem, error) {
 	}
 
 	return result, nil
+}
+
+// parseRange parses a range command
+// Format: range from <start> to <end> [step <step>]
+// Example: range from 1 to 10 step 2
+func (p *Parser) parseRange() (RangeValue, error) {
+	// Expect "from" keyword
+	if p.pos >= len(p.tokens) || p.tokens[p.pos].Type != "identifier" || p.tokens[p.pos].Value != "from" {
+		return RangeValue{}, errors.New("expected 'from' keyword in range command")
+	}
+	p.pos++ // consume "from"
+
+	// Parse start value (number or string)
+	if p.pos >= len(p.tokens) {
+		return RangeValue{}, errors.New("expected start value in range command")
+	}
+
+	var start interface{}
+	if p.tokens[p.pos].Type == "number" {
+		num, err := p.parseNumber()
+		if err != nil {
+			return RangeValue{}, err
+		}
+		start = num
+	} else if p.tokens[p.pos].Type == "string" || p.tokens[p.pos].Type == "sq_string" {
+		str, err := p.parseString()
+		if err != nil {
+			return RangeValue{}, err
+		}
+		start = str
+	} else {
+		return RangeValue{}, fmt.Errorf("expected number or string for start value, got %s", p.tokens[p.pos].Type)
+	}
+
+	// Expect "to" keyword
+	if p.pos >= len(p.tokens) || p.tokens[p.pos].Type != "identifier" || p.tokens[p.pos].Value != "to" {
+		return RangeValue{}, errors.New("expected 'to' keyword in range command")
+	}
+	p.pos++ // consume "to"
+
+	// Parse end value (number or string)
+	if p.pos >= len(p.tokens) {
+		return RangeValue{}, errors.New("expected end value in range command")
+	}
+
+	var end interface{}
+	if p.tokens[p.pos].Type == "number" {
+		num, err := p.parseNumber()
+		if err != nil {
+			return RangeValue{}, err
+		}
+		end = num
+	} else if p.tokens[p.pos].Type == "string" || p.tokens[p.pos].Type == "sq_string" {
+		str, err := p.parseString()
+		if err != nil {
+			return RangeValue{}, err
+		}
+		end = str
+	} else {
+		return RangeValue{}, fmt.Errorf("expected number or string for end value, got %s", p.tokens[p.pos].Type)
+	}
+
+	// Default step values
+	var step interface{}
+	if _, ok := start.(float64); ok {
+		step = 1.0
+	} else {
+		step = ""
+	}
+
+	// Check for optional "step" keyword
+	if p.pos < len(p.tokens) && p.tokens[p.pos].Type == "identifier" && p.tokens[p.pos].Value == "step" {
+		p.pos++ // consume "step"
+
+		if p.pos >= len(p.tokens) {
+			return RangeValue{}, errors.New("expected step value in range command")
+		}
+
+		if p.tokens[p.pos].Type == "number" {
+			num, err := p.parseNumber()
+			if err != nil {
+				return RangeValue{}, err
+			}
+			step = num
+		} else if p.tokens[p.pos].Type == "string" || p.tokens[p.pos].Type == "sq_string" {
+			str, err := p.parseString()
+			if err != nil {
+				return RangeValue{}, err
+			}
+			step = str
+		} else {
+			return RangeValue{}, fmt.Errorf("expected number or string for step value, got %s", p.tokens[p.pos].Type)
+		}
+	}
+
+	return RangeValue{Start: start, End: end, Step: step}, nil
+}
+
+// parseMvExpand parses an mv-expand command
+// Format: mv-expand "<field>" or mv-expand "<alias>"="<field>"
+// Example: mv-expand "users" or mv-expand "user"="users"
+func (p *Parser) parseMvExpand() (MvExpandValue, error) {
+	var alias string
+	var field string
+
+	// Check for alias assignment
+	if p.pos < len(p.tokens) && (p.tokens[p.pos].Type == "string" || p.tokens[p.pos].Type == "sq_string") {
+		firstStr := p.tokens[p.pos].Value
+		p.pos++
+
+		// Check if there's an assignment
+		if p.pos < len(p.tokens) && p.tokens[p.pos].Type == "assignment" {
+			p.pos++ // consume =
+			alias = firstStr
+
+			// Parse the actual field name
+			if p.pos >= len(p.tokens) {
+				return MvExpandValue{}, errors.New("expected field name after '=' in mv-expand")
+			}
+
+			if p.tokens[p.pos].Type == "string" || p.tokens[p.pos].Type == "sq_string" {
+				field = p.tokens[p.pos].Value
+				p.pos++
+			} else if p.tokens[p.pos].Type == "identifier" {
+				field = p.tokens[p.pos].Value
+				p.pos++
+			} else {
+				return MvExpandValue{}, fmt.Errorf("expected field name in mv-expand, got %s", p.tokens[p.pos].Type)
+			}
+		} else {
+			// No assignment, just the field name
+			field = firstStr
+		}
+	} else if p.pos < len(p.tokens) && p.tokens[p.pos].Type == "identifier" {
+		field = p.tokens[p.pos].Value
+		p.pos++
+	} else {
+		return MvExpandValue{}, errors.New("expected field name in mv-expand command")
+	}
+
+	return MvExpandValue{Field: field, Alias: alias}, nil
 }
 
 // Helper function to match regex patterns
