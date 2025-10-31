@@ -464,6 +464,15 @@ func (p *Parser) parseCommand() (Command, error) {
 			return Command{}, err
 		}
 		return Command{Type: CmdScope, Value: RefType(field)}, nil
+	case "jsonata":
+		if err := p.skipWhitespace(); err != nil {
+			return Command{}, err
+		}
+		expression, err := p.parseString()
+		if err != nil {
+			return Command{}, err
+		}
+		return Command{Type: CmdJSONata, Value: expression}, nil
 	case "where":
 		if err := p.skipWhitespace(); err != nil {
 			return Command{}, err

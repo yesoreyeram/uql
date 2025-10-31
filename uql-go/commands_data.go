@@ -501,8 +501,18 @@ func evalCommandFunc(prev CommandResult, cmd Command) (CommandResult, error) {
 }
 
 func evalJSONata(prev CommandResult, cmd Command) (CommandResult, error) {
-	// TODO: Implement JSONata
-	return prev, nil
+	expression, ok := cmd.Value.(string)
+	if !ok {
+		return prev, errors.New("jsonata: expression must be a string")
+	}
+
+	// Evaluate JSONata expression using the jsonata-go library
+	result, err := evaluateJSONata(expression, prev.Output)
+	if err != nil {
+		return prev, fmt.Errorf("jsonata evaluation error: %w", err)
+	}
+
+	return CommandResult{Output: result}, nil
 }
 
 func evalRange(prev CommandResult, cmd Command) (CommandResult, error) {

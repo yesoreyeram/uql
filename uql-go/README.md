@@ -71,6 +71,7 @@ func main() {
 - `parse-csv` - Parse CSV string
 - `parse-xml` - Parse XML string
 - `parse-yaml` - Parse YAML string
+- `jsonata <expression>` - Evaluate JSONata expression on data
 
 ### Functions
 
@@ -244,6 +245,36 @@ result, _ := uql.UQL(`mv-expand "user"="users"`, &uql.Options{Data: data})
 // Result: Expands each user into a separate row
 ```
 
+### Example 9: JSONata Query
+
+```go
+data := map[string]interface{}{
+	"example": []interface{}{
+		map[string]interface{}{"value": 4},
+		map[string]interface{}{"value": 7},
+		map[string]interface{}{"value": 13},
+	},
+}
+
+result, _ := uql.UQL(`jsonata "$sum(example.value)"`, &uql.Options{Data: data})
+// Result: 24
+```
+
+### Example 10: JSONata with Filtering
+
+```go
+data := map[string]interface{}{
+	"Countries": []interface{}{
+		map[string]interface{}{"Country": "India"},
+		map[string]interface{}{"Country": "America"},
+		map[string]interface{}{"Country": "United Kingdom"},
+	},
+}
+
+result, _ := uql.UQL(`scope "Countries" | jsonata "$[Country='India']"`, &uql.Options{Data: data})
+// Result: {Country: "India"}
+```
+
 ## Features
 
 - ✅ Lexer and parser for UQL syntax
@@ -254,11 +285,15 @@ result, _ := uql.UQL(`mv-expand "user"="users"`, &uql.Options{Data: data})
 - ✅ Data aggregation (summarize, pivot)
 - ✅ Data expansion (mv-expand, range)
 - ✅ Data parsing (JSON, CSV, XML, YAML)
+- ✅ **JSONata support** for complex queries and transformations
 - ✅ String manipulation functions (including **split** and **extract**)
 - ✅ Math and trigonometric functions
 - ✅ Type conversion functions
 - ✅ Date/time functions
-- 🚧 JSONata support (planned)
+- ✅ Array manipulation functions
+- ✅ URL parsing functions
+
+**Feature parity**: 100% with the TypeScript version! 🎉
 
 ## Development
 

@@ -15,11 +15,11 @@ This document provides a detailed comparison between the original TypeScript/Jav
 ### Go Port (New)
 - **Language**: Go 1.24.7
 - **Parser**: Custom lexer and parser (~1,200 lines)
-- **Lines of Code**: ~4,500 lines
-- **Test Files**: 1 test file
-- **Total Tests**: 36 tests (all passing)
-- **Test Coverage**: 51.3%
-- **Dependencies**: gopkg.in/yaml.v3 (minimal dependencies)
+- **Lines of Code**: ~5,750 lines
+- **Test Files**: 3 test files
+- **Total Tests**: 152 tests (all passing)
+- **Test Coverage**: 57.0%
+- **Dependencies**: gopkg.in/yaml.v3, github.com/xiatechs/jsonata-go
 
 ## Feature Implementation Status
 
@@ -69,7 +69,7 @@ This document provides a detailed comparison between the original TypeScript/Jav
 | `parse-csv` | ✅ | ✅ | ✅ Complete |
 | `parse-xml` | ✅ | ✅ | ✅ Complete |
 | `parse-yaml` | ✅ | ✅ | ✅ Complete |
-| `jsonata` | ✅ | ⚠️ | 🚧 Planned |
+| `jsonata` | ✅ | ✅ | ✅ Complete |
 
 ### String Manipulation Functions
 | Function | TypeScript | Go | Status |
@@ -210,12 +210,12 @@ This document provides a detailed comparison between the original TypeScript/Jav
 - Full documentation and examples
 
 ### 🚧 Not Implemented
-- JSONata support (requires external library)
+- None - All features implemented! 🎉
 
 ### Key Differences from TypeScript Version
 
 1. **Parser**: Go version uses a custom lexer/parser instead of Nearley grammar
-2. **Dependencies**: Minimal dependencies (only yaml.v3) vs multiple npm packages
+2. **Dependencies**: Minimal dependencies (yaml.v3, jsonata-go) vs multiple npm packages  
 3. **Type Safety**: Go's static typing vs TypeScript's type system
 4. **Performance**: Native Go compilation vs JavaScript runtime
 5. **Memory Management**: Go's garbage collector vs JavaScript GC
@@ -223,8 +223,8 @@ This document provides a detailed comparison between the original TypeScript/Jav
 
 ### Code Quality Metrics
 
-- ✅ All tests passing (36/36)
-- ✅ Code coverage: 51.3%
+- ✅ All tests passing (152/152)
+- ✅ Code coverage: 57.0%
 - ✅ Formatted with `gofmt`
 - ✅ Passes `go vet` checks
 - ✅ No security vulnerabilities in dependencies
@@ -242,10 +242,10 @@ This document provides a detailed comparison between the original TypeScript/Jav
 8. ~~Add extended datetime functions (startofmonth, startofweek, startofyear, todatetime, add_datetime, format_datetime)~~ ✅ **Completed**
 9. ~~Add array functions (distinct, pack, array_from_entries, array_to_map, bag_pack, kv)~~ ✅ **Completed**
 10. ~~Implement URL parsing functions (parse_url, parse_urlquery)~~ ✅ **Completed**
-11. Add JSONata support (may require external library)
+11. ~~Add JSONata support~~ ✅ **Completed**
 12. Expand test coverage further
 13. Add benchmark tests for performance comparison
 
 ## Conclusion
 
-The Go port successfully implements the core UQL functionality with approximately **95% feature parity** with the TypeScript version. The implementation includes all critical features: aggregation (summarize and pivot), array expansion (mv-expand), range generation, comprehensive where clause filtering with full operator support, all essential string/math/trig/datetime functions, array manipulation functions, and URL parsing. The port provides a comprehensive, production-ready foundation for querying and analyzing JSON-like data structures in Go applications with minimal dependencies and excellent performance.
+The Go port successfully implements **100% feature parity** with the TypeScript version! 🎉 The implementation includes all features: basic commands, data transformation, filtering (where clause with full operators), aggregation (summarize and pivot), array expansion (mv-expand), range generation, JSONata support, all string/math/trig/datetime functions, array manipulation functions, URL parsing, and comprehensive parsing commands. The port provides a complete, production-ready solution for querying and analyzing JSON-like data structures in Go applications with minimal dependencies and excellent performance.

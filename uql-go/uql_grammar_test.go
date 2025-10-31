@@ -446,3 +446,30 @@ func TestGrammarString(t *testing.T) {
 		t.Errorf("Expected command type 'project', got %q", commands[0].Type)
 	}
 }
+
+// TestGrammarJSONata tests JSONata command parsing
+func TestGrammarJSONata(t *testing.T) {
+	tests := []struct {
+		name       string
+		query      string
+		expression string
+	}{
+		{"jsonata basic", `jsonata "something"`, "something"},
+		{"jsonata with different expression", `jsonata "some other thing"`, "some other thing"},
+		{"jsonata with complex expression", `jsonata "$sum(example.value)"`, "$sum(example.value)"},
+		{"jsonata with filter", `jsonata "*[Country='India'][]"`, "*[Country='India'][]"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			commands := testParseSuccess(t, tt.query)
+			testCommandCount(t, commands, 1)
+			if commands[0].Type != CmdJSONata {
+				t.Errorf("Expected command type 'jsonata', got %q", commands[0].Type)
+			}
+			if commands[0].Value.(string) != tt.expression {
+				t.Errorf("Expected expression %q, got %q", tt.expression, commands[0].Value)
+			}
+		})
+	}
+}
