@@ -786,6 +786,12 @@ func (p *Parser) parseWhereOperator() (TypedValue, error) {
 	case "ne": // !=
 		op = "!="
 		p.pos++
+	case "gte": // >=
+		op = ">="
+		p.pos++
+	case "lte": // <=
+		op = "<="
+		p.pos++
 	case "gt": // >
 		if p.pos+1 < len(p.tokens) && p.tokens[p.pos+1].Type == "assignment" {
 			op = ">="
@@ -802,6 +808,12 @@ func (p *Parser) parseWhereOperator() (TypedValue, error) {
 			op = "<"
 			p.pos++
 		}
+	case "regex_not_match": // !~
+		op = "!~"
+		p.pos++
+	case "regex_match": // =~
+		op = "=~"
+		p.pos++
 	case "assignment": // = (could be part of =~, ==, etc)
 		if p.pos+1 < len(p.tokens) {
 			next := p.tokens[p.pos+1]
@@ -993,6 +1005,7 @@ func (p *Parser) parseExtensions() ([]interface{}, error) {
 	for {
 		// Similar to projections
 		var alias string
+		startPos := p.pos
 
 		if p.pos < len(p.tokens) && (p.tokens[p.pos].Type == "string" || p.tokens[p.pos].Type == "sq_string") {
 			alias = p.tokens[p.pos].Value
@@ -1019,7 +1032,26 @@ func (p *Parser) parseExtensions() ([]interface{}, error) {
 				} else {
 					return nil, errors.New("expected function or field reference after assignment")
 				}
+			} else {
+				// No assignment, just a field reference
+				extensions = append(extensions, RefType(alias))
 			}
+		} else if p.pos < len(p.tokens) && p.tokens[p.pos].Type == "identifier" {
+			// Could be a function or identifier without alias
+			if p.pos+1 < len(p.tokens) && p.tokens[p.pos+1].Type == "lparen" {
+				fn, err := p.parseFunction()
+				if err != nil {
+					return nil, err
+				}
+				extensions = append(extensions, fn)
+			} else {
+				field := p.tokens[p.pos].Value
+				p.pos++
+				extensions = append(extensions, RefType(field))
+			}
+		} else {
+			p.pos = startPos
+			break
 		}
 
 		if p.pos >= len(p.tokens) || p.tokens[p.pos].Type != "comma" {
@@ -1204,8 +1236,19 @@ func (p *Parser) parseSummarizeAssignments() ([]SummarizeAssignment, error) {
 // parsePivot parses a pivot command
 // Format: pivot <function>, [<row_field>], [<col_field>]
 // Example: pivot sum("qty"), "fruit", "size"
+// Example with alias: pivot "total"=sum("qty"), "fruit", "size"
 func (p *Parser) parsePivot() (PivotItem, error) {
-	// Parse the metric assignment (required)
+	// Check for alias assignment
+	var alias string
+	if p.pos < len(p.tokens) && (p.tokens[p.pos].Type == "string" || p.tokens[p.pos].Type == "sq_string") {
+		// Might be an alias
+		if p.pos+1 < len(p.tokens) && p.tokens[p.pos+1].Type == "assignment" {
+			alias = p.tokens[p.pos].Value
+			p.pos += 2 // consume alias and =
+		}
+	}
+
+	// Parse the metric function (required)
 	if p.pos >= len(p.tokens) || p.tokens[p.pos].Type != "identifier" {
 		return PivotItem{}, errors.New("expected function name in pivot")
 	}
@@ -1244,6 +1287,7 @@ func (p *Parser) parsePivot() (PivotItem, error) {
 	metric := SummarizeAssignment{
 		Operator: FunctionName(fnName),
 		Args:     args,
+		Alias:    alias,
 	}
 
 	result := PivotItem{
