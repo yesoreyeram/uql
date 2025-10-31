@@ -55,6 +55,8 @@ func main() {
 - `order by <field> [asc|desc]` - Sort results
 - `distinct [field]` - Get distinct values
 - `scope <field>` - Navigate to a nested field
+- `summarize <metrics> [by <fields>]` - Aggregate data by groups
+- `pivot <metric>, [<row_field>], [<col_field>]` - Pivot data into cross-tabular format
 
 ### Data Parsing
 - `parse-json` - Parse JSON string
@@ -146,7 +148,33 @@ result, _ := uql.UQL(`parse-json | scope "users"`, &uql.Options{Data: jsonData})
 // Result: Array of users
 ```
 
-### Example 4: Pipeline Processing
+### Example 4: Summarize Data
+
+```go
+users := []interface{}{
+	map[string]interface{}{"patron": "a", "age": 48, "country": "foo"},
+	map[string]interface{}{"patron": "b", "age": 34, "country": "foo"},
+	map[string]interface{}{"patron": "c", "age": 12, "country": "bar"},
+}
+
+result, _ := uql.UQL(`summarize "total_age"=sum("age") by "country"`, &uql.Options{Data: users})
+// Result: Grouped aggregation by country
+```
+
+### Example 5: Pivot Data (Cross-tabulation)
+
+```go
+fruits := []interface{}{
+	map[string]interface{}{"fruit": "apple", "size": "sm", "qty": 1},
+	map[string]interface{}{"fruit": "apple", "size": "lg", "qty": 3},
+	map[string]interface{}{"fruit": "banana", "size": "sm", "qty": 1},
+}
+
+result, _ := uql.UQL(`pivot sum("qty"), "fruit", "size"`, &uql.Options{Data: fruits})
+// Result: Cross-tabulated data with fruits as rows and sizes as columns
+```
+
+### Example 6: Pipeline Processing
 
 ```go
 jsonData := `[{"name": "foo", "age": 25}, {"name": "bar", "age": 30}]`
@@ -163,13 +191,13 @@ result, _ := uql.UQL(query, &uql.Options{Data: jsonData})
 - ✅ Basic commands (hello, ping, echo, count, limit)
 - ✅ Data transformation (project, project-away, project-reorder, extend, order by)
 - ✅ Data filtering (distinct, scope)
+- ✅ Data aggregation (summarize, pivot)
 - ✅ Data parsing (JSON, CSV, XML, YAML)
 - ✅ String manipulation functions
 - ✅ Math and trigonometric functions
 - ✅ Type conversion functions
 - ✅ Date/time functions
 - 🚧 Where clause (partial support)
-- 🚧 Summarize and pivot (planned)
 - 🚧 mv-expand (planned)
 - 🚧 JSONata support (planned)
 

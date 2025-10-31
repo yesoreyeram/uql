@@ -223,6 +223,160 @@ func TestUQLDistinct(t *testing.T) {
 	}
 }
 
+func TestUQLSummarize(t *testing.T) {
+	data := []interface{}{
+		map[string]interface{}{"patron": "a", "age": 48, "country": "foo"},
+		map[string]interface{}{"patron": "b", "age": 34, "country": "foo"},
+		map[string]interface{}{"patron": "c", "age": 12, "country": "bar"},
+		map[string]interface{}{"patron": "d", "age": 40, "country": "bar"},
+		map[string]interface{}{"patron": "e", "age": 36, "country": "baz"},
+	}
+
+	// Test summarize with single group by
+	result, err := UQL(`summarize "user"=first("patron") by "country"`, &Options{Data: data})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	slice, ok := result.([]interface{})
+	if !ok {
+		t.Fatalf("expected slice, got %T", result)
+	}
+
+	if len(slice) != 3 {
+		t.Errorf("expected 3 groups, got %d", len(slice))
+	}
+
+	// Test summarize with sum
+	result2, err := UQL(`summarize "age"=sum("age") by "country"`, &Options{Data: data})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	slice2, ok := result2.([]interface{})
+	if !ok {
+		t.Fatalf("expected slice, got %T", result2)
+	}
+
+	if len(slice2) != 3 {
+		t.Errorf("expected 3 groups, got %d", len(slice2))
+	}
+}
+
+func TestUQLSummarizeMultiple(t *testing.T) {
+	data := []interface{}{
+		map[string]interface{}{"age": 1, "name": "foo1", "city": "chennai", "country": "india"},
+		map[string]interface{}{"age": 2, "name": "foo1", "city": "chennai", "country": "india"},
+		map[string]interface{}{"age": 3, "name": "foo1", "city": "mumbai", "country": "india"},
+		map[string]interface{}{"age": 4, "name": "foo1", "city": "london", "country": "england"},
+	}
+
+	result, err := UQL(`summarize "age"=sum("age") by "country", "city"`, &Options{Data: data})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	slice, ok := result.([]interface{})
+	if !ok {
+		t.Fatalf("expected slice, got %T", result)
+	}
+
+	if len(slice) != 3 {
+		t.Errorf("expected 3 groups, got %d", len(slice))
+	}
+}
+
+func TestUQLPivot(t *testing.T) {
+	data := []interface{}{
+		map[string]interface{}{"fruit": "apple", "size": "sm", "qty": 1},
+		map[string]interface{}{"fruit": "apple", "size": "md", "qty": 2},
+		map[string]interface{}{"fruit": "apple", "size": "lg", "qty": 3},
+		map[string]interface{}{"fruit": "banana", "size": "sm", "qty": 1},
+		map[string]interface{}{"fruit": "banana", "size": "lg", "qty": 6},
+		map[string]interface{}{"fruit": "banana", "size": "xl", "qty": 5},
+	}
+
+	// Test pivot with no fields
+	result, err := UQL(`pivot count()`, &Options{Data: data})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if result != 6 {
+		t.Errorf("expected 6, got %v", result)
+	}
+
+	// Test pivot with sum
+	result2, err := UQL(`pivot sum("qty")`, &Options{Data: data})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if result2 != 18.0 {
+		t.Errorf("expected 18, got %v", result2)
+	}
+}
+
+func TestUQLPivotWithRow(t *testing.T) {
+	data := []interface{}{
+		map[string]interface{}{"fruit": "apple", "size": "sm", "qty": 1},
+		map[string]interface{}{"fruit": "apple", "size": "md", "qty": 2},
+		map[string]interface{}{"fruit": "apple", "size": "lg", "qty": 3},
+		map[string]interface{}{"fruit": "banana", "size": "sm", "qty": 1},
+		map[string]interface{}{"fruit": "banana", "size": "lg", "qty": 6},
+		map[string]interface{}{"fruit": "banana", "size": "xl", "qty": 5},
+	}
+
+	result, err := UQL(`pivot sum("qty"), "fruit"`, &Options{Data: data})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	slice, ok := result.([]interface{})
+	if !ok {
+		t.Fatalf("expected slice, got %T", result)
+	}
+
+	if len(slice) != 2 {
+		t.Errorf("expected 2 rows, got %d", len(slice))
+	}
+}
+
+func TestUQLPivotWithRowAndCol(t *testing.T) {
+	data := []interface{}{
+		map[string]interface{}{"fruit": "apple", "size": "sm", "qty": 1},
+		map[string]interface{}{"fruit": "apple", "size": "md", "qty": 2},
+		map[string]interface{}{"fruit": "apple", "size": "lg", "qty": 3},
+		map[string]interface{}{"fruit": "banana", "size": "sm", "qty": 1},
+		map[string]interface{}{"fruit": "banana", "size": "lg", "qty": 6},
+		map[string]interface{}{"fruit": "banana", "size": "xl", "qty": 5},
+	}
+
+	result, err := UQL(`pivot sum("qty"), "fruit", "size"`, &Options{Data: data})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	slice, ok := result.([]interface{})
+	if !ok {
+		t.Fatalf("expected slice, got %T", result)
+	}
+
+	if len(slice) != 2 {
+		t.Errorf("expected 2 rows, got %d", len(slice))
+	}
+
+	// Check first row has correct structure
+	row1, ok := slice[0].(map[string]interface{})
+	if !ok {
+		t.Fatalf("expected map, got %T", slice[0])
+	}
+
+	if _, hasFruit := row1["fruit"]; !hasFruit {
+		t.Error("expected 'fruit' field in result")
+	}
+}
+
 func TestUQLPipeline(t *testing.T) {
 	data := []interface{}{
 		map[string]interface{}{"name": "foo", "age": 2, "location": "uk"},

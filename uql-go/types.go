@@ -227,7 +227,7 @@ type OrderByArg struct {
 // SummarizeAssignment represents a summarize assignment
 type SummarizeAssignment struct {
 	Alias    string
-	Operator interface{} // FunctionName or Operator
+	Operator FunctionName
 	Args     []TypedValue
 }
 
@@ -235,6 +235,12 @@ type SummarizeAssignment struct {
 type SummarizeItem struct {
 	Metrics []SummarizeAssignment
 	By      []TypedValue
+}
+
+// PivotItem represents a pivot item
+type PivotItem struct {
+	Metric SummarizeAssignment
+	Fields []TypedValue
 }
 
 // ParseArg represents a parse argument

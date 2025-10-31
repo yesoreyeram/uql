@@ -2,7 +2,9 @@ package uql
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
+	"strings"
 )
 
 // evalProject evaluates a project command
@@ -252,14 +254,156 @@ func extendItem(item interface{}, extensions []interface{}) interface{} {
 
 // evalSummarize evaluates a summarize command
 func evalSummarize(prev CommandResult, cmd Command) (CommandResult, error) {
-	// TODO: Implement summarize
-	return prev, nil
+	item, ok := cmd.Value.(SummarizeItem)
+	if !ok {
+		return prev, errors.New("invalid summarize arguments")
+	}
+
+	output := prev.Output
+	if output == nil {
+		return prev, nil
+	}
+
+	slice, err := toSlice(output)
+	if err != nil {
+		return prev, nil
+	}
+
+	var result interface{}
+
+	// Group by fields
+	if len(item.By) == 0 {
+		// No grouping, summarize all data
+		result = summarizeGroup(nil, item.Metrics, slice)
+	} else if len(item.By) == 1 {
+		// Single field grouping
+		groupByKey := item.By[0].Value.(string)
+		groups := groupByField(slice, groupByKey)
+
+		resultArray := make([]interface{}, 0, len(groups))
+		for key, group := range groups {
+			summarized := summarizeGroup(map[string]interface{}{groupByKey: key}, item.Metrics, group)
+			resultArray = append(resultArray, summarized)
+		}
+		result = resultArray
+	} else {
+		// Multiple field grouping
+		groups := groupByFields(slice, item.By)
+
+		resultArray := make([]interface{}, 0, len(groups))
+		for _, group := range groups {
+			if len(group) == 0 {
+				continue
+			}
+			// Extract group keys from first item
+			baseObj := make(map[string]interface{})
+			for _, byField := range item.By {
+				fieldName := byField.Value.(string)
+				baseObj[fieldName] = getValue(group[0], fieldName)
+			}
+			summarized := summarizeGroup(baseObj, item.Metrics, group)
+			resultArray = append(resultArray, summarized)
+		}
+		result = resultArray
+	}
+
+	return CommandResult{Output: result, Context: prev.Context}, nil
 }
 
 // evalPivot evaluates a pivot command
 func evalPivot(prev CommandResult, cmd Command) (CommandResult, error) {
-	// TODO: Implement pivot
-	return prev, nil
+	item, ok := cmd.Value.(PivotItem)
+	if !ok {
+		return prev, errors.New("invalid pivot arguments")
+	}
+
+	input := prev.Output
+	if input == nil {
+		return CommandResult{Output: nil, Context: prev.Context}, nil
+	}
+
+	slice, err := toSlice(input)
+	if err != nil {
+		return CommandResult{Output: nil, Context: prev.Context}, nil
+	}
+
+	// No fields - just aggregate all data
+	if len(item.Fields) == 0 {
+		result := summarizeGroup(nil, []SummarizeAssignment{item.Metric}, slice)
+		// Try to extract the value from the result
+		if m, ok := result.(map[string]interface{}); ok {
+			// Try different possible key names
+			metricName := string(item.Metric.Operator)
+			if val, exists := m[metricName]; exists {
+				return CommandResult{Output: val, Context: prev.Context}, nil
+			}
+			// If there's only one key, return its value
+			if len(m) == 1 {
+				for _, v := range m {
+					return CommandResult{Output: v, Context: prev.Context}, nil
+				}
+			}
+		}
+		return CommandResult{Output: result, Context: prev.Context}, nil
+	}
+
+	// One field - pivot by rows
+	if len(item.Fields) == 1 {
+		rowField := item.Fields[0].Value.(string)
+		rows := getUniqueValues(slice, rowField)
+
+		resultArray := make([]interface{}, 0, len(rows))
+		for _, row := range rows {
+			filteredData := filterByField(slice, rowField, row)
+			summarized := summarizeGroup(nil, []SummarizeAssignment{item.Metric}, filteredData)
+
+			rowObj := map[string]interface{}{
+				rowField: row,
+				"value":  extractMetricValue(summarized, string(item.Metric.Operator)),
+			}
+			resultArray = append(resultArray, rowObj)
+		}
+		return CommandResult{Output: resultArray, Context: prev.Context}, nil
+	}
+
+	// Two fields - pivot by rows and columns
+	if len(item.Fields) >= 2 {
+		rowField := item.Fields[0].Value.(string)
+		colField := item.Fields[1].Value.(string)
+
+		rows := getUniqueValues(slice, rowField)
+		cols := getUniqueValues(slice, colField)
+
+		resultArray := make([]interface{}, 0, len(rows))
+		for _, row := range rows {
+			rowObj := map[string]interface{}{rowField: row}
+
+			for _, col := range cols {
+				filteredData := filterByTwoFields(slice, rowField, row, colField, col)
+
+				var value interface{}
+				if len(filteredData) == 0 {
+					// Default values for empty groups
+					op := string(item.Metric.Operator)
+					if op == "count" || op == "dcount" || op == "sum" {
+						value = 0
+					} else {
+						value = nil
+					}
+				} else {
+					summarized := summarizeGroup(nil, []SummarizeAssignment{item.Metric}, filteredData)
+					value = extractMetricValue(summarized, string(item.Metric.Operator))
+				}
+
+				colStr := fmt.Sprintf("%v", col)
+				rowObj[colStr] = value
+			}
+			resultArray = append(resultArray, rowObj)
+		}
+		return CommandResult{Output: resultArray, Context: prev.Context}, nil
+	}
+
+	return CommandResult{Output: slice, Context: prev.Context}, nil
 }
 
 // resolveArg resolves an argument value
@@ -293,4 +437,221 @@ func toMap(v interface{}) (map[string]interface{}, bool) {
 	}
 
 	return nil, false
+}
+
+// summarizeGroup applies summarize metrics to a group of data
+func summarizeGroup(baseObj map[string]interface{}, metrics []SummarizeAssignment, data []interface{}) interface{} {
+	result := make(map[string]interface{})
+
+	// Copy base object fields
+	if baseObj != nil {
+		for k, v := range baseObj {
+			result[k] = v
+		}
+	}
+
+	for _, metric := range metrics {
+		statName := metric.Alias
+		if statName == "" {
+			if len(metric.Args) > 0 {
+				argValue := ""
+				if metric.Args[0].Type == "ref" {
+					argValue = metric.Args[0].Value.(string)
+				} else if metric.Args[0].Type == "string" {
+					argValue = metric.Args[0].Value.(string)
+				}
+				statName = fmt.Sprintf("%s (%s)", argValue, metric.Operator)
+			} else {
+				statName = string(metric.Operator)
+			}
+		}
+
+		var value interface{}
+
+		switch metric.Operator {
+		case FnCount:
+			value = len(data)
+		case FnDCount:
+			if len(metric.Args) > 0 {
+				fieldName := metric.Args[0].Value.(string)
+				uniqueVals := make(map[interface{}]bool)
+				for _, item := range data {
+					val := getValue(item, fieldName)
+					uniqueVals[val] = true
+				}
+				value = len(uniqueVals)
+			} else {
+				value = len(data)
+			}
+		case FnSum:
+			sum := 0.0
+			if len(metric.Args) > 0 {
+				fieldName := metric.Args[0].Value.(string)
+				for _, item := range data {
+					if num, ok := toNumber(getValue(item, fieldName)); ok {
+						sum += num
+					}
+				}
+			}
+			value = sum
+		case FnMean:
+			if len(metric.Args) > 0 {
+				fieldName := metric.Args[0].Value.(string)
+				values := make([]float64, 0)
+				for _, item := range data {
+					if num, ok := toNumber(getValue(item, fieldName)); ok {
+						values = append(values, num)
+					}
+				}
+				if len(values) > 0 {
+					sum := 0.0
+					for _, v := range values {
+						sum += v
+					}
+					value = sum / float64(len(values))
+				}
+			}
+		case FnMin:
+			if len(metric.Args) > 0 {
+				fieldName := metric.Args[0].Value.(string)
+				var minVal *float64
+				for _, item := range data {
+					if num, ok := toNumber(getValue(item, fieldName)); ok {
+						if minVal == nil || num < *minVal {
+							minVal = &num
+						}
+					}
+				}
+				if minVal != nil {
+					value = *minVal
+				}
+			}
+		case FnMax:
+			if len(metric.Args) > 0 {
+				fieldName := metric.Args[0].Value.(string)
+				var maxVal *float64
+				for _, item := range data {
+					if num, ok := toNumber(getValue(item, fieldName)); ok {
+						if maxVal == nil || num > *maxVal {
+							maxVal = &num
+						}
+					}
+				}
+				if maxVal != nil {
+					value = *maxVal
+				}
+			}
+		case FnFirst:
+			if len(data) > 0 {
+				if len(metric.Args) > 0 {
+					fieldName := metric.Args[0].Value.(string)
+					value = getValue(data[0], fieldName)
+				} else {
+					value = data[0]
+				}
+			}
+		case FnLast, FnLatest:
+			if len(data) > 0 {
+				if len(metric.Args) > 0 {
+					fieldName := metric.Args[0].Value.(string)
+					value = getValue(data[len(data)-1], fieldName)
+				} else {
+					value = data[len(data)-1]
+				}
+			}
+		}
+
+		result[statName] = value
+	}
+
+	return result
+}
+
+// groupByField groups data by a single field
+func groupByField(data []interface{}, field string) map[interface{}][]interface{} {
+	groups := make(map[interface{}][]interface{})
+	for _, item := range data {
+		key := getValue(item, field)
+		groups[key] = append(groups[key], item)
+	}
+	return groups
+}
+
+// groupByFields groups data by multiple fields
+func groupByFields(data []interface{}, fields []TypedValue) [][]interface{} {
+	groupMap := make(map[string][]interface{})
+
+	for _, item := range data {
+		keyParts := make([]string, len(fields))
+		for i, field := range fields {
+			fieldName := field.Value.(string)
+			val := getValue(item, fieldName)
+			keyParts[i] = fmt.Sprintf("%v", val)
+		}
+		key := strings.Join(keyParts, "#___#")
+		groupMap[key] = append(groupMap[key], item)
+	}
+
+	result := make([][]interface{}, 0, len(groupMap))
+	for _, group := range groupMap {
+		result = append(result, group)
+	}
+	return result
+}
+
+// getUniqueValues gets unique values for a field
+func getUniqueValues(data []interface{}, field string) []interface{} {
+	seen := make(map[interface{}]bool)
+	result := make([]interface{}, 0)
+
+	for _, item := range data {
+		val := getValue(item, field)
+		if val != nil && val != "" {
+			if !seen[val] {
+				seen[val] = true
+				result = append(result, val)
+			}
+		}
+	}
+
+	return result
+}
+
+// filterByField filters data by a field value
+func filterByField(data []interface{}, field string, value interface{}) []interface{} {
+	result := make([]interface{}, 0)
+	for _, item := range data {
+		if getValue(item, field) == value {
+			result = append(result, item)
+		}
+	}
+	return result
+}
+
+// filterByTwoFields filters data by two field values
+func filterByTwoFields(data []interface{}, field1 string, value1 interface{}, field2 string, value2 interface{}) []interface{} {
+	result := make([]interface{}, 0)
+	for _, item := range data {
+		if getValue(item, field1) == value1 && getValue(item, field2) == value2 {
+			result = append(result, item)
+		}
+	}
+	return result
+}
+
+// extractMetricValue extracts a metric value from summarized result
+func extractMetricValue(summarized interface{}, metricName string) interface{} {
+	if m, ok := summarized.(map[string]interface{}); ok {
+		// Try exact match first
+		if val, exists := m[metricName]; exists {
+			return val
+		}
+		// If only one key, return its value
+		if len(m) == 1 {
+			for _, v := range m {
+				return v
+			}
+		}
+	}
+	return nil
 }

@@ -58,8 +58,8 @@ This document provides a detailed comparison between the original TypeScript/Jav
 ### Aggregation Commands
 | Command | TypeScript | Go | Status |
 |---------|-----------|-----|--------|
-| `summarize` | ✅ | ⚠️ | 🚧 Planned |
-| `pivot` | ✅ | ⚠️ | 🚧 Planned |
+| `summarize` | ✅ | ✅ | ✅ Complete |
+| `pivot` | ✅ | ✅ | ✅ Complete |
 | `range` | ✅ | ⚠️ | 🚧 Planned |
 
 ### Parsing Commands
@@ -218,8 +218,8 @@ This document provides a detailed comparison between the original TypeScript/Jav
 
 ### Code Quality Metrics
 
-- ✅ All tests passing (13/13)
-- ✅ Code coverage: 33.4%
+- ✅ All tests passing (18/18)
+- ✅ Code coverage: 43.4%
 - ✅ Formatted with `gofmt`
 - ✅ Passes `go vet` checks
 - ✅ No security vulnerabilities in dependencies
@@ -228,7 +228,7 @@ This document provides a detailed comparison between the original TypeScript/Jav
 ## Next Steps for Full Feature Parity
 
 1. Implement where clause with full operator support
-2. Add summarize and pivot commands
+2. ~~Add summarize and pivot commands~~ ✅ **Completed**
 3. Implement mv-expand for array expansion
 4. Add remaining math and array functions
 5. Implement URL parsing functions
@@ -238,4 +238,4 @@ This document provides a detailed comparison between the original TypeScript/Jav
 
 ## Conclusion
 
-The Go port successfully implements the core UQL functionality with approximately 75% feature parity with the TypeScript version. The implementation focuses on the most commonly used commands and functions, providing a solid foundation for querying JSON-like data structures in Go applications.
+The Go port successfully implements the core UQL functionality with approximately 80% feature parity with the TypeScript version. The implementation includes the critical aggregation features (summarize and pivot), providing a comprehensive foundation for querying and analyzing JSON-like data structures in Go applications.

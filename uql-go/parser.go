@@ -519,6 +519,24 @@ func (p *Parser) parseCommand() (Command, error) {
 			return Command{}, err
 		}
 		return Command{Type: CmdExtend, Value: extensions}, nil
+	case "summarize":
+		if err := p.skipWhitespace(); err != nil {
+			return Command{}, err
+		}
+		summarizeItem, err := p.parseSummarize()
+		if err != nil {
+			return Command{}, err
+		}
+		return Command{Type: CmdSummarize, Value: summarizeItem}, nil
+	case "pivot":
+		if err := p.skipWhitespace(); err != nil {
+			return Command{}, err
+		}
+		pivotItem, err := p.parsePivot()
+		if err != nil {
+			return Command{}, err
+		}
+		return Command{Type: CmdPivot, Value: pivotItem}, nil
 	default:
 		return Command{}, fmt.Errorf("unknown command: %s", cmdName)
 	}
@@ -814,6 +832,178 @@ func (p *Parser) parseFunction() (FunctionCall, error) {
 		Operator: FunctionName(fnName),
 		Args:     args,
 	}, nil
+}
+
+// parseSummarize parses a summarize command
+// Format: summarize <assignments> [by <fields>]
+// Example: summarize "total"=sum("qty") by "category"
+func (p *Parser) parseSummarize() (SummarizeItem, error) {
+	// Parse summarize assignments
+	assignments, err := p.parseSummarizeAssignments()
+	if err != nil {
+		return SummarizeItem{}, err
+	}
+
+	result := SummarizeItem{
+		Metrics: assignments,
+		By:      make([]TypedValue, 0),
+	}
+
+	// Check for "by" keyword
+	if p.pos < len(p.tokens) && p.tokens[p.pos].Type == "identifier" && p.tokens[p.pos].Value == "by" {
+		p.pos++ // consume "by"
+
+		// Parse the "by" fields
+		byFields, err := p.parseFieldList()
+		if err != nil {
+			return SummarizeItem{}, err
+		}
+		result.By = byFields
+	}
+
+	return result, nil
+}
+
+// parseSummarizeAssignments parses comma-separated summarize assignments
+func (p *Parser) parseSummarizeAssignments() ([]SummarizeAssignment, error) {
+	assignments := make([]SummarizeAssignment, 0)
+
+	for {
+		var alias string
+
+		// Check for alias (optional)
+		if p.pos < len(p.tokens) && (p.tokens[p.pos].Type == "string" || p.tokens[p.pos].Type == "sq_string") {
+			alias = p.tokens[p.pos].Value
+			p.pos++
+
+			// Check for assignment operator
+			if p.pos < len(p.tokens) && p.tokens[p.pos].Type == "assignment" {
+				p.pos++ // consume =
+			} else {
+				// No assignment, this might be a field reference, backtrack
+				p.pos--
+				alias = ""
+			}
+		}
+
+		// Parse the function (e.g., sum("qty"), count(), etc.)
+		if p.pos >= len(p.tokens) || p.tokens[p.pos].Type != "identifier" {
+			return nil, errors.New("expected function name in summarize")
+		}
+
+		fnName := p.tokens[p.pos].Value
+		p.pos++
+
+		if p.pos >= len(p.tokens) || p.tokens[p.pos].Type != "lparen" {
+			return nil, errors.New("expected '(' after function name in summarize")
+		}
+		p.pos++ // consume (
+
+		// Parse arguments
+		args := make([]TypedValue, 0)
+		for p.pos < len(p.tokens) && p.tokens[p.pos].Type != "rparen" {
+			if p.tokens[p.pos].Type == "string" || p.tokens[p.pos].Type == "sq_string" {
+				args = append(args, StringType(p.tokens[p.pos].Value))
+				p.pos++
+			} else if p.tokens[p.pos].Type == "identifier" {
+				args = append(args, RefType(p.tokens[p.pos].Value))
+				p.pos++
+			} else {
+				return nil, fmt.Errorf("unexpected token in summarize function args: %s", p.tokens[p.pos].Type)
+			}
+
+			if p.pos < len(p.tokens) && p.tokens[p.pos].Type == "comma" {
+				p.pos++ // consume comma
+			}
+		}
+
+		if p.pos >= len(p.tokens) || p.tokens[p.pos].Type != "rparen" {
+			return nil, errors.New("expected ')' after function arguments in summarize")
+		}
+		p.pos++ // consume )
+
+		assignment := SummarizeAssignment{
+			Alias:    alias,
+			Operator: FunctionName(fnName),
+			Args:     args,
+		}
+		assignments = append(assignments, assignment)
+
+		// Check for comma (more assignments)
+		if p.pos < len(p.tokens) && p.tokens[p.pos].Type == "comma" {
+			p.pos++ // consume comma
+			continue
+		}
+
+		break
+	}
+
+	return assignments, nil
+}
+
+// parsePivot parses a pivot command
+// Format: pivot <function>, [<row_field>], [<col_field>]
+// Example: pivot sum("qty"), "fruit", "size"
+func (p *Parser) parsePivot() (PivotItem, error) {
+	// Parse the metric assignment (required)
+	if p.pos >= len(p.tokens) || p.tokens[p.pos].Type != "identifier" {
+		return PivotItem{}, errors.New("expected function name in pivot")
+	}
+
+	fnName := p.tokens[p.pos].Value
+	p.pos++
+
+	if p.pos >= len(p.tokens) || p.tokens[p.pos].Type != "lparen" {
+		return PivotItem{}, errors.New("expected '(' after function name in pivot")
+	}
+	p.pos++ // consume (
+
+	// Parse function arguments
+	args := make([]TypedValue, 0)
+	for p.pos < len(p.tokens) && p.tokens[p.pos].Type != "rparen" {
+		if p.tokens[p.pos].Type == "string" || p.tokens[p.pos].Type == "sq_string" {
+			args = append(args, StringType(p.tokens[p.pos].Value))
+			p.pos++
+		} else if p.tokens[p.pos].Type == "identifier" {
+			args = append(args, RefType(p.tokens[p.pos].Value))
+			p.pos++
+		} else {
+			return PivotItem{}, fmt.Errorf("unexpected token in pivot function args: %s", p.tokens[p.pos].Type)
+		}
+
+		if p.pos < len(p.tokens) && p.tokens[p.pos].Type == "comma" {
+			p.pos++ // consume comma
+		}
+	}
+
+	if p.pos >= len(p.tokens) || p.tokens[p.pos].Type != "rparen" {
+		return PivotItem{}, errors.New("expected ')' after function arguments in pivot")
+	}
+	p.pos++ // consume )
+
+	metric := SummarizeAssignment{
+		Operator: FunctionName(fnName),
+		Args:     args,
+	}
+
+	result := PivotItem{
+		Metric: metric,
+		Fields: make([]TypedValue, 0),
+	}
+
+	// Check for comma and optional fields
+	if p.pos < len(p.tokens) && p.tokens[p.pos].Type == "comma" {
+		p.pos++ // consume comma
+
+		// Parse row and column fields
+		fields, err := p.parseFieldList()
+		if err != nil {
+			return PivotItem{}, err
+		}
+		result.Fields = fields
+	}
+
+	return result, nil
 }
 
 // Helper function to match regex patterns
