@@ -174,13 +174,14 @@ func (l *Lexer) Tokenize() ([]Token, error) {
 			continue
 		}
 
-		// Numbers
-		if (l.input[l.pos] >= '0' && l.input[l.pos] <= '9') || (l.input[l.pos] == '-' && l.pos+1 < len(l.input) && l.input[l.pos+1] >= '0' && l.input[l.pos+1] <= '9') {
+		// Numbers - check if it's a digit or negative number
+		if l.isDigit(l.input[l.pos]) || l.isNegativeNumber() {
 			start := l.pos
 			if l.input[l.pos] == '-' {
 				l.pos++
 			}
-			for l.pos < len(l.input) && ((l.input[l.pos] >= '0' && l.input[l.pos] <= '9') || l.input[l.pos] == '.' || l.input[l.pos] == 'e' || l.input[l.pos] == 'E' || l.input[l.pos] == '+' || l.input[l.pos] == '-') {
+			// Parse integer and decimal parts
+			for l.pos < len(l.input) && l.isNumberChar(l.input[l.pos]) {
 				l.pos++
 			}
 			l.tokens = append(l.tokens, Token{Type: "number", Value: l.input[start:l.pos], Pos: start})
@@ -290,6 +291,23 @@ func NewParser(tokens []Token) *Parser {
 		tokens: tokens,
 		pos:    0,
 	}
+}
+
+// Helper methods for lexer
+
+// isDigit checks if a character is a digit
+func (l *Lexer) isDigit(c byte) bool {
+	return c >= '0' && c <= '9'
+}
+
+// isNegativeNumber checks if current position is start of a negative number
+func (l *Lexer) isNegativeNumber() bool {
+	return l.input[l.pos] == '-' && l.pos+1 < len(l.input) && l.isDigit(l.input[l.pos+1])
+}
+
+// isNumberChar checks if a character is valid in a number (digit, dot, or exponent notation)
+func (l *Lexer) isNumberChar(c byte) bool {
+	return l.isDigit(c) || c == '.' || c == 'e' || c == 'E' || c == '+' || c == '-'
 }
 
 // Parse parses a UQL query string into commands

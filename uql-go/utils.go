@@ -11,6 +11,11 @@ import (
 	"time"
 )
 
+func init() {
+	// Seed the random number generator at package initialization
+	rand.Seed(time.Now().UnixNano())
+}
+
 // getValue retrieves a value from an object using dot notation
 func getValue(obj interface{}, path string) interface{} {
 	if obj == nil {
@@ -347,7 +352,9 @@ func evaluateFunction(fn FunctionName, args []interface{}) interface{} {
 			case bool:
 				return v
 			case string:
-				return v == "true" || v == "1" || v == "yes"
+				// Case-insensitive boolean parsing
+				lower := strings.ToLower(strings.TrimSpace(v))
+				return lower == "true" || lower == "1" || lower == "yes"
 			case int, int64, float64:
 				num, _ := toNumber(v)
 				return num != 0
