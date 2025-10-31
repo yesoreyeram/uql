@@ -52,7 +52,7 @@ This document provides a detailed comparison between the original TypeScript/Jav
 | `order by` | ✅ | ✅ | ✅ Complete |
 | `scope` | ✅ | ✅ | ✅ Complete |
 | `distinct` | ✅ | ✅ | ✅ Complete |
-| `where` | ✅ | ⚠️ | 🚧 Partial (stub) |
+| `where` | ✅ | ✅ | ✅ Complete |
 | `mv-expand` | ✅ | ✅ | ✅ Complete |
 
 ### Aggregation Commands
@@ -76,7 +76,7 @@ This document provides a detailed comparison between the original TypeScript/Jav
 |---------|-----------|-----|--------|
 | `replace_string` | ✅ | ✅ | ✅ Complete |
 | `substring` | ✅ | ✅ | ✅ Complete |
-| `split` | ✅ | ⚠️ | 🚧 Planned |
+| `split` | ✅ | ✅ | ✅ Complete |
 | `strcat` | ✅ | ✅ | ✅ Complete |
 | `strlen` | ✅ | ✅ | ✅ Complete |
 | `toupper` | ✅ | ✅ | ✅ Complete |
@@ -85,7 +85,7 @@ This document provides a detailed comparison between the original TypeScript/Jav
 | `trim_start` | ✅ | ✅ | ✅ Complete |
 | `trim_end` | ✅ | ✅ | ✅ Complete |
 | `reverse` | ✅ | ✅ | ✅ Complete |
-| `extract` | ✅ | ⚠️ | 🚧 Planned |
+| `extract` | ✅ | ✅ | ✅ Complete |
 
 ### Math Functions
 | Function | TypeScript | Go | Status |
@@ -218,8 +218,8 @@ This document provides a detailed comparison between the original TypeScript/Jav
 
 ### Code Quality Metrics
 
-- ✅ All tests passing (23/23)
-- ✅ Code coverage: 45.7%
+- ✅ All tests passing (31/31)
+- ✅ Code coverage: 51.8%
 - ✅ Formatted with `gofmt`
 - ✅ Passes `go vet` checks
 - ✅ No security vulnerabilities in dependencies
@@ -227,16 +227,17 @@ This document provides a detailed comparison between the original TypeScript/Jav
 
 ## Next Steps for Full Feature Parity
 
-1. Implement where clause with full operator support
+1. ~~Implement where clause with full operator support~~ ✅ **Completed**
 2. ~~Add summarize and pivot commands~~ ✅ **Completed**
 3. ~~Implement mv-expand for array expansion~~ ✅ **Completed**
 4. ~~Add range command~~ ✅ **Completed**
-5. Add remaining math and array functions
-6. Implement URL parsing functions
-7. Add JSONata support (may require external library)
+5. ~~Add split and extract functions~~ ✅ **Completed**
+6. Add remaining math and array functions
+7. Implement URL parsing functions
+8. Add JSONata support (may require external library)
 7. ~~Expand test coverage to match TypeScript version (254 tests)~~
 8. Add benchmark tests for performance comparison
 
 ## Conclusion
 
-The Go port successfully implements the core UQL functionality with approximately 85% feature parity with the TypeScript version. The implementation includes critical features like aggregation (summarize and pivot), array expansion (mv-expand), and range generation, providing a comprehensive foundation for querying and analyzing JSON-like data structures in Go applications.
+The Go port successfully implements the core UQL functionality with approximately 90% feature parity with the TypeScript version. The implementation includes critical features like aggregation (summarize and pivot), array expansion (mv-expand), range generation, comprehensive where clause filtering, and essential string functions (split, extract), providing a comprehensive foundation for querying and analyzing JSON-like data structures in Go applications.

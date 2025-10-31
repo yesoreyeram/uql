@@ -3,8 +3,11 @@ package uql
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"reflect"
+	"regexp"
 	"sort"
+	"strings"
 )
 
 // evalCount evaluates a count command
@@ -161,8 +164,277 @@ func evalDistinct(prev CommandResult, cmd Command) (CommandResult, error) {
 
 // Placeholder implementations for other commands
 func evalWhere(prev CommandResult, cmd Command) (CommandResult, error) {
-	// TODO: Implement where clause evaluation
-	return prev, nil
+	conditions, ok := cmd.Value.([]TypedValue)
+	if !ok {
+		return prev, errors.New("invalid where arguments")
+	}
+
+	output := prev.Output
+	if output == nil {
+		return prev, nil
+	}
+
+	slice, err := toSlice(output)
+	if err != nil {
+		return prev, nil
+	}
+
+	if len(conditions) < 3 || conditions[1].Type != "operation" {
+		return prev, errors.New("invalid where clause: expected field operator value")
+	}
+
+	result := make([]interface{}, 0)
+	for _, item := range slice {
+		if matchesCondition(item, conditions) {
+			result = append(result, item)
+		}
+	}
+
+	return CommandResult{Output: result, Context: prev.Context}, nil
+}
+
+// matchesCondition checks if an item matches the where condition
+func matchesCondition(item interface{}, conditions []TypedValue) bool {
+	if len(conditions) < 3 {
+		return false
+	}
+
+	// Get left-hand side value
+	lhs := getWhereValue(item, conditions[0])
+
+	// Get operator
+	operator := conditions[1].Value.(string)
+
+	// Get right-hand side value
+	rhs := getWhereValue(item, conditions[2])
+
+	// Handle array values for 'in', 'between', etc.
+	var rhsArray []interface{}
+	if conditions[2].Type == "value_array" {
+		if arr, ok := conditions[2].Value.([]interface{}); ok {
+			rhsArray = make([]interface{}, 0, len(arr))
+			for _, v := range arr {
+				if tv, ok := v.(TypedValue); ok {
+					rhsArray = append(rhsArray, getWhereValue(item, tv))
+				} else {
+					rhsArray = append(rhsArray, v)
+				}
+			}
+		}
+	}
+
+	// Apply operator
+	switch operator {
+	case "==":
+		return compareEqual(lhs, rhs)
+	case "!=":
+		return !compareEqual(lhs, rhs)
+	case ">":
+		return compareGreater(lhs, rhs)
+	case ">=":
+		return compareGreaterEqual(lhs, rhs)
+	case "<":
+		return compareLess(lhs, rhs)
+	case "<=":
+		return compareLessEqual(lhs, rhs)
+	case "=~":
+		return caseInsensitiveContains(lhs, rhs)
+	case "!~":
+		return !caseInsensitiveContains(lhs, rhs)
+	case "contains":
+		return caseInsensitiveContains(lhs, rhs)
+	case "!contains", "not contains":
+		return !caseInsensitiveContains(lhs, rhs)
+	case "contains_cs":
+		return caseSensitiveContains(lhs, rhs)
+	case "!contains_cs", "not contains_cs":
+		return !caseSensitiveContains(lhs, rhs)
+	case "startswith":
+		return caseInsensitiveStartsWith(lhs, rhs)
+	case "!startswith":
+		return !caseInsensitiveStartsWith(lhs, rhs)
+	case "startswith_cs":
+		return caseSensitiveStartsWith(lhs, rhs)
+	case "!startswith_cs":
+		return !caseSensitiveStartsWith(lhs, rhs)
+	case "endswith":
+		return caseInsensitiveEndsWith(lhs, rhs)
+	case "!endswith":
+		return !caseInsensitiveEndsWith(lhs, rhs)
+	case "endswith_cs":
+		return caseSensitiveEndsWith(lhs, rhs)
+	case "!endswith_cs":
+		return !caseSensitiveEndsWith(lhs, rhs)
+	case "in":
+		return inArray(lhs, rhsArray)
+	case "!in":
+		return !inArray(lhs, rhsArray)
+	case "in~":
+		return inArrayCaseInsensitive(lhs, rhsArray)
+	case "!in~":
+		return !inArrayCaseInsensitive(lhs, rhsArray)
+	case "between":
+		if len(rhsArray) >= 2 {
+			return betweenValues(lhs, rhsArray[0], rhsArray[1])
+		}
+	case "inside":
+		if len(rhsArray) >= 2 {
+			return insideValues(lhs, rhsArray[0], rhsArray[1])
+		}
+	case "outside":
+		if len(rhsArray) >= 2 {
+			return outsideValues(lhs, rhsArray[0], rhsArray[1])
+		}
+	case "matches regex":
+		return matchesRegex(lhs, rhs)
+	case "!matches regex":
+		return !matchesRegex(lhs, rhs)
+	}
+
+	return false
+}
+
+// getWhereValue extracts the actual value from a TypedValue
+func getWhereValue(item interface{}, tv TypedValue) interface{} {
+	switch tv.Type {
+	case "ref":
+		// It's a field reference
+		if fieldName, ok := tv.Value.(string); ok {
+			return getValue(item, fieldName)
+		}
+	case "number", "string":
+		return tv.Value
+	case "value_array":
+		return tv.Value
+	}
+	return tv.Value
+}
+
+// String comparison functions
+func caseInsensitiveContains(lhs, rhs interface{}) bool {
+	lhsStr := strings.ToLower(fmt.Sprintf("%v", lhs))
+	rhsStr := strings.ToLower(fmt.Sprintf("%v", rhs))
+	return strings.Contains(lhsStr, rhsStr)
+}
+
+func caseSensitiveContains(lhs, rhs interface{}) bool {
+	lhsStr := fmt.Sprintf("%v", lhs)
+	rhsStr := fmt.Sprintf("%v", rhs)
+	return strings.Contains(lhsStr, rhsStr)
+}
+
+func caseInsensitiveStartsWith(lhs, rhs interface{}) bool {
+	lhsStr := strings.ToLower(fmt.Sprintf("%v", lhs))
+	rhsStr := strings.ToLower(fmt.Sprintf("%v", rhs))
+	return strings.HasPrefix(lhsStr, rhsStr)
+}
+
+func caseSensitiveStartsWith(lhs, rhs interface{}) bool {
+	lhsStr := fmt.Sprintf("%v", lhs)
+	rhsStr := fmt.Sprintf("%v", rhs)
+	return strings.HasPrefix(lhsStr, rhsStr)
+}
+
+func caseInsensitiveEndsWith(lhs, rhs interface{}) bool {
+	lhsStr := strings.ToLower(fmt.Sprintf("%v", lhs))
+	rhsStr := strings.ToLower(fmt.Sprintf("%v", rhs))
+	return strings.HasSuffix(lhsStr, rhsStr)
+}
+
+func caseSensitiveEndsWith(lhs, rhs interface{}) bool {
+	lhsStr := fmt.Sprintf("%v", lhs)
+	rhsStr := fmt.Sprintf("%v", rhs)
+	return strings.HasSuffix(lhsStr, rhsStr)
+}
+
+func matchesRegex(lhs, rhs interface{}) bool {
+	lhsStr := fmt.Sprintf("%v", lhs)
+	rhsStr := fmt.Sprintf("%v", rhs)
+	re, err := regexp.Compile(rhsStr)
+	if err != nil {
+		return false
+	}
+	return re.MatchString(lhsStr)
+}
+
+// Comparison functions
+func compareEqual(lhs, rhs interface{}) bool {
+	// Handle nil cases
+	if lhs == nil && rhs == nil {
+		return true
+	}
+	if lhs == nil || rhs == nil {
+		return false
+	}
+
+	// Try numeric comparison
+	lhsNum, lhsOk := toNumber(lhs)
+	rhsNum, rhsOk := toNumber(rhs)
+	if lhsOk && rhsOk {
+		return lhsNum == rhsNum
+	}
+
+	// String comparison
+	return fmt.Sprintf("%v", lhs) == fmt.Sprintf("%v", rhs)
+}
+
+func compareGreater(lhs, rhs interface{}) bool {
+	lhsNum, lhsOk := toNumber(lhs)
+	rhsNum, rhsOk := toNumber(rhs)
+	if lhsOk && rhsOk {
+		return lhsNum > rhsNum
+	}
+	return fmt.Sprintf("%v", lhs) > fmt.Sprintf("%v", rhs)
+}
+
+func compareGreaterEqual(lhs, rhs interface{}) bool {
+	return compareGreater(lhs, rhs) || compareEqual(lhs, rhs)
+}
+
+func compareLess(lhs, rhs interface{}) bool {
+	lhsNum, lhsOk := toNumber(lhs)
+	rhsNum, rhsOk := toNumber(rhs)
+	if lhsOk && rhsOk {
+		return lhsNum < rhsNum
+	}
+	return fmt.Sprintf("%v", lhs) < fmt.Sprintf("%v", rhs)
+}
+
+func compareLessEqual(lhs, rhs interface{}) bool {
+	return compareLess(lhs, rhs) || compareEqual(lhs, rhs)
+}
+
+// Array comparison functions
+func inArray(lhs interface{}, arr []interface{}) bool {
+	for _, item := range arr {
+		if compareEqual(lhs, item) {
+			return true
+		}
+	}
+	return false
+}
+
+func inArrayCaseInsensitive(lhs interface{}, arr []interface{}) bool {
+	lhsStr := strings.ToLower(fmt.Sprintf("%v", lhs))
+	for _, item := range arr {
+		itemStr := strings.ToLower(fmt.Sprintf("%v", item))
+		if lhsStr == itemStr {
+			return true
+		}
+	}
+	return false
+}
+
+func betweenValues(lhs, lower, upper interface{}) bool {
+	return (compareGreaterEqual(lhs, lower) && compareLessEqual(lhs, upper))
+}
+
+func insideValues(lhs, lower, upper interface{}) bool {
+	return (compareGreater(lhs, lower) && compareLess(lhs, upper))
+}
+
+func outsideValues(lhs, lower, upper interface{}) bool {
+	return (compareLess(lhs, lower) || compareGreater(lhs, upper))
 }
 
 func evalMvExpand(prev CommandResult, cmd Command) (CommandResult, error) {

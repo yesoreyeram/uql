@@ -542,6 +542,221 @@ func TestUQLMvExpandIgnoresNonArray(t *testing.T) {
 	}
 }
 
+func TestUQLWhere(t *testing.T) {
+	data := []interface{}{
+		map[string]interface{}{"a": 1},
+		map[string]interface{}{"a": 10},
+		map[string]interface{}{"a": 20},
+		map[string]interface{}{"a": 30},
+	}
+
+	result, err := UQL(`where "a" == 10`, &Options{Data: data})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	slice, ok := result.([]interface{})
+	if !ok {
+		t.Fatalf("expected slice, got %T", result)
+	}
+
+	if len(slice) != 1 {
+		t.Errorf("expected 1 item, got %d", len(slice))
+	}
+
+	first, ok := slice[0].(map[string]interface{})
+	if !ok {
+		t.Fatalf("expected map, got %T", slice[0])
+	}
+
+	if first["a"] != 10 {
+		t.Errorf("expected a=10, got %v", first["a"])
+	}
+}
+
+func TestUQLWhereGreaterThan(t *testing.T) {
+	data := []interface{}{
+		map[string]interface{}{"a": 1},
+		map[string]interface{}{"a": 10},
+		map[string]interface{}{"a": 20},
+		map[string]interface{}{"a": 30},
+	}
+
+	result, err := UQL(`where "a" > 10`, &Options{Data: data})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	slice, ok := result.([]interface{})
+	if !ok {
+		t.Fatalf("expected slice, got %T", result)
+	}
+
+	if len(slice) != 2 {
+		t.Errorf("expected 2 items, got %d", len(slice))
+	}
+}
+
+func TestUQLWhereStringContains(t *testing.T) {
+	data := []interface{}{
+		map[string]interface{}{"a": "FabriKam"},
+		map[string]interface{}{"a": "banana"},
+	}
+
+	result, err := UQL(`where "a" contains 'BRik'`, &Options{Data: data})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	slice, ok := result.([]interface{})
+	if !ok {
+		t.Fatalf("expected slice, got %T", result)
+	}
+
+	if len(slice) != 1 {
+		t.Errorf("expected 1 item, got %d", len(slice))
+	}
+
+	first, ok := slice[0].(map[string]interface{})
+	if !ok {
+		t.Fatalf("expected map, got %T", slice[0])
+	}
+
+	if first["a"] != "FabriKam" {
+		t.Errorf("expected 'FabriKam', got %v", first["a"])
+	}
+}
+
+func TestUQLWhereIn(t *testing.T) {
+	data := []interface{}{
+		map[string]interface{}{"a": 1},
+		map[string]interface{}{"a": 10},
+		map[string]interface{}{"a": 20},
+		map[string]interface{}{"a": 30},
+	}
+
+	result, err := UQL(`where "a" in (10,20)`, &Options{Data: data})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	slice, ok := result.([]interface{})
+	if !ok {
+		t.Fatalf("expected slice, got %T", result)
+	}
+
+	if len(slice) != 2 {
+		t.Errorf("expected 2 items, got %d", len(slice))
+	}
+}
+
+func TestUQLWhereBetween(t *testing.T) {
+	data := []interface{}{
+		map[string]interface{}{"a": 1},
+		map[string]interface{}{"a": 10},
+		map[string]interface{}{"a": 20},
+		map[string]interface{}{"a": 30},
+	}
+
+	result, err := UQL(`where "a" between (10,20)`, &Options{Data: data})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	slice, ok := result.([]interface{})
+	if !ok {
+		t.Fatalf("expected slice, got %T", result)
+	}
+
+	if len(slice) != 2 {
+		t.Errorf("expected 2 items (10 and 20), got %d", len(slice))
+	}
+}
+
+func TestUQLSplit(t *testing.T) {
+	data := []interface{}{
+		map[string]interface{}{"text": "a,b,c"},
+	}
+
+	result, err := UQL(`extend "parts"=split("text", ',')`, &Options{Data: data})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	slice, ok := result.([]interface{})
+	if !ok {
+		t.Fatalf("expected slice, got %T", result)
+	}
+
+	first, ok := slice[0].(map[string]interface{})
+	if !ok {
+		t.Fatalf("expected map, got %T", slice[0])
+	}
+
+	parts, ok := first["parts"].([]interface{})
+	if !ok {
+		t.Fatalf("expected parts to be array, got %T", first["parts"])
+	}
+
+	if len(parts) != 3 {
+		t.Errorf("expected 3 parts, got %d", len(parts))
+	}
+
+	if parts[0] != "a" || parts[1] != "b" || parts[2] != "c" {
+		t.Errorf("unexpected split result: %v", parts)
+	}
+}
+
+func TestUQLExtract(t *testing.T) {
+	data := []interface{}{
+		map[string]interface{}{"text": "The price is 123 dollars"},
+	}
+
+	result, err := UQL(`extend "price"=extract('([0-9]+)', 1, "text")`, &Options{Data: data})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	slice, ok := result.([]interface{})
+	if !ok {
+		t.Fatalf("expected slice, got %T", result)
+	}
+
+	first, ok := slice[0].(map[string]interface{})
+	if !ok {
+		t.Fatalf("expected map, got %T", slice[0])
+	}
+
+	if first["price"] != "123" {
+		t.Errorf("expected '123', got %v", first["price"])
+	}
+}
+
+func TestUQLExtractWithNumberConversion(t *testing.T) {
+	data := []interface{}{
+		map[string]interface{}{"text": "The price is 123 dollars"},
+	}
+
+	result, err := UQL(`extend "price"=extract('([0-9]+)', 1, "text", 'number')`, &Options{Data: data})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	slice, ok := result.([]interface{})
+	if !ok {
+		t.Fatalf("expected slice, got %T", result)
+	}
+
+	first, ok := slice[0].(map[string]interface{})
+	if !ok {
+		t.Fatalf("expected map, got %T", slice[0])
+	}
+
+	if price, ok := first["price"].(float64); !ok || price != 123.0 {
+		t.Errorf("expected 123.0 as float64, got %v (type %T)", first["price"], first["price"])
+	}
+}
+
 func TestUQLComplexQuery(t *testing.T) {
 	users := []interface{}{
 		map[string]interface{}{"name": "foo", "age": 2, "location": "uk"},

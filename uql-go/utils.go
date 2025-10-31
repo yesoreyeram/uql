@@ -6,6 +6,7 @@ import (
 	"math"
 	"math/rand"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -186,6 +187,79 @@ func evaluateFunction(fn FunctionName, args []interface{}) interface{} {
 			}
 			return text[startInt:]
 		}
+	case FnSplit:
+		if len(args) >= 1 {
+			text := fmt.Sprintf("%v", args[0])
+			separator := ""
+			if len(args) >= 2 {
+				separator = fmt.Sprintf("%v", args[1])
+			}
+			if separator == "" {
+				// Split into characters
+				result := make([]interface{}, 0, len(text))
+				for _, ch := range text {
+					result = append(result, string(ch))
+				}
+				return result
+			}
+			parts := strings.Split(text, separator)
+			result := make([]interface{}, len(parts))
+			for i, p := range parts {
+				result[i] = p
+			}
+			return result
+		}
+		return []interface{}{}
+	case FnExtract:
+		if len(args) >= 3 {
+			pattern := fmt.Sprintf("%v", args[0])
+			index := 0
+			if num, ok := toNumber(args[1]); ok {
+				index = int(num)
+			}
+			text := fmt.Sprintf("%v", args[2])
+
+			// Use regexp to extract
+			re, err := regexp.Compile(pattern)
+			if err != nil {
+				return nil
+			}
+			matches := re.FindStringSubmatch(text)
+			if matches == nil || index >= len(matches) {
+				return nil
+			}
+
+			result := matches[index]
+
+			// Check for type conversion
+			if len(args) >= 4 {
+				typeStr := fmt.Sprintf("%v", args[3])
+				switch typeStr {
+				case "number":
+					if num, err := strconv.ParseFloat(result, 64); err == nil {
+						return num
+					}
+				case "date":
+					if t, err := time.Parse(time.RFC3339, result); err == nil {
+						return t
+					}
+					// Try other common date formats
+					formats := []string{
+						"2006-01-02",
+						"2006-01-02 15:04:05",
+						"01/02/2006",
+						"01-02-2006",
+					}
+					for _, format := range formats {
+						if t, err := time.Parse(format, result); err == nil {
+							return t
+						}
+					}
+				}
+			}
+			return result
+		}
+		return nil
 
 	// Math functions
 	case FnSum:

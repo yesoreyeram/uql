@@ -47,6 +47,12 @@ func main() {
 - `count` - Returns the count of items
 - `limit <number>` - Limits the number of results
 
+### Data Filtering
+- `where <field> <operator> <value>` - Filter data based on conditions
+  - Comparison: `==`, `!=`, `>`, `>=`, `<`, `<=`
+  - String matching: `=~`, `!~`, `contains`, `!contains`, `startswith`, `endswith`
+  - Set operations: `in`, `!in`, `between`, `inside`, `outside`
+
 ### Data Transformation
 - `project <fields>` - Select specific fields
 - `project-away <fields>` - Remove specific fields
@@ -79,6 +85,8 @@ func main() {
 - `strcat(str1, str2, ...)` - Concatenate strings
 - `replace_string(str, old, new)` - Replace substrings
 - `substring(str, start, length)` - Extract substring
+- `split(str, separator)` - Split string into array
+- `extract(pattern, index, str, [type])` - Extract using regex
 
 #### Math Functions
 - `sum(...)` - Sum of values
@@ -211,15 +219,14 @@ result, _ := uql.UQL(`mv-expand "user"="users"`, &uql.Options{Data: data})
 - ✅ Support for piped commands
 - ✅ Basic commands (hello, ping, echo, count, limit)
 - ✅ Data transformation (project, project-away, project-reorder, extend, order by)
-- ✅ Data filtering (distinct, scope)
+- ✅ Data filtering (distinct, scope, **where clause with operators**)
 - ✅ Data aggregation (summarize, pivot)
 - ✅ Data expansion (mv-expand, range)
 - ✅ Data parsing (JSON, CSV, XML, YAML)
-- ✅ String manipulation functions
+- ✅ String manipulation functions (including **split** and **extract**)
 - ✅ Math and trigonometric functions
 - ✅ Type conversion functions
 - ✅ Date/time functions
-- 🚧 Where clause (partial support)
 - 🚧 JSONata support (planned)
 
 ## Development

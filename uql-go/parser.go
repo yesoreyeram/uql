@@ -736,11 +736,248 @@ func (p *Parser) parseFieldList() ([]TypedValue, error) {
 }
 
 // parseWhereConditions parses where clause conditions
-func (p *Parser) parseWhereConditions() ([]interface{}, error) {
-	// Simplified implementation - just parse the expression as a string for now
-	conditions := make([]interface{}, 0)
-	// This is a placeholder - full implementation would parse the actual condition logic
+func (p *Parser) parseWhereConditions() ([]TypedValue, error) {
+	// Parse where expression: field operator value
+	// Example: "a" == 10 or "a" in (10, 20)
+	conditions := make([]TypedValue, 0, 3)
+
+	// Parse left-hand side (field or value)
+	lhs, err := p.parseWhereArgument()
+	if err != nil {
+		return nil, err
+	}
+	conditions = append(conditions, lhs)
+
+	// Parse operator
+	if p.pos >= len(p.tokens) {
+		return nil, errors.New("expected operator in where clause")
+	}
+
+	operator, err := p.parseWhereOperator()
+	if err != nil {
+		return nil, err
+	}
+	conditions = append(conditions, operator)
+
+	// Parse right-hand side (value, field, or array)
+	rhs, err := p.parseWhereArgument()
+	if err != nil {
+		return nil, err
+	}
+	conditions = append(conditions, rhs)
+
 	return conditions, nil
+}
+
+// parseWhereOperator parses comparison operators
+func (p *Parser) parseWhereOperator() (TypedValue, error) {
+	if p.pos >= len(p.tokens) {
+		return TypedValue{}, errors.New("expected operator")
+	}
+
+	token := p.tokens[p.pos]
+	var op string
+
+	// Handle multi-token operators
+	switch token.Type {
+	case "eq": // ==
+		op = "=="
+		p.pos++
+	case "ne": // !=
+		op = "!="
+		p.pos++
+	case "gt": // >
+		if p.pos+1 < len(p.tokens) && p.tokens[p.pos+1].Type == "assignment" {
+			op = ">="
+			p.pos += 2
+		} else {
+			op = ">"
+			p.pos++
+		}
+	case "lt": // <
+		if p.pos+1 < len(p.tokens) && p.tokens[p.pos+1].Type == "assignment" {
+			op = "<="
+			p.pos += 2
+		} else {
+			op = "<"
+			p.pos++
+		}
+	case "assignment": // = (could be part of =~, ==, etc)
+		if p.pos+1 < len(p.tokens) {
+			next := p.tokens[p.pos+1]
+			if next.Type == "tilde" {
+				op = "=~"
+				p.pos += 2
+			} else if next.Type == "eq" {
+				op = "=="
+				p.pos += 2
+			} else {
+				return TypedValue{}, fmt.Errorf("unexpected operator: %s", token.Type)
+			}
+		} else {
+			return TypedValue{}, fmt.Errorf("unexpected operator: %s", token.Type)
+		}
+	case "exclaim": // ! (could be !=, !~, !contains, !in, etc)
+		if p.pos+1 < len(p.tokens) {
+			next := p.tokens[p.pos+1]
+			if next.Type == "eq" {
+				op = "!="
+				p.pos += 2
+			} else if next.Type == "tilde" {
+				op = "!~"
+				p.pos += 2
+			} else if next.Type == "identifier" {
+				switch next.Value {
+				case "contains":
+					op = "!contains"
+					p.pos += 2
+				case "contains_cs":
+					op = "!contains_cs"
+					p.pos += 2
+				case "startswith":
+					op = "!startswith"
+					p.pos += 2
+				case "startswith_cs":
+					op = "!startswith_cs"
+					p.pos += 2
+				case "endswith":
+					op = "!endswith"
+					p.pos += 2
+				case "endswith_cs":
+					op = "!endswith_cs"
+					p.pos += 2
+				case "in":
+					op = "!in"
+					p.pos += 2
+				case "in~":
+					op = "!in~"
+					p.pos += 2
+				default:
+					return TypedValue{}, fmt.Errorf("unexpected operator: !%s", next.Value)
+				}
+			} else {
+				return TypedValue{}, fmt.Errorf("unexpected operator after !")
+			}
+		} else {
+			return TypedValue{}, errors.New("unexpected end after !")
+		}
+	case "identifier":
+		// Handle word operators like "in", "between", "contains", etc.
+		switch token.Value {
+		case "in", "between", "inside", "outside", "in~",
+			"contains", "contains_cs", "startswith", "startswith_cs",
+			"endswith", "endswith_cs", "matches", "not":
+			if token.Value == "not" && p.pos+1 < len(p.tokens) {
+				next := p.tokens[p.pos+1]
+				if next.Type == "identifier" && next.Value == "contains" {
+					op = "!contains"
+					p.pos += 2
+				} else if next.Type == "identifier" && next.Value == "contains_cs" {
+					op = "!contains_cs"
+					p.pos += 2
+				} else {
+					return TypedValue{}, fmt.Errorf("unexpected 'not' operator")
+				}
+			} else if token.Value == "matches" && p.pos+1 < len(p.tokens) {
+				next := p.tokens[p.pos+1]
+				if next.Type == "identifier" && next.Value == "regex" {
+					op = "matches regex"
+					p.pos += 2
+				} else {
+					return TypedValue{}, errors.New("expected 'regex' after 'matches'")
+				}
+			} else {
+				op = token.Value
+				p.pos++
+			}
+		default:
+			return TypedValue{}, fmt.Errorf("unexpected identifier in operator position: %s", token.Value)
+		}
+	default:
+		return TypedValue{}, fmt.Errorf("unexpected token type for operator: %s", token.Type)
+	}
+
+	return TypedValue{Type: "operation", Value: op}, nil
+}
+
+// parseWhereArgument parses a single argument in where clause (field, value, or array)
+func (p *Parser) parseWhereArgument() (TypedValue, error) {
+	if p.pos >= len(p.tokens) {
+		return TypedValue{}, errors.New("unexpected end of expression")
+	}
+
+	token := p.tokens[p.pos]
+
+	// Check for array (for 'in', 'between', etc.)
+	if token.Type == "lparen" {
+		p.pos++ // consume (
+		values := make([]interface{}, 0)
+
+		for {
+			if p.pos >= len(p.tokens) {
+				return TypedValue{}, errors.New("unexpected end in array")
+			}
+
+			if p.tokens[p.pos].Type == "rparen" {
+				p.pos++ // consume )
+				break
+			}
+
+			// Parse value
+			val, err := p.parseWhereValue()
+			if err != nil {
+				return TypedValue{}, err
+			}
+			values = append(values, val)
+
+			// Check for comma
+			if p.pos < len(p.tokens) && p.tokens[p.pos].Type == "comma" {
+				p.pos++ // consume ,
+			} else if p.pos < len(p.tokens) && p.tokens[p.pos].Type == "rparen" {
+				// Will be consumed in next iteration
+			} else {
+				break
+			}
+		}
+
+		return TypedValue{Type: "value_array", Value: values}, nil
+	}
+
+	// Parse single value or reference
+	return p.parseWhereValue()
+}
+
+// parseWhereValue parses a single value (number, string, or field reference)
+func (p *Parser) parseWhereValue() (TypedValue, error) {
+	if p.pos >= len(p.tokens) {
+		return TypedValue{}, errors.New("unexpected end of expression")
+	}
+
+	token := p.tokens[p.pos]
+
+	switch token.Type {
+	case "string":
+		// Double-quoted string is a field reference
+		p.pos++
+		return TypedValue{Type: "ref", Value: token.Value}, nil
+	case "sq_string":
+		// Single-quoted string is a literal value
+		p.pos++
+		return TypedValue{Type: "string", Value: token.Value}, nil
+	case "number":
+		p.pos++
+		num, err := strconv.ParseFloat(token.Value, 64)
+		if err != nil {
+			return TypedValue{}, err
+		}
+		return TypedValue{Type: "number", Value: num}, nil
+	case "identifier":
+		// Field reference without quotes
+		p.pos++
+		return TypedValue{Type: "ref", Value: token.Value}, nil
+	default:
+		return TypedValue{}, fmt.Errorf("unexpected token type in where argument: %s", token.Type)
+	}
 }
 
 // parseParseArgs parses parse command arguments
@@ -816,7 +1053,12 @@ func (p *Parser) parseFunction() (FunctionCall, error) {
 
 		token := p.tokens[p.pos]
 		switch token.Type {
-		case "string", "sq_string":
+		case "string":
+			// Double-quoted string is a field reference
+			arg = RefType(token.Value)
+			p.pos++
+		case "sq_string":
+			// Single-quoted string is a literal value
 			arg = StringType(token.Value)
 			p.pos++
 		case "number":
