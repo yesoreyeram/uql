@@ -99,10 +99,17 @@ func main() {
 - `round(num)` - Round value
 - `pow(base, exp)` - Power
 - `log(num)`, `log2(num)`, `log10(num)` - Logarithms
+- `diff(a, b)` - Difference (a - b)
+- `mul(...)` - Multiply values
+- `div(a, b)` - Divide (a / b)
+- `percentage(part, whole)` - Calculate percentage
 
 #### Trigonometric Functions
 - `sin(x)`, `cos(x)`, `tan(x)` - Trigonometric functions
 - `asin(x)`, `acos(x)`, `atan(x)` - Inverse trigonometric functions
+- `sinh(x)`, `cosh(x)`, `tanh(x)` - Hyperbolic functions
+- `asinh(x)`, `acosh(x)`, `atanh(x)` - Inverse hyperbolic functions
+- `atan2(y, x)` - Two-argument arctangent
 
 #### Conversion Functions
 - `tostring(val)` - Convert to string
@@ -117,10 +124,34 @@ func main() {
 #### Date/Time Functions
 - `unixtime_milliseconds_todatetime(ms)` - Convert Unix timestamp (ms) to datetime
 - `unixtime_seconds_todatetime(sec)` - Convert Unix timestamp (sec) to datetime
+- `unixtime_microseconds_todatetime(us)` - Convert Unix timestamp (μs) to datetime
+- `unixtime_nanoseconds_todatetime(ns)` - Convert Unix timestamp (ns) to datetime
 - `tounixtime(datetime)` - Convert datetime to Unix timestamp
 - `startofday(datetime)` - Get start of day
 - `startofhour(datetime)` - Get start of hour
 - `startofminute(datetime)` - Get start of minute
+- `startofmonth(datetime)` - Get start of month
+- `startofweek(datetime)` - Get start of week
+- `startofyear(datetime)` - Get start of year
+- `todatetime(str)` - Parse string to datetime
+- `format_datetime(datetime, format)` - Format datetime as string
+- `add_datetime(datetime, value, unit)` - Add duration to datetime
+
+#### Array Functions
+- `distinct(array)` - Get unique values from array
+- `pack(...)` - Pack values into array
+- `kv(key, value)` - Create key-value pair object
+- `array_from_entries(array)` - Convert array of {key, value} to object
+- `array_to_map(array, keyField)` - Convert array to map using key field
+- `bag_pack(key1, value1, key2, value2, ...)` - Create object from key-value pairs
+
+#### URL Functions
+- `parse_url(url)` - Parse URL into components (scheme, host, pathname, query, etc.)
+- `parse_urlquery(query)` - Parse URL query string into object
+
+#### Other Functions
+- `random()` - Generate random number (0-1)
+- `sign(num)` - Return sign of number (-1, 0, 1)
 
 ## Examples
 

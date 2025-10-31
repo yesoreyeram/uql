@@ -364,6 +364,43 @@ func evaluateFunction(fn FunctionName, args []interface{}) interface{} {
 				return math.Log10(num)
 			}
 		}
+	case FnDiff:
+		if len(args) >= 2 {
+			a, ok1 := toNumber(args[0])
+			b, ok2 := toNumber(args[1])
+			if ok1 && ok2 {
+				return a - b
+			}
+		}
+	case FnMul:
+		if len(args) == 0 {
+			return 1.0
+		}
+		result := 1.0
+		for _, arg := range args {
+			if num, ok := toNumber(arg); ok {
+				result *= num
+			}
+		}
+		return result
+	case FnDiv:
+		if len(args) >= 2 {
+			a, ok1 := toNumber(args[0])
+			b, ok2 := toNumber(args[1])
+			if ok1 && ok2 && b != 0 {
+				return a / b
+			}
+		}
+		return nil
+	case FnPercentage:
+		if len(args) >= 2 {
+			part, ok1 := toNumber(args[0])
+			whole, ok2 := toNumber(args[1])
+			if ok1 && ok2 && whole != 0 {
+				return (part / whole) * 100
+			}
+		}
+		return nil
 
 	// Trigonometric functions
 	case FnSin:
@@ -400,6 +437,50 @@ func evaluateFunction(fn FunctionName, args []interface{}) interface{} {
 		if len(args) > 0 {
 			if num, ok := toNumber(args[0]); ok {
 				return math.Atan(num)
+			}
+		}
+	case FnSinh:
+		if len(args) > 0 {
+			if num, ok := toNumber(args[0]); ok {
+				return math.Sinh(num)
+			}
+		}
+	case FnCosh:
+		if len(args) > 0 {
+			if num, ok := toNumber(args[0]); ok {
+				return math.Cosh(num)
+			}
+		}
+	case FnTanh:
+		if len(args) > 0 {
+			if num, ok := toNumber(args[0]); ok {
+				return math.Tanh(num)
+			}
+		}
+	case FnAtan2:
+		if len(args) >= 2 {
+			y, ok1 := toNumber(args[0])
+			x, ok2 := toNumber(args[1])
+			if ok1 && ok2 {
+				return math.Atan2(y, x)
+			}
+		}
+	case FnAsinh:
+		if len(args) > 0 {
+			if num, ok := toNumber(args[0]); ok {
+				return math.Asinh(num)
+			}
+		}
+	case FnAcosh:
+		if len(args) > 0 {
+			if num, ok := toNumber(args[0]); ok {
+				return math.Acosh(num)
+			}
+		}
+	case FnAtanh:
+		if len(args) > 0 {
+			if num, ok := toNumber(args[0]); ok {
+				return math.Atanh(num)
 			}
 		}
 
@@ -449,6 +530,16 @@ func evaluateFunction(fn FunctionName, args []interface{}) interface{} {
 			str := fmt.Sprintf("%v", args[0])
 			return base64.StdEncoding.EncodeToString([]byte(str))
 		}
+	case FnParseURL:
+		if len(args) > 0 {
+			urlStr := fmt.Sprintf("%v", args[0])
+			return parseURL(urlStr)
+		}
+	case FnParseURLQuery:
+		if len(args) > 0 {
+			queryStr := fmt.Sprintf("%v", args[0])
+			return parseURLQuery(queryStr)
+		}
 
 	// Other functions
 	case FnRandom:
@@ -464,6 +555,90 @@ func evaluateFunction(fn FunctionName, args []interface{}) interface{} {
 				return 0
 			}
 		}
+	case FnDistinct:
+		if len(args) > 0 {
+			// Get array argument
+			arr, err := toSlice(args[0])
+			if err != nil {
+				return []interface{}{}
+			}
+			// Use map to track unique values
+			seen := make(map[string]bool)
+			result := make([]interface{}, 0)
+			for _, item := range arr {
+				key := fmt.Sprintf("%v", item)
+				if !seen[key] {
+					seen[key] = true
+					result = append(result, item)
+				}
+			}
+			return result
+		}
+		return []interface{}{}
+	case FnPack:
+		// Pack multiple values into an array
+		return args
+	case FnArrayFromEntries:
+		if len(args) > 0 {
+			arr, err := toSlice(args[0])
+			if err != nil {
+				return make(map[string]interface{})
+			}
+			result := make(map[string]interface{})
+			for _, item := range arr {
+				if m, ok := toMap(item); ok {
+					if key, hasKey := m["key"]; hasKey {
+						if value, hasValue := m["value"]; hasValue {
+							keyStr := fmt.Sprintf("%v", key)
+							result[keyStr] = value
+						}
+					}
+				}
+			}
+			return result
+		}
+		return make(map[string]interface{})
+	case FnArrayToMap:
+		if len(args) >= 2 {
+			arr, err := toSlice(args[0])
+			if err != nil {
+				return make(map[string]interface{})
+			}
+			keyField := fmt.Sprintf("%v", args[1])
+
+			result := make(map[string]interface{})
+			for _, item := range arr {
+				if m, ok := toMap(item); ok {
+					if keyVal, exists := m[keyField]; exists {
+						keyStr := fmt.Sprintf("%v", keyVal)
+						result[keyStr] = item
+					}
+				}
+			}
+			return result
+		}
+		return make(map[string]interface{})
+	case FnBagPack:
+		// Similar to pack but creates an object with field names
+		if len(args)%2 != 0 {
+			return nil
+		}
+		result := make(map[string]interface{})
+		for i := 0; i < len(args); i += 2 {
+			key := fmt.Sprintf("%v", args[i])
+			value := args[i+1]
+			result[key] = value
+		}
+		return result
+	case FnKV:
+		// Create key-value pair object
+		if len(args) >= 2 {
+			return map[string]interface{}{
+				"key":   args[0],
+				"value": args[1],
+			}
+		}
+		return nil
 
 	// Date/time functions
 	case FnUnixTimeMillisecondsToDatetime:
@@ -504,7 +679,188 @@ func evaluateFunction(fn FunctionName, args []interface{}) interface{} {
 				return time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), 0, 0, t.Location())
 			}
 		}
+	case FnUnixTimeMicrosecondsToDatetime:
+		if len(args) > 0 {
+			if num, ok := toNumber(args[0]); ok {
+				us := int64(num)
+				return time.Unix(0, us*int64(time.Microsecond))
+			}
+		}
+	case FnUnixTimeNanosecondsToDatetime:
+		if len(args) > 0 {
+			if num, ok := toNumber(args[0]); ok {
+				ns := int64(num)
+				return time.Unix(0, ns)
+			}
+		}
+	case FnStartOfMonth:
+		if len(args) > 0 {
+			if t, ok := args[0].(time.Time); ok {
+				return time.Date(t.Year(), t.Month(), 1, 0, 0, 0, 0, t.Location())
+			}
+		}
+	case FnStartOfWeek:
+		if len(args) > 0 {
+			if t, ok := args[0].(time.Time); ok {
+				// Start of week (Sunday)
+				weekday := int(t.Weekday())
+				return time.Date(t.Year(), t.Month(), t.Day()-weekday, 0, 0, 0, 0, t.Location())
+			}
+		}
+	case FnStartOfYear:
+		if len(args) > 0 {
+			if t, ok := args[0].(time.Time); ok {
+				return time.Date(t.Year(), 1, 1, 0, 0, 0, 0, t.Location())
+			}
+		}
+	case FnToDatetime:
+		if len(args) > 0 {
+			str := fmt.Sprintf("%v", args[0])
+			// Try RFC3339 first
+			if t, err := time.Parse(time.RFC3339, str); err == nil {
+				return t
+			}
+			// Try other common formats
+			formats := []string{
+				"2006-01-02",
+				"2006-01-02 15:04:05",
+				"01/02/2006",
+				"01-02-2006",
+				time.RFC1123,
+				time.RFC822,
+			}
+			for _, format := range formats {
+				if t, err := time.Parse(format, str); err == nil {
+					return t
+				}
+			}
+		}
+	case FnFormatDatetime:
+		if len(args) >= 2 {
+			if t, ok := args[0].(time.Time); ok {
+				format := fmt.Sprintf("%v", args[1])
+				// Convert from .NET/C# style format to Go's time format
+				// This is a simplified conversion
+				format = strings.ReplaceAll(format, "yyyy", "2006")
+				format = strings.ReplaceAll(format, "yy", "06")
+				format = strings.ReplaceAll(format, "MM", "01")
+				format = strings.ReplaceAll(format, "dd", "02")
+				format = strings.ReplaceAll(format, "HH", "15")
+				format = strings.ReplaceAll(format, "mm", "04")
+				format = strings.ReplaceAll(format, "ss", "05")
+				return t.Format(format)
+			}
+		}
+	case FnAddDatetime:
+		if len(args) >= 3 {
+			if t, ok := args[0].(time.Time); ok {
+				value, ok1 := toNumber(args[1])
+				unit := fmt.Sprintf("%v", args[2])
+				if ok1 {
+					duration := int(value)
+					switch strings.ToLower(unit) {
+					case "year", "years":
+						return t.AddDate(duration, 0, 0)
+					case "month", "months":
+						return t.AddDate(0, duration, 0)
+					case "day", "days":
+						return t.AddDate(0, 0, duration)
+					case "hour", "hours":
+						return t.Add(time.Duration(duration) * time.Hour)
+					case "minute", "minutes":
+						return t.Add(time.Duration(duration) * time.Minute)
+					case "second", "seconds":
+						return t.Add(time.Duration(duration) * time.Second)
+					}
+				}
+			}
+		}
 	}
 
 	return nil
+}
+
+// parseURL parses a URL and returns components
+func parseURL(urlStr string) map[string]interface{} {
+	result := make(map[string]interface{})
+
+	// Simple URL parsing without importing net/url to keep dependencies minimal
+	// Protocol
+	protocolEnd := strings.Index(urlStr, "://")
+	if protocolEnd > 0 {
+		result["scheme"] = urlStr[:protocolEnd]
+		urlStr = urlStr[protocolEnd+3:]
+	}
+
+	// Host and path
+	pathStart := strings.Index(urlStr, "/")
+	if pathStart > 0 {
+		hostPort := urlStr[:pathStart]
+		result["host"] = hostPort
+
+		// Port
+		portStart := strings.LastIndex(hostPort, ":")
+		if portStart > 0 {
+			result["hostname"] = hostPort[:portStart]
+			result["port"] = hostPort[portStart+1:]
+		} else {
+			result["hostname"] = hostPort
+		}
+
+		// Path and query
+		remaining := urlStr[pathStart:]
+		queryStart := strings.Index(remaining, "?")
+		if queryStart > 0 {
+			result["pathname"] = remaining[:queryStart]
+			queryAndHash := remaining[queryStart+1:]
+
+			// Hash
+			hashStart := strings.Index(queryAndHash, "#")
+			if hashStart > 0 {
+				result["search"] = "?" + queryAndHash[:hashStart]
+				result["query"] = queryAndHash[:hashStart]
+				result["hash"] = "#" + queryAndHash[hashStart+1:]
+			} else {
+				result["search"] = "?" + queryAndHash
+				result["query"] = queryAndHash
+			}
+		} else {
+			hashStart := strings.Index(remaining, "#")
+			if hashStart > 0 {
+				result["pathname"] = remaining[:hashStart]
+				result["hash"] = "#" + remaining[hashStart+1:]
+			} else {
+				result["pathname"] = remaining
+			}
+		}
+	} else {
+		result["host"] = urlStr
+		result["hostname"] = urlStr
+	}
+
+	return result
+}
+
+// parseURLQuery parses URL query string
+func parseURLQuery(queryStr string) map[string]interface{} {
+	result := make(map[string]interface{})
+
+	// Remove leading ? if present
+	queryStr = strings.TrimPrefix(queryStr, "?")
+
+	if queryStr == "" {
+		return result
+	}
+
+	pairs := strings.Split(queryStr, "&")
+	for _, pair := range pairs {
+		kv := strings.SplitN(pair, "=", 2)
+		if len(kv) == 2 {
+			result[kv[0]] = kv[1]
+		} else if len(kv) == 1 {
+			result[kv[0]] = ""
+		}
+	}
+
+	return result
 }

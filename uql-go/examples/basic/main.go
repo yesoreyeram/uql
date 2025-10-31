@@ -103,11 +103,11 @@ func main() {
 	fmt.Println("Example 12: Scope to access nested data")
 	nestedData := map[string]interface{}{
 		"metadata": map[string]interface{}{
-			"version": "1.0",
+			"version":   "1.0",
 			"timestamp": "2024-01-01",
 		},
 		"result": map[string]interface{}{
-			"value": 42,
+			"value":  42,
 			"status": "success",
 		},
 	}

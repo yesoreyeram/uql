@@ -793,3 +793,217 @@ func TestUQLComplexQuery(t *testing.T) {
 		t.Errorf("expected first location to be 'usa', got %v", first["location"])
 	}
 }
+
+// Test new math functions
+func TestUQLMathFunctions(t *testing.T) {
+	data := []interface{}{
+		map[string]interface{}{"value": 10.0},
+	}
+
+	// Test diff
+	result, err := UQL(`extend "diff"=diff(10, 3)`, &Options{Data: data})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	slice := result.([]interface{})
+	m := slice[0].(map[string]interface{})
+	if m["diff"] != 7.0 {
+		t.Errorf("expected diff to be 7, got %v", m["diff"])
+	}
+
+	// Test mul
+	result, err = UQL(`extend "product"=mul(3, 4, 2)`, &Options{Data: data})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	slice = result.([]interface{})
+	m = slice[0].(map[string]interface{})
+	if m["product"] != 24.0 {
+		t.Errorf("expected product to be 24, got %v", m["product"])
+	}
+
+	// Test div
+	result, err = UQL(`extend "quotient"=div(20, 4)`, &Options{Data: data})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	slice = result.([]interface{})
+	m = slice[0].(map[string]interface{})
+	if m["quotient"] != 5.0 {
+		t.Errorf("expected quotient to be 5, got %v", m["quotient"])
+	}
+
+	// Test percentage
+	result, err = UQL(`extend "pct"=percentage(25, 200)`, &Options{Data: data})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	slice = result.([]interface{})
+	m = slice[0].(map[string]interface{})
+	if m["pct"] != 12.5 {
+		t.Errorf("expected percentage to be 12.5, got %v", m["pct"])
+	}
+}
+
+// Test hyperbolic trig functions
+func TestUQLHyperbolicTrigFunctions(t *testing.T) {
+	data := []interface{}{
+		map[string]interface{}{"value": 1.0},
+	}
+
+	// Test sinh
+	result, err := UQL(`extend "result"=sinh(0)`, &Options{Data: data})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	slice := result.([]interface{})
+	m := slice[0].(map[string]interface{})
+	if m["result"] != 0.0 {
+		t.Errorf("expected sinh(0) to be 0, got %v", m["result"])
+	}
+
+	// Test cosh
+	result, err = UQL(`extend "result"=cosh(0)`, &Options{Data: data})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	slice = result.([]interface{})
+	m = slice[0].(map[string]interface{})
+	if m["result"] != 1.0 {
+		t.Errorf("expected cosh(0) to be 1, got %v", m["result"])
+	}
+
+	// Test tanh
+	result, err = UQL(`extend "result"=tanh(0)`, &Options{Data: data})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	slice = result.([]interface{})
+	m = slice[0].(map[string]interface{})
+	if m["result"] != 0.0 {
+		t.Errorf("expected tanh(0) to be 0, got %v", m["result"])
+	}
+}
+
+// Test extended datetime functions
+func TestUQLExtendedDatetimeFunctions(t *testing.T) {
+	data := []interface{}{
+		map[string]interface{}{"timestamp": 1609459200000000}, // 2021-01-01 00:00:00 in microseconds
+	}
+
+	// Test unixtime_microseconds_todatetime
+	result, err := UQL(`extend "dt"=unixtime_microseconds_todatetime("timestamp")`, &Options{Data: data})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	slice := result.([]interface{})
+	m := slice[0].(map[string]interface{})
+	if m["dt"] == nil {
+		t.Errorf("expected datetime value, got nil")
+	}
+
+	// Test todatetime
+	data2 := []interface{}{
+		map[string]interface{}{"datestr": "2021-01-01"},
+	}
+	result, err = UQL(`extend "dt"=todatetime("datestr")`, &Options{Data: data2})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	slice = result.([]interface{})
+	m = slice[0].(map[string]interface{})
+	if m["dt"] == nil {
+		t.Errorf("expected datetime value, got nil")
+	}
+}
+
+// Test array functions
+func TestUQLArrayFunctions(t *testing.T) {
+	data := []interface{}{
+		map[string]interface{}{"items": []interface{}{1, 2, 2, 3, 3, 3}},
+	}
+
+	// Test distinct
+	result, err := UQL(`extend "unique"=distinct("items")`, &Options{Data: data})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	slice := result.([]interface{})
+	m := slice[0].(map[string]interface{})
+	unique := m["unique"].([]interface{})
+	if len(unique) != 3 {
+		t.Errorf("expected 3 unique items, got %d", len(unique))
+	}
+
+	// Test pack
+	data2 := []interface{}{
+		map[string]interface{}{"a": 1, "b": 2},
+	}
+	result, err = UQL(`extend "packed"=pack("a", "b", 3)`, &Options{Data: data2})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	slice = result.([]interface{})
+	m = slice[0].(map[string]interface{})
+	packed := m["packed"].([]interface{})
+	if len(packed) != 3 {
+		t.Errorf("expected 3 packed items, got %d", len(packed))
+	}
+
+	// Test kv
+	result, err = UQL(`extend "pair"=kv('name', 'value123')`, &Options{Data: data2})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	slice = result.([]interface{})
+	m = slice[0].(map[string]interface{})
+	pair := m["pair"].(map[string]interface{})
+	if pair["key"] != "name" || pair["value"] != "value123" {
+		t.Errorf("expected kv pair with key='name' and value='value123', got %v", pair)
+	}
+}
+
+// Test URL parsing functions
+func TestUQLURLFunctions(t *testing.T) {
+	data := []interface{}{
+		map[string]interface{}{"url": "https://example.com:8080/path/to/resource?foo=bar&baz=qux#section"},
+	}
+
+	// Test parse_url
+	result, err := UQL(`extend "parsed"=parse_url("url")`, &Options{Data: data})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	slice := result.([]interface{})
+	m := slice[0].(map[string]interface{})
+	parsed := m["parsed"].(map[string]interface{})
+
+	if parsed["scheme"] != "https" {
+		t.Errorf("expected scheme to be 'https', got %v", parsed["scheme"])
+	}
+	if parsed["hostname"] != "example.com" {
+		t.Errorf("expected hostname to be 'example.com', got %v", parsed["hostname"])
+	}
+	if parsed["port"] != "8080" {
+		t.Errorf("expected port to be '8080', got %v", parsed["port"])
+	}
+
+	// Test parse_urlquery
+	data2 := []interface{}{
+		map[string]interface{}{"query": "foo=bar&baz=qux"},
+	}
+	result, err = UQL(`extend "params"=parse_urlquery("query")`, &Options{Data: data2})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	slice = result.([]interface{})
+	m = slice[0].(map[string]interface{})
+	params := m["params"].(map[string]interface{})
+
+	if params["foo"] != "bar" {
+		t.Errorf("expected foo to be 'bar', got %v", params["foo"])
+	}
+	if params["baz"] != "qux" {
+		t.Errorf("expected baz to be 'qux', got %v", params["baz"])
+	}
+}
