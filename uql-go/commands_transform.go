@@ -162,7 +162,7 @@ func reorderFieldsInItem(item interface{}, orderedFields []string) interface{} {
 	}
 
 	result := make(map[string]interface{})
-	
+
 	// Add ordered fields first
 	for _, field := range orderedFields {
 		if val, exists := m[field]; exists {
