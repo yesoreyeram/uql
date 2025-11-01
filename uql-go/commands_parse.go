@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"errors"
+	"fmt"
 	"strings"
 
 	"gopkg.in/yaml.v3"
@@ -55,7 +56,22 @@ func evalParseCSV(prev CommandResult, cmd Command) (CommandResult, error) {
 		return prev, errors.New("CSV data must be a string")
 	}
 
+	// Get options from command value
+	options := getParseCSVOptions(cmd.Value)
+
 	reader := csv.NewReader(strings.NewReader(csvStr))
+	
+	// Apply options
+	if options.Delimiter != "" {
+		reader.Comma = rune(options.Delimiter[0])
+	}
+	if options.Comment != "" {
+		reader.Comment = rune(options.Comment[0])
+	}
+	reader.TrimLeadingSpace = options.Trim
+	reader.LazyQuotes = true
+	reader.FieldsPerRecord = -1 // Allow variable number of fields
+	
 	records, err := reader.ReadAll()
 	if err != nil {
 		return prev, err
@@ -65,21 +81,129 @@ func evalParseCSV(prev CommandResult, cmd Command) (CommandResult, error) {
 		return CommandResult{Output: []interface{}{}, Context: prev.Context}, nil
 	}
 
-	// First row as headers
-	headers := records[0]
-	result := make([]interface{}, 0, len(records)-1)
+	// Handle skipEmptyLines
+	if options.SkipEmptyLines {
+		filtered := make([][]string, 0)
+		for _, record := range records {
+			isEmpty := true
+			for _, field := range record {
+				if strings.TrimSpace(field) != "" {
+					isEmpty = false
+					break
+				}
+			}
+			if !isEmpty {
+				filtered = append(filtered, record)
+			}
+		}
+		records = filtered
+	}
 
-	for i := 1; i < len(records); i++ {
+	if len(records) == 0 {
+		return CommandResult{Output: []interface{}{}, Context: prev.Context}, nil
+	}
+
+	// Determine headers
+	var headers []string
+	startRow := 0
+
+	if options.Columns != nil && len(options.Columns) > 0 {
+		// Custom headers provided
+		headers = options.Columns
+	} else if options.UseColumns {
+		// First row as headers
+		headers = records[0]
+		startRow = 1
+	} else {
+		// Generate default column names
+		if len(records) > 0 {
+			headers = make([]string, len(records[0]))
+			for i := range headers {
+				headers[i] = fmt.Sprintf("col_%d", i)
+			}
+		}
+	}
+
+	result := make([]interface{}, 0, len(records)-startRow)
+
+	for i := startRow; i < len(records); i++ {
 		row := make(map[string]interface{})
 		for j, header := range headers {
+			value := ""
 			if j < len(records[i]) {
-				row[header] = records[i][j]
+				value = records[i][j]
+				if options.Trim {
+					value = strings.TrimSpace(value)
+				}
 			}
+			row[header] = value
 		}
 		result = append(result, row)
 	}
 
 	return CommandResult{Output: result, Context: prev.Context}, nil
+}
+
+// CSVOptions holds CSV parsing options
+type CSVOptions struct {
+	Delimiter       string
+	Comment         string
+	Columns         []string
+	UseColumns      bool
+	Trim            bool
+	SkipEmptyLines  bool
+	RelaxColumnCount bool
+}
+
+// getParseCSVOptions extracts CSV options from parse args
+func getParseCSVOptions(value interface{}) CSVOptions {
+	options := CSVOptions{
+		Delimiter:  ",",
+		UseColumns: true, // Default to using first row as headers
+	}
+
+	if value == nil {
+		return options
+	}
+
+	// value should be [][]ParseArg
+	argsSlice, ok := value.([][]ParseArg)
+	if !ok || len(argsSlice) == 0 {
+		return options
+	}
+
+	args := argsSlice[0]
+	for _, arg := range args {
+		switch arg.Identifier {
+		case "delimiter":
+			// Handle escape sequences
+			delimiter := arg.Value
+			delimiter = strings.ReplaceAll(delimiter, "\\t", "\t")
+			delimiter = strings.ReplaceAll(delimiter, "\\n", "\n")
+			delimiter = strings.ReplaceAll(delimiter, "\\r", "\r")
+			options.Delimiter = delimiter
+		case "comment":
+			options.Comment = arg.Value
+		case "columns":
+			if strings.ToLower(arg.Value) == "false" {
+				options.UseColumns = false
+			} else if strings.ToLower(arg.Value) == "true" {
+				options.UseColumns = true
+			} else {
+				// Custom column names
+				options.Columns = strings.Split(arg.Value, ",")
+				options.UseColumns = false
+			}
+		case "trim":
+			options.Trim = strings.ToLower(arg.Value) == "true"
+		case "skipEmptyLines":
+			options.SkipEmptyLines = strings.ToLower(arg.Value) == "true"
+		case "relaxColumnCount":
+			options.RelaxColumnCount = strings.ToLower(arg.Value) == "true"
+		}
+	}
+
+	return options
 }
 
 // evalParseXML evaluates a parse-xml command

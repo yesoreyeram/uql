@@ -232,6 +232,12 @@ func (l *Lexer) Tokenize() ([]Token, error) {
 			continue
 		}
 		if l.input[l.pos] == '-' {
+			// Check for -- (double dash for parse options)
+			if l.pos+1 < len(l.input) && l.input[l.pos+1] == '-' {
+				l.tokens = append(l.tokens, Token{Type: "double_dash", Value: "--", Pos: l.pos})
+				l.pos += 2
+				continue
+			}
 			l.tokens = append(l.tokens, Token{Type: "dash", Value: "-", Pos: l.pos})
 			l.pos++
 			continue
@@ -1003,8 +1009,75 @@ func (p *Parser) parseWhereValue() (TypedValue, error) {
 
 // parseParseArgs parses parse command arguments
 func (p *Parser) parseParseArgs() ([][]ParseArg, error) {
-	// For now, return empty args - full implementation would parse actual arguments
-	return [][]ParseArg{}, nil
+	args := make([]ParseArg, 0)
+	
+	// Parse multiple --key value pairs
+	for p.pos < len(p.tokens) {
+		// Skip whitespace
+		if p.tokens[p.pos].Type == "newline" {
+			p.pos++
+			continue
+		}
+		
+		// Stop if we hit a pipe or end
+		if p.tokens[p.pos].Type == "pipe" {
+			break
+		}
+		
+		// Look for -- (double dash)
+		if p.tokens[p.pos].Type != "double_dash" {
+			break
+		}
+		p.pos++ // consume --
+		
+		// Get the identifier/key
+		if p.pos >= len(p.tokens) || p.tokens[p.pos].Type != "identifier" {
+			return nil, errors.New("expected identifier after --")
+		}
+		identifier := p.tokens[p.pos].Value
+		p.pos++
+		
+		// Skip whitespace
+		for p.pos < len(p.tokens) && p.tokens[p.pos].Type == "newline" {
+			p.pos++
+		}
+		
+		// Get the value (string or identifier)
+		if p.pos >= len(p.tokens) {
+			return nil, fmt.Errorf("expected value for --%s", identifier)
+		}
+		
+		var value string
+		switch p.tokens[p.pos].Type {
+		case "string", "sq_string":
+			value = p.tokens[p.pos].Value
+			p.pos++
+		case "identifier":
+			value = p.tokens[p.pos].Value
+			p.pos++
+		case "number":
+			value = p.tokens[p.pos].Value
+			p.pos++
+		default:
+			return nil, fmt.Errorf("expected value for --%s, got %s", identifier, p.tokens[p.pos].Type)
+		}
+		
+		args = append(args, ParseArg{
+			Identifier: identifier,
+			Value:      value,
+		})
+		
+		// Skip whitespace after value
+		for p.pos < len(p.tokens) && p.tokens[p.pos].Type == "newline" {
+			p.pos++
+		}
+	}
+	
+	// Return args wrapped in a slice to match the expected type
+	if len(args) == 0 {
+		return [][]ParseArg{}, nil
+	}
+	return [][]ParseArg{args}, nil
 }
 
 // parseExtensions parses extend command extensions
