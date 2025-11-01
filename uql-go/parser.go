@@ -235,7 +235,7 @@ func (l *Lexer) Tokenize() ([]Token, error) {
 			// Check for -- (double dash for parse options)
 			if l.pos+1 < len(l.input) && l.input[l.pos+1] == '-' {
 				l.tokens = append(l.tokens, Token{Type: "double_dash", Value: "--", Pos: l.pos})
-				l.pos += 2
+				l.pos += 2 // Skip both dashes
 				continue
 			}
 			l.tokens = append(l.tokens, Token{Type: "dash", Value: "-", Pos: l.pos})

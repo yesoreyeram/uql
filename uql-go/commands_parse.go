@@ -62,10 +62,10 @@ func evalParseCSV(prev CommandResult, cmd Command) (CommandResult, error) {
 	reader := csv.NewReader(strings.NewReader(csvStr))
 	
 	// Apply options
-	if options.Delimiter != "" {
+	if options.Delimiter != "" && len(options.Delimiter) > 0 {
 		reader.Comma = rune(options.Delimiter[0])
 	}
-	if options.Comment != "" {
+	if options.Comment != "" && len(options.Comment) > 0 {
 		reader.Comment = rune(options.Comment[0])
 	}
 	reader.TrimLeadingSpace = options.Trim
