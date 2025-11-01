@@ -1,0 +1,44 @@
+goos: linux
+goarch: amd64
+pkg: github.com/yesoreyeram/uql/uql-go
+cpu: AMD EPYC 7763 64-Core Processor                
+BenchmarkHello-4                   	  100000	       355.2 ns/op	     440 B/op	       5 allocs/op
+BenchmarkPing-4                    	  100000	       347.0 ns/op	     440 B/op	       5 allocs/op
+BenchmarkEcho-4                    	  100000	      1047 ns/op	     712 B/op	      31 allocs/op
+BenchmarkCount-4                   	  100000	       390.5 ns/op	     440 B/op	       5 allocs/op
+BenchmarkLimit-4                   	  100000	       692.3 ns/op	     712 B/op	       9 allocs/op
+BenchmarkProject-4                 	  100000	      1894 ns/op	    2104 B/op	      40 allocs/op
+BenchmarkProjectAway-4             	  100000	      1598 ns/op	    1716 B/op	      24 allocs/op
+BenchmarkExtend-4                  	  100000	      4381 ns/op	    3848 B/op	      82 allocs/op
+BenchmarkDistinct-4                	  100000	      1436 ns/op	     880 B/op	      32 allocs/op
+BenchmarkOrderBy-4                 	  100000	      1781 ns/op	    1168 B/op	      36 allocs/op
+BenchmarkWhereSimple-4             	  100000	      1229 ns/op	    1032 B/op	      23 allocs/op
+BenchmarkWhereContains-4           	  100000	      2208 ns/op	    1160 B/op	      42 allocs/op
+BenchmarkWhereIn-4                 	  100000	      3919 ns/op	    2432 B/op	      93 allocs/op
+BenchmarkSummarize-4               	  100000	      3323 ns/op	    3440 B/op	      64 allocs/op
+BenchmarkPivot-4                   	  100000	      6049 ns/op	    4609 B/op	      99 allocs/op
+BenchmarkParseJSON-4               	  100000	      1414 ns/op	    1080 B/op	      21 allocs/op
+BenchmarkParseCSVBasic-4           	  100000	      3203 ns/op	    6520 B/op	      45 allocs/op
+BenchmarkParseCSVWithOptions-4     	  100000	      3527 ns/op	    6824 B/op	      50 allocs/op
+BenchmarkParseYAML-4               	  100000	      9336 ns/op	    8848 B/op	      76 allocs/op
+BenchmarkParseXML-4                	  100000	      2572 ns/op	    1816 B/op	      35 allocs/op
+BenchmarkRange-4                   	  100000	      3594 ns/op	    6352 B/op	     120 allocs/op
+BenchmarkRangeWithStep-4           	  100000	      1715 ns/op	    2264 B/op	      39 allocs/op
+BenchmarkMvExpand-4                	  100000	      2177 ns/op	    2568 B/op	      33 allocs/op
+BenchmarkPipelineSimple-4          	  100000	      2305 ns/op	    2552 B/op	      45 allocs/op
+BenchmarkPipelineComplex-4         	  100000	      5471 ns/op	    4457 B/op	     104 allocs/op
+BenchmarkFunctionToupper-4         	  100000	      1872 ns/op	    1688 B/op	      38 allocs/op
+BenchmarkFunctionStrcat-4          	  100000	      2776 ns/op	    2840 B/op	      56 allocs/op
+BenchmarkFunctionSplit-4           	  100000	      2553 ns/op	    2776 B/op	      48 allocs/op
+BenchmarkFunctionSum-4             	  100000	      1722 ns/op	    1688 B/op	      39 allocs/op
+BenchmarkFunctionMean-4            	  100000	      1661 ns/op	    1672 B/op	      35 allocs/op
+BenchmarkJSONataSimple-4           	  100000	     11338 ns/op	    5876 B/op	     154 allocs/op
+BenchmarkJSONataFilter-4           	  100000	     11020 ns/op	    5862 B/op	     153 allocs/op
+BenchmarkLargeDatasetProject-4     	  100000	    305137 ns/op	  385346 B/op	    4028 allocs/op
+BenchmarkLargeDatasetWhere-4       	  100000	     76928 ns/op	   35736 B/op	    1028 allocs/op
+BenchmarkLargeDatasetSummarize-4   	  100000	    157776 ns/op	   83498 B/op	    2163 allocs/op
+BenchmarkLargeDatasetOrderBy-4     	  100000	    108354 ns/op	   33212 B/op	    2038 allocs/op
+BenchmarkParserSimple-4            	  100000	       721.6 ns/op	     568 B/op	      23 allocs/op
+BenchmarkParserComplex-4           	  100000	      2076 ns/op	    2112 B/op	      49 allocs/op
+PASS
+ok  	github.com/yesoreyeram/uql/uql-go	75.047s

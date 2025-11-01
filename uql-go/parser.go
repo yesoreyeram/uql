@@ -1010,7 +1010,7 @@ func (p *Parser) parseWhereValue() (TypedValue, error) {
 // parseParseArgs parses parse command arguments
 func (p *Parser) parseParseArgs() ([][]ParseArg, error) {
 	args := make([]ParseArg, 0)
-	
+
 	// Parse multiple --key value pairs
 	for p.pos < len(p.tokens) {
 		// Skip whitespace
@@ -1018,35 +1018,35 @@ func (p *Parser) parseParseArgs() ([][]ParseArg, error) {
 			p.pos++
 			continue
 		}
-		
+
 		// Stop if we hit a pipe or end
 		if p.tokens[p.pos].Type == "pipe" {
 			break
 		}
-		
+
 		// Look for -- (double dash)
 		if p.tokens[p.pos].Type != "double_dash" {
 			break
 		}
 		p.pos++ // consume --
-		
+
 		// Get the identifier/key
 		if p.pos >= len(p.tokens) || p.tokens[p.pos].Type != "identifier" {
 			return nil, errors.New("expected identifier after --")
 		}
 		identifier := p.tokens[p.pos].Value
 		p.pos++
-		
+
 		// Skip whitespace
 		for p.pos < len(p.tokens) && p.tokens[p.pos].Type == "newline" {
 			p.pos++
 		}
-		
+
 		// Get the value (string or identifier)
 		if p.pos >= len(p.tokens) {
 			return nil, fmt.Errorf("expected value for --%s", identifier)
 		}
-		
+
 		var value string
 		switch p.tokens[p.pos].Type {
 		case "string", "sq_string":
@@ -1061,18 +1061,18 @@ func (p *Parser) parseParseArgs() ([][]ParseArg, error) {
 		default:
 			return nil, fmt.Errorf("expected value for --%s, got %s", identifier, p.tokens[p.pos].Type)
 		}
-		
+
 		args = append(args, ParseArg{
 			Identifier: identifier,
 			Value:      value,
 		})
-		
+
 		// Skip whitespace after value
 		for p.pos < len(p.tokens) && p.tokens[p.pos].Type == "newline" {
 			p.pos++
 		}
 	}
-	
+
 	// Return args wrapped in a slice to match the expected type
 	if len(args) == 0 {
 		return [][]ParseArg{}, nil

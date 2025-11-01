@@ -60,7 +60,7 @@ func evalParseCSV(prev CommandResult, cmd Command) (CommandResult, error) {
 	options := getParseCSVOptions(cmd.Value)
 
 	reader := csv.NewReader(strings.NewReader(csvStr))
-	
+
 	// Apply options
 	if options.Delimiter != "" && len(options.Delimiter) > 0 {
 		reader.Comma = rune(options.Delimiter[0])
@@ -71,7 +71,7 @@ func evalParseCSV(prev CommandResult, cmd Command) (CommandResult, error) {
 	reader.TrimLeadingSpace = options.Trim
 	reader.LazyQuotes = true
 	reader.FieldsPerRecord = -1 // Allow variable number of fields
-	
+
 	records, err := reader.ReadAll()
 	if err != nil {
 		return prev, err
@@ -146,12 +146,12 @@ func evalParseCSV(prev CommandResult, cmd Command) (CommandResult, error) {
 
 // CSVOptions holds CSV parsing options
 type CSVOptions struct {
-	Delimiter       string
-	Comment         string
-	Columns         []string
-	UseColumns      bool
-	Trim            bool
-	SkipEmptyLines  bool
+	Delimiter        string
+	Comment          string
+	Columns          []string
+	UseColumns       bool
+	Trim             bool
+	SkipEmptyLines   bool
 	RelaxColumnCount bool
 }
 

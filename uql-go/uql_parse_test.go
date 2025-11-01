@@ -197,27 +197,27 @@ func TestParseCSV(t *testing.T) {
 // TestParseXML tests parse-xml command
 func TestParseXML(t *testing.T) {
 	tests := []struct {
-		name     string
-		query    string
-		data     string
-		wantErr  bool
+		name    string
+		query   string
+		data    string
+		wantErr bool
 	}{
 		{
-			name:  "simple xml",
-			query: "parse-xml",
-			data:  `<root><name>John</name><age>30</age></root>`,
+			name:    "simple xml",
+			query:   "parse-xml",
+			data:    `<root><name>John</name><age>30</age></root>`,
 			wantErr: false,
 		},
 		{
-			name:  "xml with attributes",
-			query: "parse-xml",
-			data:  `<root id="1"><name>John</name></root>`,
+			name:    "xml with attributes",
+			query:   "parse-xml",
+			data:    `<root id="1"><name>John</name></root>`,
 			wantErr: false,
 		},
 		{
-			name:  "xml array",
-			query: "parse-xml",
-			data:  `<root><item>1</item><item>2</item><item>3</item></root>`,
+			name:    "xml array",
+			query:   "parse-xml",
+			data:    `<root><item>1</item><item>2</item><item>3</item></root>`,
 			wantErr: false,
 		},
 	}
