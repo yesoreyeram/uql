@@ -25,3 +25,13 @@ dist
 .env
 .env*.local
 next-env.d.ts
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
